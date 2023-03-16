@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Vector">
+      <UniqueIdentifier>{eb6abcc0-ae4d-47f6-b7aa-4fee76c42ef2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Vector\Vector2D">
+      <UniqueIdentifier>{37df22fa-07c1-44df-a032-db042a777e62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Vector\Vector3D">
+      <UniqueIdentifier>{64fa167c-6c27-4404-a31f-6f062d41ea23}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Vector\Vector4D">
+      <UniqueIdentifier>{da22d2a6-867e-42fb-8f92-eca736803a0c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Matrix">
+      <UniqueIdentifier>{9c68fd6b-682d-41b5-a2a0-163c6cbfe365}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Matrix\Matrix2x2">
+      <UniqueIdentifier>{02e8340f-78b5-4d28-81af-cd2df1be6ce1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Matrix\Matrix3x3">
+      <UniqueIdentifier>{4fe1d937-1ccf-4427-9489-0aac06eb6941}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Matrix\Matrix4x4">
+      <UniqueIdentifier>{0a2ea50c-e310-4fd8-9f7f-da5845133c8e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Quaternion">
+      <UniqueIdentifier>{b6a9900b-5c7e-484b-8812-b5dbae624095}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Vector2D.cpp">
+      <Filter>Vector\Vector2D</Filter>
+    </ClCompile>
+    <ClCompile Include="Vector3D.cpp">
+      <Filter>Vector\Vector3D</Filter>
+    </ClCompile>
+    <ClCompile Include="Vector4D.cpp">
+      <Filter>Vector\Vector4D</Filter>
+    </ClCompile>
+    <ClCompile Include="Matrix2x2.cpp">
+      <Filter>Matrix\Matrix2x2</Filter>
+    </ClCompile>
+    <ClCompile Include="Matrix3x3.cpp">
+      <Filter>Matrix\Matrix3x3</Filter>
+    </ClCompile>
+    <ClCompile Include="Matrix4x4.cpp">
+      <Filter>Matrix\Matrix4x4</Filter>
+    </ClCompile>
+    <ClCompile Include="Quaternion.cpp">
+      <Filter>Quaternion</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Vector2D.h">
+      <Filter>Vector\Vector2D</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector3D.h">
+      <Filter>Vector\Vector3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector4D.h">
+      <Filter>Vector\Vector4D</Filter>
+    </ClInclude>
+    <ClInclude Include="Matrix2x2.h">
+      <Filter>Matrix\Matrix2x2</Filter>
+    </ClInclude>
+    <ClInclude Include="Matrix3x3.h">
+      <Filter>Matrix\Matrix3x3</Filter>
+    </ClInclude>
+    <ClInclude Include="Matrix4x4.h">
+      <Filter>Matrix\Matrix4x4</Filter>
+    </ClInclude>
+    <ClInclude Include="Quaternion.h">
+      <Filter>Quaternion</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

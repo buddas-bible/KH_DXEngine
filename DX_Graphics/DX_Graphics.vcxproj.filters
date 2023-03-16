@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="DXGraphics">
+      <UniqueIdentifier>{d540b081-ab0c-42f6-8cfe-7aee02b77b41}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DXGraphics.h">
+      <Filter>DXGraphics</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DXGraphics.cpp">
+      <Filter>DXGraphics</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
