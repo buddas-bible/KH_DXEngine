@@ -1,12 +1,6 @@
-﻿// WIN32Graphics.cpp : 정적 라이브러리를 위한 함수를 정의합니다.
-//
-#include "WIN32Graphics.h"
+﻿#include "WIN32Graphics.h"
 
 #include "../KH_Math/Vector2D.h"
-
-#include "framework.h"
-
-// TODO: 라이브러리 함수의 예제입니다.
 
 WIN32Graphics::WIN32Graphics() : 
 	m_hWnd(), m_rect(), m_ps(),
@@ -36,9 +30,17 @@ HRESULT WIN32Graphics::Initialize(HWND hWnd)
 	return S_OK;
 }
 
+void WIN32Graphics::Finalize()
+{
+
+}
+
 void WIN32Graphics::BeginDraw()
 {
 	PatBlt(m_backBuffer, 0, 0, m_rect.right, m_rect.bottom, BLACKNESS);
+
+
+	DrawTriangle({ 10, 10 }, { 800, 10 }, { 800, 800 });
 }
 
 void WIN32Graphics::EndDraw()

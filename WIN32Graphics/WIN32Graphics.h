@@ -1,14 +1,14 @@
 #pragma once
-
-#include <windows.h>
+#include "windows.h"
+#include "../CoreEngine/IGraphics.h"
 
 class Vector2D;
 
-class WIN32Graphics
+class WIN32Graphics : public IGraphics
 {
 public:
 	WIN32Graphics();
-	~WIN32Graphics();
+	virtual ~WIN32Graphics();
 
 private:
 	HWND m_hWnd;
@@ -19,9 +19,10 @@ private:
 	HDC m_backBuffer;
 
 public:
-	HRESULT Initialize(HWND hWnd);
-	void BeginDraw();
-	void EndDraw();
+	virtual HRESULT Initialize(HWND hWnd) override;
+	virtual void Finalize() override;
+	virtual void BeginDraw() override;
+	virtual void EndDraw() override;
 
 public:
 	void DrawPixel(float _x, float _y, COLORREF _color = RGB(0, 0, 0));

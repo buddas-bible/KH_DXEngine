@@ -42,6 +42,11 @@ HRESULT DXGraphics::Initialize(HWND hwnd)
 	return hr;
 }
 
+void DXGraphics::Finalize()
+{
+
+}
+
 HRESULT DXGraphics::CreateDevice()
 {
 	HRESULT hr = S_OK;
@@ -76,9 +81,9 @@ HRESULT DXGraphics::CreateDevice()
 		FeatureLevels,
 		ARRAYSIZE(FeatureLevels),
 		D3D11_SDK_VERSION,
-		&device,
-		nullptr,
-		&context);
+		device.GetAddressOf(),
+		&m_d3dFeatureLevels,
+		context.GetAddressOf());
 
 	if (FAILED(hr))
 	{
@@ -152,8 +157,6 @@ HRESULT DXGraphics::CreateRenderTargetView()
 {
 	HRESULT hr = S_OK;
 
-	// m_pd3dRenderTargetView.Reset();
-
 	// 스왑체인이 가지고 있는 버퍼를 가져옴
 	ComPtr<ID3D11Texture2D> backBuffer;
 	hr = m_pDXGISwapChain1->GetBuffer(0,
@@ -167,7 +170,6 @@ HRESULT DXGraphics::CreateRenderTargetView()
 
 	backBuffer.As(&m_backBuffer);
 
-	// 랜더 타켓으로 버퍼를 만듬
 	ComPtr<ID3D11RenderTargetView> rendertarget;
 	hr = m_pd3dDevice->CreateRenderTargetView(
 		m_backBuffer.Get(),
@@ -182,19 +184,18 @@ HRESULT DXGraphics::CreateRenderTargetView()
 	rendertarget.As(&m_pd3dRenderTargetView);
 
 	// 만들어진 백버퍼로부터 정보를 받아옴
-	D3D11_TEXTURE2D_DESC backBufferDesc{};
-	ZeroMemory(&backBufferDesc, sizeof(backBufferDesc));
-	m_backBuffer->GetDesc(&backBufferDesc);
+	ZeroMemory(&m_d3dBackBufferDesc, sizeof(m_d3dBackBufferDesc));
+	m_backBuffer->GetDesc(&m_d3dBackBufferDesc);
 
-	D3D11_VIEWPORT viewport;
-	viewport.TopLeftX = 0.f;
-	viewport.TopLeftY = 0.f;
-	viewport.Width = static_cast<float>(backBufferDesc.Width);
-	viewport.Height = static_cast<float>(backBufferDesc.Height);
-	viewport.MinDepth = D3D11_MIN_DEPTH;
-	viewport.MaxDepth = D3D11_MAX_DEPTH;
+	ZeroMemory(&m_d3dViewport, sizeof(m_d3dViewport));
+	m_d3dViewport.TopLeftX = 0.f;
+	m_d3dViewport.TopLeftY = 0.f;
+	m_d3dViewport.Width = static_cast<float>(m_d3dBackBufferDesc.Width);
+	m_d3dViewport.Height = static_cast<float>(m_d3dBackBufferDesc.Height);
+	m_d3dViewport.MinDepth = D3D11_MIN_DEPTH;
+	m_d3dViewport.MaxDepth = D3D11_MAX_DEPTH;
 
-	m_pd3dDeviceContext->RSSetViewports(1, &viewport);
+	m_pd3dDeviceContext->RSSetViewports(1, &m_d3dViewport);
 
 	return hr;
 }
@@ -234,6 +235,8 @@ HRESULT DXGraphics::CreateDepthStencilView()
 		return hr;
 	}
 
+	depthStencil.As(&m_pDepthStencil);
+
 	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
 	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
 	depthStencilViewDesc.Format = depthStencilDesc.Format;
@@ -243,7 +246,7 @@ HRESULT DXGraphics::CreateDepthStencilView()
 
 	ComPtr<ID3D11DepthStencilView> depthStencilView;
 	hr = m_pd3dDevice->CreateDepthStencilView(
-		depthStencil.Get(),
+		m_pDepthStencil.Get(),
 		&depthStencilViewDesc,
 		&depthStencilView);
 
@@ -289,12 +292,16 @@ void DXGraphics::Test()
 void DXGraphics::BeginDraw()
 {
 	/*
-	// 랜더 타켓 설정.
-	m_pd3dDeviceContext->OMSetRenderTargets(
-		1,
-		m_pd3dRenderTargetView.GetAddressOf(),
-		m_pd3dDepthStencilView.Get());
+	m_pd3dDeviceContext->UpdateSubresource(
+		m_constantBuffer.Get(),
+		0,
+		nullptr,
+		&m_constantBufferData,
+		0,
+		0);
+	*/
 
+	/*
 	// 랜더 타겟 뷰 클리어
 	const float clearColor[] = { 0.071f, 0.04f, 0.561f, 1.0f };
 	m_pd3dDeviceContext->ClearRenderTargetView(
@@ -305,7 +312,21 @@ void DXGraphics::BeginDraw()
 	m_pd3dDeviceContext->ClearDepthStencilView(
 		m_pd3dDepthStencilView.Get(),
 		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+	// 랜더 타켓 설정.
+	m_pd3dDeviceContext->OMSetRenderTargets(
+		1,
+		m_pd3dRenderTargetView.GetAddressOf(),
+		m_pd3dDepthStencilView.Get());
 	*/
+
+	/*
+	m_pd3dDeviceContext->IASetVertexBuffers(
+		0, 1,
+		m_vertexBuffer.GetAddressOf(), );
+	*/
+
+	
 
 	/// 쉐이더 코드 자리?? 인듯??
 
@@ -318,7 +339,7 @@ void DXGraphics::BeginDraw()
 	// present.pScrollOffset = nullptr;
 	// m_pDXGISwapChain1->Present1(1, 0, &present);
 
-	Sleep(2000);
+	Sleep(1000);
 }
 
 void DXGraphics::EndDraw()

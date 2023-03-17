@@ -1,13 +1,8 @@
 #include "GameLoop.h"
 
-#include <cmath>
-
-#include "DXGraphics.h"
-#include "WIN32Graphics.h"
-
-#include "Vector2D.h"
+// #include "../CoreEngine/CoreEngine.h"
 #pragma comment(lib, "KH_Math.lib")
-
+#include <cmath>
 
 HRESULT GameLoop::SetWindow(HINSTANCE hInstance)
 {
@@ -76,10 +71,8 @@ HRESULT GameLoop::Initialize(HINSTANCE hInstance)
 	}
 
 	// 그래픽 엔진 설정
-	m_pDXGraphicsEngine = new DXGraphics();
-	hr = m_pDXGraphicsEngine->Initialize(m_hWnd);
-	// m_pWINGraphicsEngine = new WIN32Graphics();
-	// hr = m_pWINGraphicsEngine->Initialize(m_hWnd);
+	m_pCoreEngine = new CoreEngine();
+	hr = m_pCoreEngine->Initialize(m_hWnd);
 	if (FAILED(hr))
 	{
 		return hr;
@@ -106,16 +99,10 @@ void GameLoop::Loop()
 
 void GameLoop::Finalize()
 {
-	if (m_pWINGraphicsEngine != nullptr)
+	if (m_pCoreEngine != nullptr)
 	{
-		delete m_pWINGraphicsEngine;
-		m_pWINGraphicsEngine = nullptr;
-	}
-
-	if (m_pDXGraphicsEngine != nullptr)
-	{
-		delete m_pDXGraphicsEngine;
-		m_pDXGraphicsEngine = nullptr;
+		// delete m_pCoreEngine;
+		// m_pCoreEngine = nullptr;
 	}
 }
 
@@ -123,14 +110,6 @@ LRESULT CALLBACK GameLoop::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 {
 	switch (msg)
 	{
-// 		case WM_PAINT:
-// 		{
-// 			PAINTSTRUCT ps;
-// 			HDC hdc = BeginPaint(hWnd, &ps);
-// 			// TODO: 여기에 hdc를 사용하는 그리기 코드를 추가합니다...
-// 			EndPaint(hWnd, &ps);
-// 		}
-// 		break;
 
 		case WM_DESTROY:
 		{
@@ -143,15 +122,18 @@ LRESULT CALLBACK GameLoop::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 }
 
 
+void GameLoop::Render()
+{
+	m_pCoreEngine->Render();
+}
+
+void GameLoop::Update()
+{
+	m_pCoreEngine->Update();
+}
+
 void GameLoop::Run()
 {
-	// 메인 루프.
-
-	m_pDXGraphicsEngine->BeginDraw();
-
-	// m_pWINGraphicsEngine->DrawLine(10, 10, 100, 100);
-	// m_pWINGraphicsEngine->DrawTriangle(Vector2D{10, 10}, Vector2D{500, 500}, Vector2D{300, 800});
-	
-	m_pDXGraphicsEngine->EndDraw();
-
+	Update();
+	Render();
 }
