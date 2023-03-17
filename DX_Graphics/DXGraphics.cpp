@@ -28,10 +28,16 @@ HRESULT DXGraphics::Initialize(HWND hwnd)
 	{
 		return hr;
 	}
-	if (FAILED(CreateRenderTargetViewAndDepthStencilView()))
+	if (FAILED(CreateRenderTargetView()))
 	{
 		return hr;
 	}
+	if (FAILED(CreateDepthStencilView()))
+	{
+		return hr;
+	}
+
+	Test();
 
 	return hr;
 }
@@ -142,9 +148,11 @@ HRESULT DXGraphics::CreateSwapChain()
 	return hr;
 }
 
-HRESULT DXGraphics::CreateRenderTargetViewAndDepthStencilView()
+HRESULT DXGraphics::CreateRenderTargetView()
 {
 	HRESULT hr = S_OK;
+
+	// m_pd3dRenderTargetView.Reset();
 
 	// 스왑체인이 가지고 있는 버퍼를 가져옴
 	ComPtr<ID3D11Texture2D> backBuffer;
@@ -157,10 +165,12 @@ HRESULT DXGraphics::CreateRenderTargetViewAndDepthStencilView()
 		return hr;
 	}
 
+	backBuffer.As(&m_backBuffer);
+
 	// 랜더 타켓으로 버퍼를 만듬
 	ComPtr<ID3D11RenderTargetView> rendertarget;
 	hr = m_pd3dDevice->CreateRenderTargetView(
-		backBuffer.Get(),
+		m_backBuffer.Get(),
 		nullptr,
 		&rendertarget);
 
@@ -171,11 +181,34 @@ HRESULT DXGraphics::CreateRenderTargetViewAndDepthStencilView()
 
 	rendertarget.As(&m_pd3dRenderTargetView);
 
-	// 버퍼가 만들어졌으므로 디바이스 컨텍스트를 이용할 수 있음.
+	// 만들어진 백버퍼로부터 정보를 받아옴
 	D3D11_TEXTURE2D_DESC backBufferDesc{};
 	ZeroMemory(&backBufferDesc, sizeof(backBufferDesc));
-	backBuffer->GetDesc(&backBufferDesc);
+	m_backBuffer->GetDesc(&backBufferDesc);
 
+	D3D11_VIEWPORT viewport;
+	viewport.TopLeftX = 0.f;
+	viewport.TopLeftY = 0.f;
+	viewport.Width = static_cast<float>(backBufferDesc.Width);
+	viewport.Height = static_cast<float>(backBufferDesc.Height);
+	viewport.MinDepth = D3D11_MIN_DEPTH;
+	viewport.MaxDepth = D3D11_MAX_DEPTH;
+
+	m_pd3dDeviceContext->RSSetViewports(1, &viewport);
+
+	return hr;
+}
+
+HRESULT DXGraphics::CreateDepthStencilView()
+{
+	HRESULT hr = S_OK;
+
+	// 백버퍼의 정보를 가져옴
+	D3D11_TEXTURE2D_DESC backBufferDesc{};
+	ZeroMemory(&backBufferDesc, sizeof(backBufferDesc));
+	m_backBuffer->GetDesc(&backBufferDesc);
+
+	// 백버퍼의 정보로
 	D3D11_TEXTURE2D_DESC depthStencilDesc;
 	ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
 	depthStencilDesc.Width = backBufferDesc.Width;
@@ -221,17 +254,11 @@ HRESULT DXGraphics::CreateRenderTargetViewAndDepthStencilView()
 
 	depthStencilView.As(&m_pd3dDepthStencilView);
 
-	D3D11_VIEWPORT viewport;
-	viewport.TopLeftX = 0.f;
-	viewport.TopLeftY = 0.f;
-	viewport.Width = static_cast<float>(backBufferDesc.Width);
-	viewport.Height = static_cast<float>(backBufferDesc.Height);
-	viewport.MinDepth = D3D11_MIN_DEPTH;
-	viewport.MaxDepth = D3D11_MAX_DEPTH;
+	return hr;
+}
 
-	m_pd3dDeviceContext->RSSetViewports(1, &viewport);
-
-
+void DXGraphics::Test()
+{
 	{
 		m_pd3dDeviceContext->OMSetRenderTargets(
 			1,
@@ -257,8 +284,6 @@ HRESULT DXGraphics::CreateRenderTargetViewAndDepthStencilView()
 
 		m_pDXGISwapChain1->Present(1, 0);
 	}
-
-	return hr;
 }
 
 void DXGraphics::BeginDraw()

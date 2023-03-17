@@ -32,6 +32,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext>		m_pd3dDeviceContext;
 	Microsoft::WRL::ComPtr<IDXGISwapChain1>			m_pDXGISwapChain1;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView>	m_pd3dRenderTargetView;
+	Microsoft::WRL::ComPtr<ID3D11Texture2D>			m_backBuffer;
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView>	m_pd3dDepthStencilView;
 
 private:
@@ -46,7 +47,9 @@ public:
 private:
 	HRESULT CreateDevice();
 	HRESULT CreateSwapChain();
-	HRESULT CreateRenderTargetViewAndDepthStencilView();
+	HRESULT CreateRenderTargetView();
+	HRESULT CreateDepthStencilView();
+	void Test();
 
 private:
 	// winrt::agile_ref<winrt::Windows::UI::Core::CoreWindow> m_window;
