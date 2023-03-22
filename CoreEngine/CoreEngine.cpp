@@ -4,7 +4,7 @@
 #include "../DX_Graphics/DXGraphics.h"
 #include "../WIN32Graphics/WIN32Graphics.h"
 
-CoreEngine::CoreEngine()
+CoreEngine::CoreEngine() : m_pGraphics()
 {
 
 }

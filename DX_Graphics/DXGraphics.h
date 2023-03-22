@@ -10,7 +10,9 @@
 #pragma comment(lib, "dxgi.lib")
 
 #include <wrl.h>
+
 #include "../CoreEngine/IGraphics.h"
+#include "../KH_Math/Vector3D.h"
 
 class DXGraphics : public IGraphics
 {
@@ -51,9 +53,14 @@ private:
 	HRESULT CreateSwapChain();
 	HRESULT CreateRenderTargetView();
 	HRESULT CreateDepthStencilView();
+	HRESULT CreateResouce();
 	void Test();
 
 private:
-
+	struct VertexCombined
+	{
+		Vector3D position;
+		Vector3D color;
+	};
 };
 

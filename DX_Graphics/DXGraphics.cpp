@@ -22,19 +22,19 @@ HRESULT DXGraphics::Initialize(HWND hwnd)
 
 	if (FAILED(CreateDevice()))
 	{
-		return hr;
+		return S_FALSE;
 	}
 	if (FAILED(CreateSwapChain()))
 	{
-		return hr;
+		return S_FALSE;
 	}
 	if (FAILED(CreateRenderTargetView()))
 	{
-		return hr;
+		return S_FALSE;
 	}
 	if (FAILED(CreateDepthStencilView()))
 	{
-		return hr;
+		return S_FALSE;
 	}
 
 	Test();

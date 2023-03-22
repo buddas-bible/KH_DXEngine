@@ -130,9 +130,11 @@
   <ItemGroup>
     <ClInclude Include="CoreEngine.h" />
     <ClInclude Include="IGraphics.h" />
+    <ClInclude Include="Resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CoreEngine.cpp" />
+    <ClCompile Include="Resource.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
