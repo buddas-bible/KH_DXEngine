@@ -1,23 +1,11 @@
 #pragma once
-#include <d3d11.h>
-#include <d3d11_1.h>
-#include <d3d11_2.h>
-#pragma comment(lib, "d3d11.lib")
 
-#include <dxgi.h>
-#include <dxgi1_2.h>
-#include <dxgi1_3.h>
-#pragma comment(lib, "dxgi.lib")
-
-#include <wrl.h>
-
-#include "../CoreEngine/IGraphics.h"
-#include "../KH_Math/Vector3D.h"
+#include "DXDefine.h"
 
 class DXGraphics : public IGraphics
 {
 public:
-	DXGraphics();
+	DXGraphics() = default;
 	virtual ~DXGraphics();
 
 private:
@@ -33,14 +21,19 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Texture2D>			m_pDepthStencil;
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView>	m_pd3dDepthStencilView;
 
-	D3D_FEATURE_LEVEL		m_d3dFeatureLevels{};
-	D3D11_TEXTURE2D_DESC	m_d3dBackBufferDesc{};
-	D3D11_VIEWPORT			m_d3dViewport{};
+	Microsoft::WRL::ComPtr<ID3D11InputLayout>		m_pd3dInputLayout;
+
+	D3D_FEATURE_LEVEL		m_d3dFeatureLevels{};		// 피처 레벨 
+	D3D11_TEXTURE2D_DESC	m_d3dBackBufferDesc{};		// 백버퍼 설정
+	D3D11_VIEWPORT			m_d3dViewport{};			// 뷰포트
 
 private:
-	Microsoft::WRL::ComPtr<ID3D11Buffer>			m_vertexBuffer;
-	Microsoft::WRL::ComPtr<ID3D11Buffer>			m_indexBuffer;
-	Microsoft::WRL::ComPtr<ID3D11Buffer>			m_constantBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer>			m_vertexBuffer;		// 정점 버퍼		(정점들의 버퍼?)
+	Microsoft::WRL::ComPtr<ID3D11Buffer>			m_indexBuffer;		// 인덱스 버퍼	(정점들의 인덱스?)
+	Microsoft::WRL::ComPtr<ID3D11Buffer>			m_constantBuffer;	// 상수 버퍼		(아마 행렬)
+
+	Microsoft::WRL::ComPtr<ID3D11VertexShader>		m_vertexShader;
+	Microsoft::WRL::ComPtr<ID3D11PixelShader>		m_pixelShader;
 
 public:
 	virtual HRESULT Initialize(HWND hWnd) override;
@@ -56,11 +49,33 @@ private:
 	HRESULT CreateResouce();
 	void Test();
 
+	HRESULT CreateShaders();
+
+	/// <summary>
+	/// 그리드
+	/// </summary>
+	HRESULT DrawGrid();
+
+private:
+	Microsoft::WRL::ComPtr<ID3DX11Effect> m_effect;
+	Microsoft::WRL::ComPtr<ID3DX11EffectTechnique> m_effectTechnique;
+	Microsoft::WRL::ComPtr<ID3DX11EffectMatrixVariable> m_effectMatrixVariable;
+
 private:
 	struct VertexCombined
 	{
-		Vector3D position;
-		Vector3D color;
+		DirectX::XMFLOAT3 position;
+		DirectX::XMFLOAT4 color;
 	};
+
+	struct ConstantBuffer
+	{
+		DirectX::XMFLOAT4X4 worldTM;
+		DirectX::XMFLOAT4X4 viewTM;
+		DirectX::XMFLOAT4X4 projTM;
+	};
+
+	ConstantBuffer m_constantBufferData;
+	UINT count;
 };
 

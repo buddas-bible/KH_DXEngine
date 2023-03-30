@@ -10,7 +10,7 @@ class Vector4D
 {
 public:
 	Vector4D();
-	Vector4D(float, float, float, float = 0);
+	Vector4D(float, float, float, float = 0.f);
 	Vector4D(const Vector4D& other);			// 복사 생성자
 	Vector4D(const Vector4D&& other) noexcept;		// 이동 생성자
 	Vector4D(const Vector3D& other, const float _w = 0);			// 복사 생성자

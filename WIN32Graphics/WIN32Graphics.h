@@ -7,7 +7,7 @@ class Vector2D;
 class WIN32Graphics : public IGraphics
 {
 public:
-	WIN32Graphics();
+	WIN32Graphics() = default;
 	virtual ~WIN32Graphics();
 
 private:

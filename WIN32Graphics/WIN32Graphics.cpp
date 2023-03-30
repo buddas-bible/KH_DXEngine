@@ -2,15 +2,6 @@
 
 #include "../KH_Math/Vector2D.h"
 
-WIN32Graphics::WIN32Graphics() : 
-	m_hWnd(), m_rect(), m_ps(),
-	m_bitmap(),
-	m_deviceContext(), m_backBuffer()
-
-{
-
-}
-
 WIN32Graphics::~WIN32Graphics()
 {
 

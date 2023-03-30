@@ -4,11 +4,18 @@
     <Filter Include="DXGraphics">
       <UniqueIdentifier>{d540b081-ab0c-42f6-8cfe-7aee02b77b41}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Color">
+      <UniqueIdentifier>{534da521-284b-4028-aac6-cdd41f9ab46e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DXGraphics.h">
       <Filter>DXGraphics</Filter>
     </ClInclude>
+    <ClInclude Include="Color.h">
+      <Filter>Color</Filter>
+    </ClInclude>
+    <ClInclude Include="DXDefine.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DXGraphics.cpp">

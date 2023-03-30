@@ -1,13 +1,9 @@
 #include "DXGraphics.h"
 
-#include <DirectXMath.h>
+#include <fstream>
+#include <vector>
 
 using namespace Microsoft::WRL;
-
-DXGraphics::DXGraphics() : m_hWnd()
-{
-
-}
 
 DXGraphics::~DXGraphics()
 {
@@ -20,24 +16,37 @@ HRESULT DXGraphics::Initialize(HWND hwnd)
 
 	HRESULT hr = S_OK;
 
-	if (FAILED(CreateDevice()))
+	hr = CreateDevice();
+
+	if (FAILED(hr))
 	{
-		return S_FALSE;
-	}
-	if (FAILED(CreateSwapChain()))
-	{
-		return S_FALSE;
-	}
-	if (FAILED(CreateRenderTargetView()))
-	{
-		return S_FALSE;
-	}
-	if (FAILED(CreateDepthStencilView()))
-	{
-		return S_FALSE;
+		return hr;
 	}
 
-	Test();
+	hr = CreateSwapChain();
+
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+
+	hr = CreateRenderTargetView();
+
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+
+	hr = CreateDepthStencilView();
+
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+	CreateShaders();
+	CreateResouce();
+
+	// Test();
 
 	return hr;
 }
@@ -260,6 +269,17 @@ HRESULT DXGraphics::CreateDepthStencilView()
 	return hr;
 }
 
+HRESULT DXGraphics::CreateResouce()
+{
+	HRESULT hr = S_OK;
+
+	hr = DrawGrid();
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+}
+
 void DXGraphics::Test()
 {
 	{
@@ -289,9 +309,174 @@ void DXGraphics::Test()
 	}
 }
 
+HRESULT DXGraphics::CreateShaders()
+{
+	HRESULT hr = S_OK;
+
+	std::ifstream fin("CubeVertexShader.cso", std::ios::binary);
+
+	fin.seekg(0, std::ios_base::end);
+	int size = (int)fin.tellg();
+	fin.seekg(0, std::ios_base::beg);
+	std::vector<char> vsCompiledShader(size);
+
+	fin.read(&vsCompiledShader[0], size);
+	fin.close();
+
+	ComPtr<ID3D11VertexShader> vertexShader;
+	hr = m_pd3dDevice->CreateVertexShader(
+		&vsCompiledShader[0], 
+		size, 
+		0, 
+		vertexShader.GetAddressOf()
+	);
+
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+
+	vertexShader.As(&m_vertexShader);
+
+	D3D11_INPUT_ELEMENT_DESC iaDesc[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
+		0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT,
+		0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+
+	hr = m_pd3dDevice->CreateInputLayout(
+		iaDesc, 
+		ARRAYSIZE(iaDesc), 
+		&vsCompiledShader[0],
+		size, 
+		m_pd3dInputLayout.GetAddressOf());
+
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+
+
+	std::ifstream psfin("CubePixelShader.cso", std::ios::binary);
+
+	psfin.seekg(0, std::ios_base::end);
+	int pssize = (int)psfin.tellg();
+	psfin.seekg(0, std::ios_base::beg);
+	std::vector<char> psCompiledShader(pssize);
+
+	psfin.read(&psCompiledShader[0], pssize);
+	psfin.close();
+
+	ComPtr<ID3D11PixelShader> pixelShader;
+	hr = m_pd3dDevice->CreatePixelShader(
+		&psCompiledShader[0], 
+		pssize,
+		0, 
+		pixelShader.GetAddressOf()
+	);
+
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+
+	pixelShader.As(&m_pixelShader);
+
+	CD3D11_BUFFER_DESC constantBufferDesc(
+		sizeof(ConstantBuffer),
+		D3D11_BIND_CONSTANT_BUFFER
+	);
+
+	hr = m_pd3dDevice->CreateBuffer(
+		&constantBufferDesc, 
+		nullptr, 
+		m_constantBuffer.GetAddressOf()
+	);
+
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+
+	return hr;
+}
+
+HRESULT DXGraphics::DrawGrid()
+{
+	HRESULT hr = S_OK;
+
+	// 꼭짓점을 설명하는 정보
+	VertexCombined grid[] =
+	{
+		{ DirectX::XMFLOAT3(0.f, 0.f, 0.f), Color::White },		// 위치
+		{ DirectX::XMFLOAT3(1.f, 0.f, 0.f), Color::White },
+		{ DirectX::XMFLOAT3(0.f, 0.f, 1.f), Color::White },
+		{ DirectX::XMFLOAT3(1.f, 0.f, 1.f), Color::White },
+
+		{ DirectX::XMFLOAT3(2.f, 0.f, 0.f), Color::White },
+		{ DirectX::XMFLOAT3(2.f, 0.f, 1.f), Color::White },
+		{ DirectX::XMFLOAT3(0.f, 0.f, 2.f), Color::White },
+		{ DirectX::XMFLOAT3(1.f, 0.f, 2.f), Color::White },
+		{ DirectX::XMFLOAT3(2.f, 0.f, 2.f), Color::White }
+	};
+
+	// 버퍼를 설정하는 구조체
+	D3D11_BUFFER_DESC bufferDesc;
+	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	bufferDesc.ByteWidth = sizeof(grid);
+	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bufferDesc.CPUAccessFlags = 0;
+	bufferDesc.MiscFlags = 0;
+	bufferDesc.StructureByteStride = 0;
+
+	// 하위 리소스 설정. 텍스처 같은거 할때나 쓰임
+	D3D11_SUBRESOURCE_DATA InitData;
+	InitData.pSysMem = grid;
+	InitData.SysMemPitch = 0;
+	InitData.SysMemSlicePitch = 0;
+
+	// 위에 설정한 버퍼 설정을 바탕으로 버퍼를 초기화함.
+	hr = m_pd3dDevice->CreateBuffer(&bufferDesc, &InitData, &m_vertexBuffer);
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+
+	UINT indices[] = { 0,1,2, 2,1,3, 1,4,3, 3,4,5, 2,3,6, 6,3,7, 3,5,7, 7,5,8 };
+
+	count = ARRAYSIZE(indices);
+
+	D3D11_BUFFER_DESC indexBufferDesc;
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.ByteWidth = sizeof(indices);
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+	indexBufferDesc.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA indexInit;
+	indexInit.pSysMem = indices;
+	indexInit.SysMemPitch = 0;
+	indexInit.SysMemSlicePitch = 0;
+
+	hr = m_pd3dDevice->CreateBuffer(
+		&indexBufferDesc, 
+		&indexInit, 
+		m_indexBuffer.GetAddressOf()
+	);
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+
+	return hr;
+}
+
 void DXGraphics::BeginDraw()
 {
-	/*
 	m_pd3dDeviceContext->UpdateSubresource(
 		m_constantBuffer.Get(),
 		0,
@@ -299,11 +484,9 @@ void DXGraphics::BeginDraw()
 		&m_constantBufferData,
 		0,
 		0);
-	*/
 
-	/*
 	// 랜더 타겟 뷰 클리어
-	const float clearColor[] = { 0.071f, 0.04f, 0.561f, 1.0f };
+	const float clearColor[] = { 0.0f, 0.00f, 0.0f, 1.0f };
 	m_pd3dDeviceContext->ClearRenderTargetView(
 		m_pd3dRenderTargetView.Get(), 
 		clearColor);
@@ -318,19 +501,22 @@ void DXGraphics::BeginDraw()
 		1,
 		m_pd3dRenderTargetView.GetAddressOf(),
 		m_pd3dDepthStencilView.Get());
-	*/
-
-	/*
-	m_pd3dDeviceContext->IASetVertexBuffers(
-		0, 1,
-		m_vertexBuffer.GetAddressOf(), );
-	*/
-
 	
 
 	/// 쉐이더 코드 자리?? 인듯??
+	UINT stride = sizeof(VertexCombined);
+	UINT offset = 0;
+	m_pd3dDeviceContext->IASetVertexBuffers(0, 1, m_vertexBuffer.GetAddressOf(), &stride, &offset);
+	m_pd3dDeviceContext->IASetIndexBuffer(m_indexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
 
-
+	m_pd3dDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	m_pd3dDeviceContext->IASetInputLayout(m_pd3dInputLayout.Get());
+	
+	m_pd3dDeviceContext->VSSetShader(m_vertexShader.Get(), nullptr, 0);
+	m_pd3dDeviceContext->VSSetConstantBuffers(0, 1, m_constantBuffer.GetAddressOf());
+	m_pd3dDeviceContext->PSSetShader(m_pixelShader.Get(), nullptr, 0);
+	m_pd3dDeviceContext->DrawIndexed(count, 0, 0);
+	
 	/// 스왑체인1의 프리센트1을 사용하기 위해서는 이것도 필요함.
 	// DXGI_PRESENT_PARAMETERS present;
 	// present.DirtyRectsCount = 0;
@@ -338,8 +524,6 @@ void DXGraphics::BeginDraw()
 	// present.pScrollRect = nullptr;
 	// present.pScrollOffset = nullptr;
 	// m_pDXGISwapChain1->Present1(1, 0, &present);
-
-	Sleep(1000);
 }
 
 void DXGraphics::EndDraw()
