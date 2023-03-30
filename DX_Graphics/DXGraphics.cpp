@@ -445,7 +445,15 @@ HRESULT DXGraphics::DrawGrid()
 		return hr;
 	}
 
-	UINT indices[] = { 0,1,2, 2,1,3, 1,4,3, 3,4,5, 2,3,6, 6,3,7, 3,5,7, 7,5,8 };
+	UINT indices[] = { 
+		0,1,2, 
+		2,1,3, 
+		1,4,3, 
+		3,4,5, 
+		2,3,6, 
+		6,3,7, 
+		3,5,7, 
+		7,5,8 };
 
 	count = ARRAYSIZE(indices);
 
