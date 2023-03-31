@@ -46,7 +46,7 @@ private:
 	HRESULT CreateSwapChain();
 	HRESULT CreateRenderTargetView();
 	HRESULT CreateDepthStencilView();
-	HRESULT CreateResouce();
+	HRESULT CreateObject();
 	void Test();
 
 	HRESULT CreateShaders();
@@ -64,15 +64,15 @@ private:
 private:
 	struct VertexCombined
 	{
-		DirectX::XMFLOAT3 position;
-		DirectX::XMFLOAT4 color;
+		DirectX::XMFLOAT3 pos;
+		DirectX::XMFLOAT3 color;
 	};
 
 	struct ConstantBuffer
 	{
-		DirectX::XMFLOAT4X4 worldTM;
-		DirectX::XMFLOAT4X4 viewTM;
-		DirectX::XMFLOAT4X4 projTM;
+		DirectX::XMFLOAT4X4 world;
+		DirectX::XMFLOAT4X4 view;
+		DirectX::XMFLOAT4X4 projection;
 	};
 
 	ConstantBuffer m_constantBufferData;
