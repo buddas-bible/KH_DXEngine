@@ -17,35 +17,37 @@ HRESULT DXGraphics::Initialize(HWND hwnd)
 	HRESULT hr = S_OK;
 
 	hr = CreateDevice();
-
 	if (FAILED(hr))
 	{
 		return hr;
 	}
 
 	hr = CreateSwapChain();
-
 	if (FAILED(hr))
 	{
 		return hr;
 	}
 
 	hr = CreateRenderTargetView();
-
 	if (FAILED(hr))
 	{
 		return hr;
 	}
 
 	hr = CreateDepthStencilView();
-
 	if (FAILED(hr))
 	{
 		return hr;
 	}
 
-	hr = CreateShaders();
+	hr = CreateRasterState();
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+
 	hr = CreateObject();
+	hr = CreateShaders();
 
 	// Test();
 
@@ -275,6 +277,48 @@ HRESULT DXGraphics::CreateDepthStencilView()
 	return hr;
 }
 
+
+HRESULT DXGraphics::CreateRasterState()
+{
+	HRESULT hr = S_OK;
+
+	D3D11_RASTERIZER_DESC rasterDesc;				// 채우는 모드
+	ZeroMemory(&rasterDesc, sizeof(D3D11_RASTERIZER_DESC));
+	rasterDesc.FillMode = D3D11_FILL_SOLID;			// 채우기 모드
+	rasterDesc.CullMode = D3D11_CULL_BACK;			// 지정된 방향은 그리지 않음 (BACK이니 뒷면은 그리지 않음)	
+	rasterDesc.FrontCounterClockwise = false;		// 시계방향으로 할 거임
+	rasterDesc.DepthClipEnable = true;				// 거리에 따라 클리핑을 할지
+
+	hr = m_pd3dDevice->CreateRasterizerState(
+		&rasterDesc, 
+		m_solidRasterizerState.GetAddressOf()
+	);
+
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+
+	D3D11_RASTERIZER_DESC Desc;						// 채우지 않는 모드
+	ZeroMemory(&rasterDesc, sizeof(D3D11_RASTERIZER_DESC));
+	rasterDesc.FillMode = D3D11_FILL_WIREFRAME;		// 채우기 모드
+	rasterDesc.CullMode = D3D11_CULL_BACK;			// 지정된 방향은 그리지 않음 (BACK이니 뒷면은 그리지 않음)	
+	rasterDesc.FrontCounterClockwise = false;		// 시계방향으로 할 거임
+	rasterDesc.DepthClipEnable = true;				// 거리에 따라 클리핑을 할지
+
+	hr = m_pd3dDevice->CreateRasterizerState(
+		&rasterDesc,
+		m_wireRasterizerState.GetAddressOf()
+	);
+
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+
+	return hr;
+}
+
 HRESULT DXGraphics::CreateObject()
 {
 	HRESULT hr = S_OK;
@@ -336,6 +380,9 @@ HRESULT DXGraphics::CreateShaders()
 		0, 
 		vertexShader.GetAddressOf()
 	);
+
+	D3D11CreateEffectFromMemory();
+	m_effectTechnique = m_effect->GetTechniqueByName()
 
 	if (FAILED(hr))
 	{
@@ -407,6 +454,7 @@ HRESULT DXGraphics::CreateShaders()
 		return hr;
 	}
 
+	/// 상수 버퍼 설정하기 위한 것
 	DirectX::XMVECTOR eye = DirectX::XMVectorSet(0.0f, 0.7f, 1.5f, 0.f);
 	DirectX::XMVECTOR at = DirectX::XMVectorSet(0.0f, -0.1f, 0.0f, 0.f);
 	DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.f);
@@ -569,6 +617,13 @@ void DXGraphics::BeginDraw()
 		0
 	);
 
+	// 랜더 타켓 설정.
+	m_pd3dDeviceContext->OMSetRenderTargets(
+		1,
+		m_pd3dRenderTargetView.GetAddressOf(),
+		m_pd3dDepthStencilView.Get()
+	);
+
 	// 랜더 타겟 뷰 클리어
 	m_pd3dDeviceContext->ClearRenderTargetView(
 		m_pd3dRenderTargetView.Get(), 
@@ -581,13 +636,6 @@ void DXGraphics::BeginDraw()
 		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 
 		1.0f, 
 		0
-	);
-
-	// 랜더 타켓 설정.
-	m_pd3dDeviceContext->OMSetRenderTargets(
-		1,
-		m_pd3dRenderTargetView.GetAddressOf(),
-		m_pd3dDepthStencilView.Get()
 	);
 
 	m_pd3dDeviceContext->RSSetState(0);
@@ -606,7 +654,7 @@ void DXGraphics::BeginDraw()
 
 	m_pd3dDeviceContext->IASetIndexBuffer(
 		m_indexBuffer.Get(), 
-		DXGI_FORMAT_R32_UINT,
+		DXGI_FORMAT_R32_UINT,					// 32비트 unsigned int 형으로 읽음
 		0
 	);
 
