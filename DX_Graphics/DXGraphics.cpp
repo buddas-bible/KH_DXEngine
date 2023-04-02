@@ -373,6 +373,7 @@ HRESULT DXGraphics::CreateShaders()
 	fin.read(&vsCompiledShader[0], size);
 	fin.close();
 
+	/*
 	ComPtr<ID3D11VertexShader> vertexShader;
 	hr = m_pd3dDevice->CreateVertexShader(
 		&vsCompiledShader[0], 
@@ -380,39 +381,63 @@ HRESULT DXGraphics::CreateShaders()
 		0, 
 		vertexShader.GetAddressOf()
 	);
+	*/
 
-	D3D11CreateEffectFromMemory();
-	m_effectTechnique = m_effect->GetTechniqueByName()
+	/// 파일로부터 이펙트 정보를 읽어옴
+	D3DX11CreateEffectFromMemory(
+		&vsCompiledShader[0], 
+		size, 
+		0, 
+		m_pd3dDevice.Get(), 
+		m_effect.GetAddressOf()
+	);
+
+	m_effectTechnique = m_effect->GetTechniqueByName("Tech");							// 파일에 Tech 이름의 데이터를 읽어옴
+	m_effectMatrixVariable = m_effect->GetVariableByName("worldViewProj")->AsMatrix();	// 파일에 worldViewProj 이름의 데이터를 읽어옴
 
 	if (FAILED(hr))
 	{
 		return hr;
 	}
 
-	vertexShader.As(&m_vertexShader);
+	// vertexShader.As(&m_vertexShader);
 
+	// 버텍스 정보가 어떻게 되어있는지 설정
 	D3D11_INPUT_ELEMENT_DESC iaDesc[] =
 	{
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
 		0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT,
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT,
 		0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
+	/*
 	hr = m_pd3dDevice->CreateInputLayout(
 		iaDesc, 
 		ARRAYSIZE(iaDesc), 
 		&vsCompiledShader[0],
 		size, 
 		m_pd3dInputLayout.GetAddressOf());
+	*/
+
+	// 인풋 레이아웃 만듬
+	D3DX11_PASS_DESC passDesc;
+	m_effectTechnique->GetPassByIndex(0)->GetDesc(&passDesc);
+	hr = m_pd3dDevice->CreateInputLayout(
+		iaDesc,
+		2,										// 버텍스에 들어간 데이터 갯수
+		passDesc.pIAInputSignature,				// 셰이더 코드 포인터
+		passDesc.IAInputSignatureSize,			// 셰이더 크기
+		m_pd3dInputLayout.GetAddressOf()
+	);
 
 	if (FAILED(hr))
 	{
 		return hr;
 	}
 
-
+	/*
 	std::ifstream psfin("CubePixelShader.cso", std::ios::binary);
 
 	psfin.seekg(0, std::ios_base::end);
@@ -488,6 +513,7 @@ HRESULT DXGraphics::CreateShaders()
 			)
 		)
 	);
+	*/
 
 	return hr;
 }
@@ -510,15 +536,15 @@ HRESULT DXGraphics::DrawGrid()
 // 		{ DirectX::XMFLOAT3(1.f, 0.f, 2.f), Color::White },
 // 		{ DirectX::XMFLOAT3(2.f, 0.f, 2.f), Color::White }
 
-		{DirectX::XMFLOAT3(-0.5f,-0.5f,-0.5f), DirectX::XMFLOAT3(0,   0,   0),},
-		{DirectX::XMFLOAT3(-0.5f,-0.5f, 0.5f), DirectX::XMFLOAT3(0,   0,   1),},
-		{DirectX::XMFLOAT3(-0.5f, 0.5f,-0.5f), DirectX::XMFLOAT3(0,   1,   0),},
-		{DirectX::XMFLOAT3(-0.5f, 0.5f, 0.5f), DirectX::XMFLOAT3(0,   1,   1),},
+		{DirectX::XMFLOAT3(-0.5f,-0.5f,-0.5f), DirectX::XMFLOAT4(0, 0, 0, 1),},
+		{DirectX::XMFLOAT3(-0.5f,-0.5f, 0.5f), DirectX::XMFLOAT4(0, 0, 1, 1),},
+		{DirectX::XMFLOAT3(-0.5f, 0.5f,-0.5f), DirectX::XMFLOAT4(0, 1, 0, 1),},
+		{DirectX::XMFLOAT3(-0.5f, 0.5f, 0.5f), DirectX::XMFLOAT4(0, 1, 1, 1),},
 
-		{DirectX::XMFLOAT3(0.5f,-0.5f,-0.5f), DirectX::XMFLOAT3(1,   0,   0),},
-		{DirectX::XMFLOAT3(0.5f,-0.5f, 0.5f), DirectX::XMFLOAT3(1,   0,   1),},
-		{DirectX::XMFLOAT3(0.5f, 0.5f,-0.5f), DirectX::XMFLOAT3(1,   1,   0),},
-		{DirectX::XMFLOAT3(0.5f, 0.5f, 0.5f), DirectX::XMFLOAT3(1,   1,   1),},
+		{DirectX::XMFLOAT3(0.5f,-0.5f,-0.5f), DirectX::XMFLOAT4(1, 0, 0, 1),},
+		{DirectX::XMFLOAT3(0.5f,-0.5f, 0.5f), DirectX::XMFLOAT4(1, 0, 1, 1),},
+		{DirectX::XMFLOAT3(0.5f, 0.5f,-0.5f), DirectX::XMFLOAT4(1, 1, 0, 1),},
+		{DirectX::XMFLOAT3(0.5f, 0.5f, 0.5f), DirectX::XMFLOAT4(1, 1, 1, 1),},
 	};
 
 	// 버퍼를 설정하는 구조체

@@ -17,7 +17,8 @@
 #include "../KH_Math/Vector4D.h"
 #include "../KH_Math/Matrix4x4.h"
 
-#include "d3dx11effect.h"
+#include "../DXTK/Inc/d3dx11effect.h"
+#include "../DXTK/Inc/Effects.h"
 
 #include <DirectXMath.h>
 #include "Color.h"
