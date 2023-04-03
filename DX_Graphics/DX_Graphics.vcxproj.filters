@@ -7,6 +7,9 @@
     <Filter Include="Color">
       <UniqueIdentifier>{534da521-284b-4028-aac6-cdd41f9ab46e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Camera">
+      <UniqueIdentifier>{3644887e-4b67-4f20-b601-304c24241ef7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DXGraphics.h">
@@ -16,10 +19,20 @@
       <Filter>Color</Filter>
     </ClInclude>
     <ClInclude Include="DXDefine.h" />
+    <ClInclude Include="Camera.h">
+      <Filter>Camera</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DXGraphics.cpp">
       <Filter>DXGraphics</Filter>
     </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Camera</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="VertexShader.fx" />
+    <FxCompile Include="VertexShader2.fx" />
   </ItemGroup>
 </Project>

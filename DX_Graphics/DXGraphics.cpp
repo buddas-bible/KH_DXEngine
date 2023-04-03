@@ -300,14 +300,14 @@ HRESULT DXGraphics::CreateRasterState()
 	}
 
 	D3D11_RASTERIZER_DESC Desc;						// 채우지 않는 모드
-	ZeroMemory(&rasterDesc, sizeof(D3D11_RASTERIZER_DESC));
-	rasterDesc.FillMode = D3D11_FILL_WIREFRAME;		// 채우기 모드
-	rasterDesc.CullMode = D3D11_CULL_BACK;			// 지정된 방향은 그리지 않음 (BACK이니 뒷면은 그리지 않음)	
-	rasterDesc.FrontCounterClockwise = false;		// 시계방향으로 할 거임
-	rasterDesc.DepthClipEnable = true;				// 거리에 따라 클리핑을 할지
+	ZeroMemory(&Desc, sizeof(D3D11_RASTERIZER_DESC));
+	Desc.FillMode = D3D11_FILL_WIREFRAME;		// 채우기 모드
+	Desc.CullMode = D3D11_CULL_BACK;			// 지정된 방향은 그리지 않음 (BACK이니 뒷면은 그리지 않음)	
+	Desc.FrontCounterClockwise = false;		// 시계방향으로 할 거임
+	Desc.DepthClipEnable = true;				// 거리에 따라 클리핑을 할지
 
 	hr = m_pd3dDevice->CreateRasterizerState(
-		&rasterDesc,
+		&Desc,
 		m_wireRasterizerState.GetAddressOf()
 	);
 
@@ -328,6 +328,8 @@ HRESULT DXGraphics::CreateObject()
 	{
 		return hr;
 	}
+
+	return hr;
 }
 
 void DXGraphics::Test()
@@ -363,7 +365,7 @@ HRESULT DXGraphics::CreateShaders()
 {
 	HRESULT hr = S_OK;
 
-	std::ifstream fin("CubeVertexShader.cso", std::ios::binary);
+	std::ifstream fin("../x64/debug/VertexShader.cso", std::ios::binary);
 
 	fin.seekg(0, std::ios_base::end);
 	int size = (int)fin.tellg();
@@ -384,7 +386,7 @@ HRESULT DXGraphics::CreateShaders()
 	*/
 
 	/// 파일로부터 이펙트 정보를 읽어옴
-	D3DX11CreateEffectFromMemory(
+	hr = D3DX11CreateEffectFromMemory(
 		&vsCompiledShader[0], 
 		size, 
 		0, 
@@ -436,6 +438,36 @@ HRESULT DXGraphics::CreateShaders()
 	{
 		return hr;
 	}
+
+	DirectX::XMVECTOR eye = DirectX::XMVectorSet(0.0f, 0.7f, 1.5f, 0.f);
+	DirectX::XMVECTOR at = DirectX::XMVectorSet(0.0f, -0.1f, 0.0f, 0.f);
+	DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.f);
+
+	m_constantBufferData.view = 
+		// DirectX::XMMatrixTranspose(
+		DirectX::XMMatrixLookAtRH(		// 뷰 매트릭스를 만듬
+			eye, 
+			at,	
+			up
+		// )	
+		);
+
+	D3D11_TEXTURE2D_DESC backBufferDesc{};
+	ZeroMemory(&backBufferDesc, sizeof(backBufferDesc));
+	m_backBuffer->GetDesc(&backBufferDesc);
+
+	float aspectRatioX = static_cast<float>(backBufferDesc.Width) / static_cast<float>(backBufferDesc.Height);
+	float aspectRatioY = aspectRatioX < (16.0f / 9.0f) ? aspectRatioX / (16.0f / 9.0f) : 1.0f;
+
+	m_constantBufferData.projection =
+		// DirectX::XMMatrixTranspose(
+			DirectX::XMMatrixPerspectiveFovRH(			// 투영 매트릭스를 만듬
+				2.0f * std::atan(std::tan(DirectX::XMConvertToRadians(70) * 0.5f) / aspectRatioY),
+				aspectRatioX,
+				0.01f,
+				100.0f
+			// )
+		);
 
 	/*
 	std::ifstream psfin("CubePixelShader.cso", std::ios::binary);
@@ -634,15 +666,6 @@ HRESULT DXGraphics::DrawGrid()
 
 void DXGraphics::BeginDraw()
 {
-	m_pd3dDeviceContext->UpdateSubresource(
-		m_constantBuffer.Get(),
-		0,
-		nullptr,
-		&m_constantBufferData,
-		0,
-		0
-	);
-
 	// 랜더 타켓 설정.
 	m_pd3dDeviceContext->OMSetRenderTargets(
 		1,
@@ -664,10 +687,15 @@ void DXGraphics::BeginDraw()
 		0
 	);
 
-	m_pd3dDeviceContext->RSSetState(0);
-	
 
 	/// 쉐이더 코드 자리?? 인듯??
+	// 레스터라이즈 스테이트
+	m_pd3dDeviceContext->RSSetState(0);
+
+	m_pd3dDeviceContext->IASetInputLayout(m_pd3dInputLayout.Get());
+	m_pd3dDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	// IA에 버텍스 버퍼 설정
 	UINT stride = sizeof(VertexCombined);
 	UINT offset = 0;
 	m_pd3dDeviceContext->IASetVertexBuffers(
@@ -678,15 +706,28 @@ void DXGraphics::BeginDraw()
 		&offset
 	);
 
+	// IA에 인덱스 버퍼 설정
 	m_pd3dDeviceContext->IASetIndexBuffer(
 		m_indexBuffer.Get(), 
 		DXGI_FORMAT_R32_UINT,					// 32비트 unsigned int 형으로 읽음
 		0
 	);
 
-	m_pd3dDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	m_pd3dDeviceContext->IASetInputLayout(m_pd3dInputLayout.Get());
+	// 상수 버퍼 설정
+	DirectX::XMMATRIX worldViewProj = m_constantBufferData.world * m_constantBufferData.view * m_constantBufferData.projection;
+	m_effectMatrixVariable->SetMatrix(reinterpret_cast<float*>(&worldViewProj));
 	
+	// 테크닉
+	D3DX11_TECHNIQUE_DESC techDesc;
+	m_effectTechnique->GetDesc(&techDesc);
+
+	for (UINT p = 0; p < techDesc.Passes; ++p )
+	{
+		m_effectTechnique->GetPassByIndex(p)->Apply(0, m_pd3dDeviceContext.Get());
+
+		m_pd3dDeviceContext->DrawIndexed(count, 0, 0);
+	}
+	/*
 	m_pd3dDeviceContext->VSSetShader(
 		m_vertexShader.Get(), 
 		nullptr, 
@@ -710,6 +751,7 @@ void DXGraphics::BeginDraw()
 		0, 
 		0
 	);
+	*/
 	
 	/// 스왑체인1의 프리센트1을 사용하기 위해서는 이것도 필요함.
 	// DXGI_PRESENT_PARAMETERS present;

@@ -5,24 +5,15 @@
     <ClCompile Include="GameLoop.cpp">
       <Filter>GameLoop</Filter>
     </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>Camera</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="GameLoop">
       <UniqueIdentifier>{41d1786c-1325-47d3-84ce-68b2f2a7a065}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Camera">
-      <UniqueIdentifier>{aaf8f257-13a0-4f84-b2bf-9cd6c944074f}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameLoop.h">
       <Filter>GameLoop</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>Camera</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

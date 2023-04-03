@@ -1,4 +1,23 @@
 #pragma once
+
+#ifdef _WIN64 
+
+#ifdef _DEBUG 
+#pragma comment(lib, "Effects11d.lib")
+#else
+#pragma comment(lib, "Effects11.lib")
+#endif
+
+#else
+
+#ifdef _DEBUG 
+#pragma comment(lib, "Effects11d_x86.lib")
+#else
+#pragma comment(lib, "Effects11_x86.lib")
+#endif
+
+#endif
+
 #include <d3d11.h>
 #include <d3d11_1.h>
 #include <d3d11_2.h>
@@ -18,7 +37,7 @@
 #include "../KH_Math/Matrix4x4.h"
 
 #include "../DXTK/Inc/d3dx11effect.h"
-#include "../DXTK/Inc/Effects.h"
 
 #include <DirectXMath.h>
+
 #include "Color.h"

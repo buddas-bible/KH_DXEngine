@@ -1,6 +1,9 @@
 #pragma once
-
 #include "DXDefine.h"
+#include "Color.h"
+
+// #include "../DXTK/Inc/d3dx11effect.h"
+// #include "../DXTK/Inc/Effects.h"
 
 class DXGraphics : public IGraphics
 {
@@ -62,8 +65,8 @@ private:
 
 
 private:
-	Microsoft::WRL::ComPtr<ID3D11VertexShader>		m_vertexShader;		// 버텍스 셰이더
-	Microsoft::WRL::ComPtr<ID3D11PixelShader>		m_pixelShader;		// 픽셀 셰이더
+	// Microsoft::WRL::ComPtr<ID3D11VertexShader>		m_vertexShader;		// 버텍스 셰이더
+	// Microsoft::WRL::ComPtr<ID3D11PixelShader>		m_pixelShader;		// 픽셀 셰이더
 
 
 	Microsoft::WRL::ComPtr<ID3DX11Effect> m_effect;								// 버텍스 셰이더 픽셀 셰이더를 대체할 무언가
@@ -81,9 +84,9 @@ private:
 
 	struct ConstantBuffer
 	{
-		DirectX::XMFLOAT4X4 world;			// 월드 매트릭스
-		DirectX::XMFLOAT4X4 view;			// 뷰 매트릭스
-		DirectX::XMFLOAT4X4 projection;		// 투영 매트릭스
+		DirectX::XMMATRIX world;			// 월드 매트릭스
+		DirectX::XMMATRIX view;			// 뷰 매트릭스
+		DirectX::XMMATRIX projection;		// 투영 매트릭스
 	};
 
 	ConstantBuffer m_constantBufferData;	// 상수 버퍼 데이터 (월드 뷰 투영 매트릭스 정보)
