@@ -41,3 +41,6 @@
 #include <DirectXMath.h>
 
 #include "Color.h"
+
+#include <d3dcompiler.h>
+#pragma comment(lib, "d3dcompiler.lib")

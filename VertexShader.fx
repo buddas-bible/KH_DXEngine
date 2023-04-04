@@ -31,11 +31,31 @@ VertexOut VS(VertexIn vin)
     // Just pass vertex color into the pixel shader.
     vout.Color = vin.Color;
 
+    //vout.Color.x = 1.0f;
+    //vout.Color.y = 0;
+    //vout.Color.z = 0;
+    //vout.Color.w = 1.0f;
+
     return vout;
 }
 
 float4 PS(VertexOut pin) : SV_Target
 {
+    //float4 test;
+    //test.r = 1.0f;
+    //test.g = 0.0f;
+    //test.b = 1.0f;
+    //test.a = 1.0f;
+    //return test;
+
+    //pin.Color.x = pin.PosH.z;
+    //pin.Color.y = pin.PosH.z;
+    //pin.Color.z = pin.PosH.z;
+
+    //pin.Color.x = 0.0f;
+    //pin.Color.y = 0.7f;
+    //pin.Color.z = 0.0f;
+
     return pin.Color;
 }
 
