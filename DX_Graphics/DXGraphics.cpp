@@ -3,11 +3,14 @@
 #include <fstream>
 #include <vector>
 
+#include "InputManager.h"
+#include "TimeController.h"
+
 using namespace Microsoft::WRL;
 
 DXGraphics::~DXGraphics()
 {
-
+	
 }
 
 HRESULT DXGraphics::Initialize(HWND hwnd)
@@ -57,6 +60,45 @@ HRESULT DXGraphics::Initialize(HWND hwnd)
 void DXGraphics::Finalize()
 {
 
+}
+
+
+void DXGraphics::Update()
+{
+	if (GetAsyncKeyState(VK_UP))
+	{
+		m_eye.z += 1.f * 0.016;
+	}
+	if (GetAsyncKeyState(VK_DOWN))
+	{
+		m_eye.z -= 1.f * 0.016;
+	}
+	if (GetAsyncKeyState(VK_LEFT))
+	{
+		m_eye.x -= 1.f * 0.016;
+	}
+	if (GetAsyncKeyState(VK_RIGHT))
+	{
+		m_eye.x += 1.f * 0.016;
+	}
+
+	if (GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_UP))
+	{
+		m_eye.y += 1.f * 0.016;
+	}
+	if (GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_DOWN))
+	{
+		m_eye.y -= 1.f * 0.016;
+	}
+
+	DirectX::XMVECTOR eye = DirectX::XMVectorSet(m_eye.x, m_eye.y, m_eye.z, m_eye.w);
+
+	m_constantBufferData.view =
+		DirectX::XMMatrixLookAtRH(
+			eye,
+			{ m_at.x, m_at.y, m_at.z, m_at.w },
+			{ m_up.x, m_up.y, m_up.z, m_up.w }
+		);
 }
 
 HRESULT DXGraphics::CreateDevice()
@@ -459,10 +501,13 @@ HRESULT DXGraphics::CreateShaders()
 
 	/// 지금은 상수로 매트릭스를 구성했지만
 	/// 꾸준히 업데이트 되는 요소로 봐야할 것
+	m_eye = { 0.0f, 0.7f, 1.5f, 0.f };
+	m_at = { 0.0f, -0.1f, 0.0f, 0.f };
+	m_up = { 0.0f, 1.0f, 0.0f, 0.f };
 
-	DirectX::XMVECTOR eye = DirectX::XMVectorSet(0.0f, 0.7f, 1.5f, 0.f);
-	DirectX::XMVECTOR at = DirectX::XMVectorSet(0.0f, -0.1f, 0.0f, 0.f);
-	DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.f);
+	DirectX::XMVECTOR eye = DirectX::XMVectorSet(m_eye.x, m_eye.y, m_eye.z, m_eye.w);
+	DirectX::XMVECTOR at = DirectX::XMVectorSet(m_at.x, m_at.y, m_at.z, m_at.w);
+	DirectX::XMVECTOR up = DirectX::XMVectorSet(m_up.x, m_up.y, m_up.z, m_up.w);
 
 	// 월드 행렬
 	m_constantBufferData.world = DirectX::XMMatrixIdentity();
@@ -581,26 +626,15 @@ HRESULT DXGraphics::DrawGrid()
 	// 꼭짓점을 설명하는 정보
 	VertexCombined grid[] =
 	{
-		{ DirectX::XMFLOAT3(0.f, 0.f, 0.f), DirectX::XMFLOAT4(0, 0, 0, 1) },		// 위치
-		{ DirectX::XMFLOAT3(1.f, 0.f, 0.f), DirectX::XMFLOAT4(0, 0, 1, 1) },
-		{ DirectX::XMFLOAT3(0.f, 0.f, 1.f), DirectX::XMFLOAT4(0, 1, 0, 1) },
-		{ DirectX::XMFLOAT3(1.f, 0.f, 1.f), DirectX::XMFLOAT4(0, 1, 1, 1) },
-
-		{ DirectX::XMFLOAT3(2.f, 0.f, 0.f), DirectX::XMFLOAT4(0, 0, 0, 1) },
-		{ DirectX::XMFLOAT3(2.f, 0.f, 1.f), DirectX::XMFLOAT4(0, 0, 1, 1) },
-		{ DirectX::XMFLOAT3(0.f, 0.f, 2.f), DirectX::XMFLOAT4(0, 1, 0, 1) },
-		{ DirectX::XMFLOAT3(1.f, 0.f, 2.f), DirectX::XMFLOAT4(0, 1, 1, 1) },
- 		{ DirectX::XMFLOAT3(2.f, 0.f, 2.f), DirectX::XMFLOAT4(0, 0, 0, 1) }
-
-// 		{DirectX::XMFLOAT3(-0.5f,-0.5f,-0.5f), DirectX::XMFLOAT4(0, 0, 0, 1),},
-// 		{DirectX::XMFLOAT3(-0.5f,-0.5f, 0.5f), DirectX::XMFLOAT4(0, 0, 1, 1),},
-// 		{DirectX::XMFLOAT3(-0.5f, 0.5f,-0.5f), DirectX::XMFLOAT4(0, 1, 0, 1),},
-// 		{DirectX::XMFLOAT3(-0.5f, 0.5f, 0.5f), DirectX::XMFLOAT4(0, 1, 1, 1),},
-// 
-// 		{DirectX::XMFLOAT3(0.5f,-0.5f,-0.5f), DirectX::XMFLOAT4(1, 0, 0, 1),},
-// 		{DirectX::XMFLOAT3(0.5f,-0.5f, 0.5f), DirectX::XMFLOAT4(1, 0, 1, 1),},
-// 		{DirectX::XMFLOAT3(0.5f, 0.5f,-0.5f), DirectX::XMFLOAT4(1, 1, 0, 1),},
-// 		{DirectX::XMFLOAT3(0.5f, 0.5f, 0.5f), DirectX::XMFLOAT4(1, 1, 1, 1),},
+		{DirectX::XMFLOAT3(-0.5f,-0.5f,-0.5f), DirectX::XMFLOAT4(Color::Black),},			// 0
+		{DirectX::XMFLOAT3(-0.5f,-0.5f, 0.5f), DirectX::XMFLOAT4(Color::Blue),},			// 1
+		{DirectX::XMFLOAT3(-0.5f, 0.5f,-0.5f), DirectX::XMFLOAT4(Color::Green),},			// 2
+		{DirectX::XMFLOAT3(-0.5f, 0.5f, 0.5f), DirectX::XMFLOAT4(Color::Cyan),},			// 3
+		
+		{DirectX::XMFLOAT3(0.5f,-0.5f,-0.5f), DirectX::XMFLOAT4(Color::Red),},				// 4
+		{DirectX::XMFLOAT3(0.5f,-0.5f, 0.5f), DirectX::XMFLOAT4(Color::Magenta),},			// 5
+		{DirectX::XMFLOAT3(0.5f, 0.5f,-0.5f), DirectX::XMFLOAT4(Color::Yellow),},			// 6
+		{DirectX::XMFLOAT3(0.5f, 0.5f, 0.5f), DirectX::XMFLOAT4(Color::White),},			// 7
 	};
 
 	// 버퍼를 설정하는 구조체
@@ -631,32 +665,23 @@ HRESULT DXGraphics::DrawGrid()
 	}
 
 	UINT indices[] = { 
- 		0,1,2, 
- 		2,1,3, 
- 		1,4,3, 
- 		3,4,5, 
- 		2,3,6, 
- 		6,3,7, 
- 		3,5,7, 
- 		7,5,8 
+			0,2,1, // -x
+			1,2,3,
 
-		// 		0,2,1, // -x
-		// 		1,2,3,
-		// 
-		// 		4,5,6, // +x
-		// 		5,7,6,
-		// 
-		// 		0,1,5, // -y
-		// 		0,5,4,
-		// 
-		// 		2,6,7, // +y
-		// 		2,7,3,
-		// 
-		// 		0,4,6, // -z
-		// 		0,6,2,
-		// 
-		// 		1,3,7, // +z
-		// 		1,7,5,
+			4,5,6, // +x
+			5,7,6,
+
+			0,1,5, // -y
+			0,5,4,
+
+			2,6,7, // +y
+			2,7,3,
+
+			0,4,6, // -z
+			0,6,2,
+
+			1,3,7, // +z
+			1,7,5,
 	};
 
 	count = ARRAYSIZE(indices);
@@ -717,7 +742,7 @@ void DXGraphics::BeginDraw()
 	m_pd3dDeviceContext->RSSetState(0);
 
 	m_pd3dDeviceContext->IASetInputLayout(m_pd3dInputLayout.Get());
-	m_pd3dDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	m_pd3dDeviceContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 
 	// IA에 버텍스 버퍼 설정
 	UINT stride = sizeof(VertexCombined);

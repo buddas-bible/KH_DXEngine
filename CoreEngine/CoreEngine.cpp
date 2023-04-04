@@ -42,5 +42,5 @@ void CoreEngine::Render()
 
 void CoreEngine::Update()
 {
-
+	m_pGraphics->Update();
 }

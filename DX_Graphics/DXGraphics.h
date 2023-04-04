@@ -29,8 +29,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState>	m_solidRasterizerState;
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState>	m_wireRasterizerState;
 
-
-
 	D3D_FEATURE_LEVEL		m_d3dFeatureLevels{};		// 피처 레벨 
 	D3D11_TEXTURE2D_DESC	m_d3dBackBufferDesc{};		// 백버퍼 설정
 	D3D11_VIEWPORT			m_d3dViewport{};			// 뷰포트
@@ -43,6 +41,7 @@ private:
 public:
 	virtual HRESULT Initialize(HWND hWnd) override;
 	virtual void Finalize() override;
+	virtual void Update() override;
 	virtual void BeginDraw() override;
 	virtual void EndDraw() override;
 
@@ -68,7 +67,6 @@ private:
 	// Microsoft::WRL::ComPtr<ID3D11VertexShader>		m_vertexShader;		// 버텍스 셰이더
 	// Microsoft::WRL::ComPtr<ID3D11PixelShader>		m_pixelShader;		// 픽셀 셰이더
 
-
 	Microsoft::WRL::ComPtr<ID3DX11Effect> m_effect;								// 버텍스 셰이더 픽셀 셰이더를 대체할 무언가
 	Microsoft::WRL::ComPtr<ID3DX11EffectTechnique> m_effectTechnique;			// 테크
 	Microsoft::WRL::ComPtr<ID3DX11EffectMatrixVariable> m_effectMatrixVariable;	// 
@@ -88,6 +86,10 @@ private:
 		DirectX::XMMATRIX view;			// 뷰 매트릭스
 		DirectX::XMMATRIX projection;		// 투영 매트릭스
 	};
+
+	DirectX::XMFLOAT4 m_eye;
+	DirectX::XMFLOAT4 m_at;
+	DirectX::XMFLOAT4 m_up;
 
 	ConstantBuffer m_constantBufferData;	// 상수 버퍼 데이터 (월드 뷰 투영 매트릭스 정보)
 	UINT count;								// 인덱스 개수

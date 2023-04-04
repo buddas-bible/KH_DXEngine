@@ -10,6 +10,9 @@
     <Filter Include="Camera">
       <UniqueIdentifier>{3644887e-4b67-4f20-b601-304c24241ef7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="etc">
+      <UniqueIdentifier>{d9397347-f2d7-4ff6-b663-4c68c5ee2976}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DXGraphics.h">
@@ -18,9 +21,17 @@
     <ClInclude Include="Color.h">
       <Filter>Color</Filter>
     </ClInclude>
-    <ClInclude Include="DXDefine.h" />
     <ClInclude Include="Camera.h">
       <Filter>Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="DXDefine.h">
+      <Filter>etc</Filter>
+    </ClInclude>
+    <ClInclude Include="TimeController.h">
+      <Filter>etc</Filter>
+    </ClInclude>
+    <ClInclude Include="InputManager.h">
+      <Filter>etc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -29,6 +40,12 @@
     </ClCompile>
     <ClCompile Include="Camera.cpp">
       <Filter>Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="TimeController.cpp">
+      <Filter>etc</Filter>
+    </ClCompile>
+    <ClCompile Include="InputManager.cpp">
+      <Filter>etc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

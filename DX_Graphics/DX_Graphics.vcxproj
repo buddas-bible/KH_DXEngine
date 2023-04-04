@@ -168,10 +168,14 @@
     <ClInclude Include="Color.h" />
     <ClInclude Include="DXDefine.h" />
     <ClInclude Include="DXGraphics.h" />
+    <ClInclude Include="InputManager.h" />
+    <ClInclude Include="TimeController.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DXGraphics.cpp" />
+    <ClCompile Include="InputManager.cpp" />
+    <ClCompile Include="TimeController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="VertexShader.fx">
