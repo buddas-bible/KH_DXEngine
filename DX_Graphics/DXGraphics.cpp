@@ -377,10 +377,10 @@ HRESULT DXGraphics::CreateShaders()
 
 #if _DEBUG
 	std::ifstream fin("../WIN32/debug/VertexShader.cso", std::ios::binary);
-
 #else
 	std::ifstream fin("../WIN32/release/VertexShader.cso", std::ios::binary);
 #endif
+
 #endif
 
 	fin.seekg(0, std::ios_base::end);
