@@ -365,7 +365,23 @@ HRESULT DXGraphics::CreateShaders()
 {
 	HRESULT hr = S_OK;
 
+#if _WIN64
+
+#if _DEBUG
 	std::ifstream fin("../x64/debug/VertexShader.cso", std::ios::binary);
+#else
+	std::ifstream fin("../x64/release/VertexShader.cso", std::ios::binary);
+#endif
+
+#else
+
+#if _DEBUG
+	std::ifstream fin("../WIN32/debug/VertexShader.cso", std::ios::binary);
+
+#else
+	std::ifstream fin("../WIN32/release/VertexShader.cso", std::ios::binary);
+#endif
+#endif
 
 	fin.seekg(0, std::ios_base::end);
 	int size = (int)fin.tellg();
@@ -410,6 +426,9 @@ HRESULT DXGraphics::CreateShaders()
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
 		0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 
+		// { "UV", 0, DXGI_FORMAT_R32G32_FLOAT,
+		// 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+
 		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT,
 		0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
@@ -443,30 +462,33 @@ HRESULT DXGraphics::CreateShaders()
 	DirectX::XMVECTOR at = DirectX::XMVectorSet(0.0f, -0.1f, 0.0f, 0.f);
 	DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.f);
 
+	// 월드 행렬
+	m_constantBufferData.world = DirectX::XMMatrixIdentity();
+
+	// 뷰 매트릭스
 	m_constantBufferData.view = 
-		// DirectX::XMMatrixTranspose(
-		DirectX::XMMatrixLookAtRH(		// 뷰 매트릭스를 만듬
+		DirectX::XMMatrixLookAtRH(
 			eye, 
 			at,	
 			up
-		// )	
 		);
 
+	// 백버퍼에서 정보를 가져옴
 	D3D11_TEXTURE2D_DESC backBufferDesc{};
 	ZeroMemory(&backBufferDesc, sizeof(backBufferDesc));
 	m_backBuffer->GetDesc(&backBufferDesc);
 
+	// 화면 비율
 	float aspectRatioX = static_cast<float>(backBufferDesc.Width) / static_cast<float>(backBufferDesc.Height);
 	float aspectRatioY = aspectRatioX < (16.0f / 9.0f) ? aspectRatioX / (16.0f / 9.0f) : 1.0f;
 
+	// 투영 매트릭스
 	m_constantBufferData.projection =
-		// DirectX::XMMatrixTranspose(
-			DirectX::XMMatrixPerspectiveFovRH(			// 투영 매트릭스를 만듬
+			DirectX::XMMatrixPerspectiveFovRH(
 				2.0f * std::atan(std::tan(DirectX::XMConvertToRadians(70) * 0.5f) / aspectRatioY),
 				aspectRatioX,
 				0.01f,
 				100.0f
-			// )
 		);
 
 	/*

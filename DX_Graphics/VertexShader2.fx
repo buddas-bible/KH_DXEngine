@@ -6,7 +6,7 @@
 
 cbuffer cbPerObject
 {
-    float4x4 gWorldViewProj;
+    float4x4 WorldViewProj;
 };
 
 struct VertexIn
@@ -27,7 +27,7 @@ VertexOut VS(VertexIn vin)
 
     // Transform to homogeneous clip space.
     // 바깥쪽에서 월드-뷰-프로젝션 행렬을 받아서 동차절단좌표계 (아직 NDC아님)으로 변환해준다.
-    vout.PosH = mul(float4(vin.PosL, 1.0f), gWorldViewProj);
+    vout.PosH = mul(float4(vin.PosL, 1.0f), WorldViewProj);
 
     // Just pass vertex color into the pixel shader.
     // 헬퍼 오브젝트는 버텍스컬러에 의존해서 그리게 한다.
