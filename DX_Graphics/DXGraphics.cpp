@@ -277,7 +277,6 @@ HRESULT DXGraphics::CreateDepthStencilView()
 	return hr;
 }
 
-
 HRESULT DXGraphics::CreateRasterState()
 {
 	HRESULT hr = S_OK;
@@ -458,6 +457,9 @@ HRESULT DXGraphics::CreateShaders()
 		return hr;
 	}
 
+	/// 지금은 상수로 매트릭스를 구성했지만
+	/// 꾸준히 업데이트 되는 요소로 봐야할 것
+
 	DirectX::XMVECTOR eye = DirectX::XMVectorSet(0.0f, 0.7f, 1.5f, 0.f);
 	DirectX::XMVECTOR at = DirectX::XMVectorSet(0.0f, -0.1f, 0.0f, 0.f);
 	DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.f);
@@ -579,26 +581,26 @@ HRESULT DXGraphics::DrawGrid()
 	// 꼭짓점을 설명하는 정보
 	VertexCombined grid[] =
 	{
-// 		{ DirectX::XMFLOAT3(0.f, 0.f, 0.f), Color::White },		// 위치
-// 		{ DirectX::XMFLOAT3(1.f, 0.f, 0.f), Color::White },
-// 		{ DirectX::XMFLOAT3(0.f, 0.f, 1.f), Color::White },
-// 		{ DirectX::XMFLOAT3(1.f, 0.f, 1.f), Color::White },
+		{ DirectX::XMFLOAT3(0.f, 0.f, 0.f), DirectX::XMFLOAT4(0, 0, 0, 1) },		// 위치
+		{ DirectX::XMFLOAT3(1.f, 0.f, 0.f), DirectX::XMFLOAT4(0, 0, 1, 1) },
+		{ DirectX::XMFLOAT3(0.f, 0.f, 1.f), DirectX::XMFLOAT4(0, 1, 0, 1) },
+		{ DirectX::XMFLOAT3(1.f, 0.f, 1.f), DirectX::XMFLOAT4(0, 1, 1, 1) },
+
+		{ DirectX::XMFLOAT3(2.f, 0.f, 0.f), DirectX::XMFLOAT4(0, 0, 0, 1) },
+		{ DirectX::XMFLOAT3(2.f, 0.f, 1.f), DirectX::XMFLOAT4(0, 0, 1, 1) },
+		{ DirectX::XMFLOAT3(0.f, 0.f, 2.f), DirectX::XMFLOAT4(0, 1, 0, 1) },
+		{ DirectX::XMFLOAT3(1.f, 0.f, 2.f), DirectX::XMFLOAT4(0, 1, 1, 1) },
+ 		{ DirectX::XMFLOAT3(2.f, 0.f, 2.f), DirectX::XMFLOAT4(0, 0, 0, 1) }
+
+// 		{DirectX::XMFLOAT3(-0.5f,-0.5f,-0.5f), DirectX::XMFLOAT4(0, 0, 0, 1),},
+// 		{DirectX::XMFLOAT3(-0.5f,-0.5f, 0.5f), DirectX::XMFLOAT4(0, 0, 1, 1),},
+// 		{DirectX::XMFLOAT3(-0.5f, 0.5f,-0.5f), DirectX::XMFLOAT4(0, 1, 0, 1),},
+// 		{DirectX::XMFLOAT3(-0.5f, 0.5f, 0.5f), DirectX::XMFLOAT4(0, 1, 1, 1),},
 // 
-// 		{ DirectX::XMFLOAT3(2.f, 0.f, 0.f), Color::White },
-// 		{ DirectX::XMFLOAT3(2.f, 0.f, 1.f), Color::White },
-// 		{ DirectX::XMFLOAT3(0.f, 0.f, 2.f), Color::White },
-// 		{ DirectX::XMFLOAT3(1.f, 0.f, 2.f), Color::White },
-// 		{ DirectX::XMFLOAT3(2.f, 0.f, 2.f), Color::White }
-
-		{DirectX::XMFLOAT3(-0.5f,-0.5f,-0.5f), DirectX::XMFLOAT4(0, 0, 0, 1),},
-		{DirectX::XMFLOAT3(-0.5f,-0.5f, 0.5f), DirectX::XMFLOAT4(0, 0, 1, 1),},
-		{DirectX::XMFLOAT3(-0.5f, 0.5f,-0.5f), DirectX::XMFLOAT4(0, 1, 0, 1),},
-		{DirectX::XMFLOAT3(-0.5f, 0.5f, 0.5f), DirectX::XMFLOAT4(0, 1, 1, 1),},
-
-		{DirectX::XMFLOAT3(0.5f,-0.5f,-0.5f), DirectX::XMFLOAT4(1, 0, 0, 1),},
-		{DirectX::XMFLOAT3(0.5f,-0.5f, 0.5f), DirectX::XMFLOAT4(1, 0, 1, 1),},
-		{DirectX::XMFLOAT3(0.5f, 0.5f,-0.5f), DirectX::XMFLOAT4(1, 1, 0, 1),},
-		{DirectX::XMFLOAT3(0.5f, 0.5f, 0.5f), DirectX::XMFLOAT4(1, 1, 1, 1),},
+// 		{DirectX::XMFLOAT3(0.5f,-0.5f,-0.5f), DirectX::XMFLOAT4(1, 0, 0, 1),},
+// 		{DirectX::XMFLOAT3(0.5f,-0.5f, 0.5f), DirectX::XMFLOAT4(1, 0, 1, 1),},
+// 		{DirectX::XMFLOAT3(0.5f, 0.5f,-0.5f), DirectX::XMFLOAT4(1, 1, 0, 1),},
+// 		{DirectX::XMFLOAT3(0.5f, 0.5f, 0.5f), DirectX::XMFLOAT4(1, 1, 1, 1),},
 	};
 
 	// 버퍼를 설정하는 구조체
@@ -629,32 +631,32 @@ HRESULT DXGraphics::DrawGrid()
 	}
 
 	UINT indices[] = { 
-// 		0,1,2, 
-// 		2,1,3, 
-// 		1,4,3, 
-// 		3,4,5, 
-// 		2,3,6, 
-// 		6,3,7, 
-// 		3,5,7, 
-// 		7,5,8 
+ 		0,1,2, 
+ 		2,1,3, 
+ 		1,4,3, 
+ 		3,4,5, 
+ 		2,3,6, 
+ 		6,3,7, 
+ 		3,5,7, 
+ 		7,5,8 
 
-		0,2,1, // -x
-		1,2,3,
-
-		4,5,6, // +x
-		5,7,6,
-
-		0,1,5, // -y
-		0,5,4,
-
-		2,6,7, // +y
-		2,7,3,
-
-		0,4,6, // -z
-		0,6,2,
-
-		1,3,7, // +z
-		1,7,5,
+		// 		0,2,1, // -x
+		// 		1,2,3,
+		// 
+		// 		4,5,6, // +x
+		// 		5,7,6,
+		// 
+		// 		0,1,5, // -y
+		// 		0,5,4,
+		// 
+		// 		2,6,7, // +y
+		// 		2,7,3,
+		// 
+		// 		0,4,6, // -z
+		// 		0,6,2,
+		// 
+		// 		1,3,7, // +z
+		// 		1,7,5,
 	};
 
 	count = ARRAYSIZE(indices);
