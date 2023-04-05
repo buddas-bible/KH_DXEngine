@@ -66,7 +66,6 @@ void DXGraphics::Finalize()
 
 }
 
-
 void DXGraphics::Update()
 {
 	if (GetAsyncKeyState(VK_UP))
