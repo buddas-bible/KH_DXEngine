@@ -48,7 +48,7 @@ private:
 
 	HRESULT CreateObject();
 
-	HRESULT CreateInputLayOut();
+	HRESULT CreateInputLayout();
 	// void Test();
 
 	HRESULT CreateCubeShaders();
@@ -71,43 +71,51 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D11InputLayout>		m_cubeInputLayout;
 
+	Microsoft::WRL::ComPtr<ID3DX11Effect>				m_cubeEffect;			// 버텍스 셰이더 픽셀 셰이더를 대체할 무언가
+	Microsoft::WRL::ComPtr<ID3DX11EffectTechnique>		m_cubeTechnique;		// 테크
+	Microsoft::WRL::ComPtr<ID3DX11EffectMatrixVariable> m_cubeMatrixVariable;	// 상수버퍼를 대신할 무언가?
+
 private:
 	HRESULT CreateAxis();
-	UINT axisIndexCount;					// 큐브 인덱스 개수
+	UINT axisIndexCount;					// 축 인덱스 개수
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer>			m_axisVertexBuffer;		// 정점 버퍼		(정점들의 버퍼?)
 	Microsoft::WRL::ComPtr<ID3D11Buffer>			m_axisIndexBuffer;		// 인덱스 버퍼	(정점들의 인덱스?)
-	Microsoft::WRL::ComPtr<ID3D11Buffer>			m_constantBuffer;	// 상수 버퍼		(아마 행렬)
 
 	Microsoft::WRL::ComPtr<ID3D11InputLayout>		m_axisInputLayout;
 
+	Microsoft::WRL::ComPtr<ID3DX11Effect>				m_axisEffect;			// 버텍스 셰이더 픽셀 셰이더를 대체할 무언가
+	Microsoft::WRL::ComPtr<ID3DX11EffectTechnique>		m_axisTechnique;		// 테크
+	Microsoft::WRL::ComPtr<ID3DX11EffectMatrixVariable> m_axisMatrixVariable;	// 상수버퍼를 대신할 무언가?
+
 private:
 	HRESULT CreateGrid();
-	UINT gridIndexCount;					// 큐브 인덱스 개수
+	UINT gridIndexCount;					// 그리드 인덱스 개수
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer>			m_gridVertexBuffer;		// 정점 버퍼		(정점들의 버퍼?)
 	Microsoft::WRL::ComPtr<ID3D11Buffer>			m_gridIndexBuffer;		// 인덱스 버퍼	(정점들의 인덱스?)
-	Microsoft::WRL::ComPtr<ID3D11Buffer>			m_constantBuffer;		// 상수 버퍼		(아마 행렬)
 
 	Microsoft::WRL::ComPtr<ID3D11InputLayout>		m_gridInputLayout;
+
+	Microsoft::WRL::ComPtr<ID3DX11Effect>				m_gridEffect;			// 버텍스 셰이더 픽셀 셰이더를 대체할 무언가
+	Microsoft::WRL::ComPtr<ID3DX11EffectTechnique>		m_gridTechnique;		// 테크
+	Microsoft::WRL::ComPtr<ID3DX11EffectMatrixVariable> m_gridMatrixVariable;	// 상수버퍼를 대신할 무언가?
+
 #pragma endregion 오브젝트
 
 private:
 	// Microsoft::WRL::ComPtr<ID3D11VertexShader>		m_vertexShader;		// 버텍스 셰이더
 	// Microsoft::WRL::ComPtr<ID3D11PixelShader>		m_pixelShader;		// 픽셀 셰이더
 
-	Microsoft::WRL::ComPtr<ID3DX11Effect> m_effect;								// 버텍스 셰이더 픽셀 셰이더를 대체할 무언가
-	Microsoft::WRL::ComPtr<ID3DX11EffectTechnique> m_effectTechnique;			// 테크
-	Microsoft::WRL::ComPtr<ID3DX11EffectMatrixVariable> m_effectMatrixVariable;	// 상수버퍼를 대신할 무언가?
 
 private:
-	struct CubeVertex
+	struct Vertex
 	{
 		DirectX::XMFLOAT3 pos;				// 버텍스 위치 정보
 		DirectX::XMFLOAT4 color;			// 버텍스 컬러 정보
 	};
 
-	struct Vertex
+	struct TextureVertex
 	{
 		DirectX::XMFLOAT3 pos;				// 버텍스 위치 정보
 		DirectX::XMFLOAT3 normal;			// 버텍스 노말 정보
@@ -122,12 +130,12 @@ private:
 		DirectX::XMMATRIX projection;		// 투영 매트릭스
 	};
 
-	DirectX::XMFLOAT4 m_eye;
-	DirectX::XMFLOAT4 m_at;
-	DirectX::XMFLOAT4 m_up;
+	DirectX::XMFLOAT4 m_x;
+	DirectX::XMFLOAT4 m_z;
+	DirectX::XMFLOAT4 m_y;
+
+	DirectX::XMFLOAT4 m_pos;
 
 	ConstantBuffer m_constantBufferData;	// 상수 버퍼 데이터 (월드 뷰 투영 매트릭스 정보)
-
-
 };
 

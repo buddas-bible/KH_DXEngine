@@ -26,6 +26,12 @@ void WIN32Graphics::Finalize()
 
 }
 
+
+void WIN32Graphics::Update()
+{
+
+}
+
 void WIN32Graphics::BeginDraw()
 {
 	PatBlt(m_backBuffer, 0, 0, m_rect.right, m_rect.bottom, BLACKNESS);
