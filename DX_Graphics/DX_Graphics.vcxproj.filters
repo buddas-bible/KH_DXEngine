@@ -49,7 +49,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="VertexShader.fx" />
-    <FxCompile Include="VertexShader2.fx" />
+    <FxCompile Include="Texture.fx" />
+    <FxCompile Include="Color.fx" />
   </ItemGroup>
 </Project>

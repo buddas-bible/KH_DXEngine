@@ -556,28 +556,28 @@ HRESULT DXGraphics::CreateCubeShaders()
 #if _WIN64
 
 #if _DEBUG
-	std::ifstream fin("../x64/debug/VertexShader.cso", std::ios::binary);
+	std::ifstream cfin("../x64/debug/Texture.cso", std::ios::binary);
 #else
-	std::ifstream fin("../x64/release/VertexShader.cso", std::ios::binary);
+	std::ifstream cfin("../x64/release/Texture.cso", std::ios::binary);
 #endif
 
 #else
 
 #if _DEBUG
-	std::ifstream fin("../WIN32/debug/VertexShader.cso", std::ios::binary);
+	std::ifstream cfin("../WIN32/debug/Texture.cso", std::ios::binary);
 #else
-	std::ifstream fin("../WIN32/release/VertexShader.cso", std::ios::binary);
+	std::ifstream cfin("../WIN32/release/Texture.cso", std::ios::binary);
 #endif
 
 #endif
 
-	fin.seekg(0, std::ios_base::end);
-	int size = (int)fin.tellg();
-	fin.seekg(0, std::ios_base::beg);
-	std::vector<char> vsCompiledShader(size);
+	cfin.seekg(0, std::ios_base::end);
+	int size = (int)cfin.tellg();
+	cfin.seekg(0, std::ios_base::beg);
+	std::vector<char> cCompiledShader(size);
 
-	fin.read(&vsCompiledShader[0], size);
-	fin.close();
+	cfin.read(&cCompiledShader[0], size);
+	cfin.close();
 
 	/*
 	ComPtr<ID3D11VertexShader> vertexShader;
@@ -618,7 +618,7 @@ HRESULT DXGraphics::CreateCubeShaders()
 	// Å¥ºê ÀÌÆåÆ®
 	{
 		hr = D3DX11CreateEffectFromMemory(
-			&vsCompiledShader[0],
+			&cCompiledShader[0],
 			size,
 			0,
 			m_pd3dDevice.Get(),
@@ -634,11 +634,37 @@ HRESULT DXGraphics::CreateCubeShaders()
 		return hr;
 	}
 
+#if _WIN64
+
+#if _DEBUG
+	std::ifstream fin("../x64/debug/Texture.cso", std::ios::binary);
+#else
+	std::ifstream fin("../x64/release/Texture.cso", std::ios::binary);
+#endif
+
+#else
+
+#if _DEBUG
+	std::ifstream fin("../WIN32/debug/Texture.cso", std::ios::binary);
+#else
+	std::ifstream fin("../WIN32/release/Texture.cso", std::ios::binary);
+#endif
+
+#endif
+
+	fin.seekg(0, std::ios_base::end);
+	int cSize = (int)fin.tellg();
+	fin.seekg(0, std::ios_base::beg);
+	std::vector<char> vsCompiledShader(cSize);
+
+	fin.read(&vsCompiledShader[0], cSize);
+	fin.close();
+
 	// Ãà ÀÌÆåÆ®
 	{
 		hr = D3DX11CreateEffectFromMemory(
 			&vsCompiledShader[0],
-			size,
+			cSize,
 			0,
 			m_pd3dDevice.Get(),
 			m_axisEffect.GetAddressOf()
@@ -854,21 +880,22 @@ HRESULT DXGraphics::CreateCube()
 		return hr;
 	}
 
-	UINT indices[] = { 
-			0, 1, 2,		// ¹Ø
-			0, 2, 3,
+	UINT indices[] =
+	{
+			0, 1, 3,		// ¹Ø
+			3, 1, 2,
 
-			4, 5, 1,		// Àü
-			4, 1, 0,
+			4, 5, 0,		// Àü
+			0, 5, 1,
 
-			4, 7, 0,		// ÁÂ
-			0, 7, 3,
+			7, 4, 3,		// ÁÂ
+			3, 4, 0,
 
-			5, 4, 1,		// ÈÄ 
-			1, 4, 0,
+			6, 7, 2,		// ÈÄ 
+			2, 7, 3,
 
-			6, 5, 2,		// ¿ì
-			2, 5, 1,
+			5, 6, 1,		// ¿ì
+			1, 6, 2,
 
 			7, 6, 5,		// »ó
 			7, 5, 4,
