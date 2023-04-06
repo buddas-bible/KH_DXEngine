@@ -169,13 +169,16 @@
     <ClInclude Include="DXDefine.h" />
     <ClInclude Include="DXGraphics.h" />
     <ClInclude Include="InputManager.h" />
+    <ClInclude Include="Struct.h" />
     <ClInclude Include="TimeController.h" />
+    <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DXGraphics.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="TimeController.cpp" />
+    <ClCompile Include="Vertex.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Texture.fx">

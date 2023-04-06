@@ -436,45 +436,23 @@ HRESULT DXGraphics::CreateInputLayout()
 		0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 
 		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,
-		0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 
-		{ "UV", 0, DXGI_FORMAT_R32G32_FLOAT,
-		0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,
+		0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 
 		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT,
-		0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
-
-	// 버텍스 정보가 어떻게 되어있는지 설정
-	D3D11_INPUT_ELEMENT_DESC iaDesc[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
-		0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-
-		// { "UV", 0, DXGI_FORMAT_R32G32_FLOAT,
-		// 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT,
-		0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-
-	/*
-	hr = m_pd3dDevice->CreateInputLayout(
-		iaDesc,
-		ARRAYSIZE(iaDesc),
-		&vsCompiledShader[0],
-		size,
-		m_pd3dInputLayout.GetAddressOf());
-	*/
 
 	// 인풋 레이아웃 만듬
-	D3DX11_PASS_DESC passDesc;
-	m_cubeTechnique->GetPassByIndex(0)->GetDesc(&passDesc);
+	D3DX11_PASS_DESC cubePassDesc;
+	m_cubeTechnique->GetPassByIndex(0)->GetDesc(&cubePassDesc);
 	hr = m_pd3dDevice->CreateInputLayout(
-		iaDesc,
-		2,										// 버텍스에 들어간 데이터 갯수
-		passDesc.pIAInputSignature,				// 셰이더 코드 포인터
-		passDesc.IAInputSignatureSize,			// 셰이더 크기
+		textureDesc,
+		ARRAYSIZE(textureDesc),						// 버텍스에 들어간 데이터 갯수
+		cubePassDesc.pIAInputSignature,				// 셰이더 코드 포인터
+		cubePassDesc.IAInputSignatureSize,			// 셰이더 크기
 		m_cubeInputLayout.GetAddressOf()
 	);
 
@@ -483,10 +461,22 @@ HRESULT DXGraphics::CreateInputLayout()
 		return hr;
 	}
 
+	// 버텍스 정보가 어떻게 되어있는지 설정
+	D3D11_INPUT_ELEMENT_DESC iaDesc[] =
+	{
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
+		0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT,
+		0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	};
+
+
+	D3DX11_PASS_DESC passDesc;
 	m_axisTechnique->GetPassByIndex(0)->GetDesc(&passDesc);
 	hr = m_pd3dDevice->CreateInputLayout(
 		iaDesc,
-		2,										// 버텍스에 들어간 데이터 갯수
+		ARRAYSIZE(iaDesc),						// 버텍스에 들어간 데이터 갯수
 		passDesc.pIAInputSignature,				// 셰이더 코드 포인터
 		passDesc.IAInputSignatureSize,			// 셰이더 크기
 		m_axisInputLayout.GetAddressOf()
@@ -625,8 +615,12 @@ HRESULT DXGraphics::CreateCubeShaders()
 			m_cubeEffect.GetAddressOf()
 		);
 
-		m_cubeTechnique = m_cubeEffect->GetTechniqueByName("Tech");							// 파일에 Tech 이름의 데이터를 읽어옴
+		m_cubeTechnique = m_cubeEffect->GetTechniqueByName("Tech");								// 파일에 Tech 이름의 데이터를 읽어옴
 		m_cubeMatrixVariable = m_cubeEffect->GetVariableByName("worldViewProj")->AsMatrix();	// 파일에 worldViewProj 이름의 데이터를 읽어옴
+		
+		// 이펙트로 셰이더 리소스랑 샘플러가 필요하지 않을까?
+		m_cubeShaderResource = m_cubeEffect->GetVariableByName("g_Texture")->AsShaderResource();	// 
+		m_cubeSampler = m_cubeEffect->GetVariableByName("g_Sampler")->AsSampler();
 	}
 
 	if (FAILED(hr))
@@ -637,17 +631,17 @@ HRESULT DXGraphics::CreateCubeShaders()
 #if _WIN64
 
 #if _DEBUG
-	std::ifstream fin("../x64/debug/Texture.cso", std::ios::binary);
+	std::ifstream fin("../x64/debug/Color.cso", std::ios::binary);
 #else
-	std::ifstream fin("../x64/release/Texture.cso", std::ios::binary);
+	std::ifstream fin("../x64/release/Color.cso", std::ios::binary);
 #endif
 
 #else
 
 #if _DEBUG
-	std::ifstream fin("../WIN32/debug/Texture.cso", std::ios::binary);
+	std::ifstream fin("../WIN32/debug/Color.cso", std::ios::binary);
 #else
-	std::ifstream fin("../WIN32/release/Texture.cso", std::ios::binary);
+	std::ifstream fin("../WIN32/release/Color.cso", std::ios::binary);
 #endif
 
 #endif
@@ -840,17 +834,17 @@ HRESULT DXGraphics::CreateCube()
 	HRESULT hr = S_OK;
 
 	// 꼭짓점을 설명하는 정보
-	Vertex cube[] =
+	TextureVertex cube[] =
 	{
-		{DirectX::XMFLOAT3(-0.5f,-0.5f,-0.5f), DirectX::XMFLOAT4(Color::Black),},
-		{DirectX::XMFLOAT3(0.5f,-0.5f,-0.5f), DirectX::XMFLOAT4(Color::Red),},
-		{DirectX::XMFLOAT3(0.5f,-0.5f, 0.5f), DirectX::XMFLOAT4(Color::Magenta),},
-		{DirectX::XMFLOAT3(-0.5f,-0.5f, 0.5f), DirectX::XMFLOAT4(Color::Blue),},
+		{DirectX::XMFLOAT3(-0.5f,-0.5f,-0.5f),	DirectX::XMFLOAT3(0.f, 0.f, 0.f), DirectX::XMFLOAT2(0.f, 1.f),	 DirectX::XMFLOAT4(Color::Black),},
+		{DirectX::XMFLOAT3(0.5f,-0.5f,-0.5f),	DirectX::XMFLOAT3(0.f, 0.f, 0.f), DirectX::XMFLOAT2(1.f, 1.f),  DirectX::XMFLOAT4(Color::Red),},
+		{DirectX::XMFLOAT3(0.5f,-0.5f, 0.5f),	DirectX::XMFLOAT3(0.f, 0.f, 0.f), DirectX::XMFLOAT2(1.f, 1.f),	 DirectX::XMFLOAT4(Color::Magenta),},
+		{DirectX::XMFLOAT3(-0.5f,-0.5f, 0.5f),	DirectX::XMFLOAT3(0.f, 0.f, 0.f), DirectX::XMFLOAT2(0.5f, 1.f),  DirectX::XMFLOAT4(Color::Blue),},
 
-		{DirectX::XMFLOAT3(-0.5f, 0.5f,-0.5f), DirectX::XMFLOAT4(Color::Green),},
-		{DirectX::XMFLOAT3(0.5f, 0.5f,-0.5f), DirectX::XMFLOAT4(Color::Yellow),},
-		{DirectX::XMFLOAT3(0.5f, 0.5f, 0.5f), DirectX::XMFLOAT4(Color::White),},
-		{DirectX::XMFLOAT3(-0.5f, 0.5f, 0.5f), DirectX::XMFLOAT4(Color::Cyan),},
+		{DirectX::XMFLOAT3(-0.5f, 0.5f,-0.5f),	DirectX::XMFLOAT3(0.f, 0.f, 0.f), DirectX::XMFLOAT2(0.f, 0.f),  DirectX::XMFLOAT4(Color::Green),},
+		{DirectX::XMFLOAT3(0.5f, 0.5f,-0.5f),	DirectX::XMFLOAT3(0.f, 0.f, 0.f), DirectX::XMFLOAT2(1.f, 0.f),	 DirectX::XMFLOAT4(Color::Yellow),},
+		{DirectX::XMFLOAT3(0.5f, 0.5f, 0.5f),	DirectX::XMFLOAT3(0.f, 0.f, 0.f), DirectX::XMFLOAT2(0.7f, 0.7f), DirectX::XMFLOAT4(Color::White),},
+		{DirectX::XMFLOAT3(-0.5f, 0.5f, 0.5f),	DirectX::XMFLOAT3(0.f, 0.f, 0.f), DirectX::XMFLOAT2(0.f, 0.f),	 DirectX::XMFLOAT4(Color::Cyan),},
 	};
 
 	// 버퍼를 설정하는 구조체
@@ -927,6 +921,40 @@ HRESULT DXGraphics::CreateCube()
 		return hr;
 	}
 
+	ComPtr<ID3D11Resource> texture;
+	ComPtr<ID3D11ShaderResourceView> textureView;
+	hr = DirectX::CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"../Texture/WoodCrate01.dds", texture.GetAddressOf(), textureView.GetAddressOf());
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+	texture.As(&m_cubeTexture);
+	textureView.As(&m_cubeTextureView);
+
+	D3D11_SAMPLER_DESC samplerDesc;
+	ZeroMemory(&samplerDesc, sizeof(D3D11_SAMPLER_DESC));
+	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MinLOD = -FLT_MAX;
+	samplerDesc.MaxLOD = FLT_MAX;
+	samplerDesc.MipLODBias = 0.f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	samplerDesc.BorderColor[0] = 1.f;
+	samplerDesc.BorderColor[1] = 1.f;
+	samplerDesc.BorderColor[2] = 1.f;
+	samplerDesc.BorderColor[3] = 1.f;
+
+	ComPtr<ID3D11SamplerState> samplerstate;
+	hr = m_pd3dDevice->CreateSamplerState(&samplerDesc, samplerstate.GetAddressOf());
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+	samplerstate.As(&m_cubeSamplerState);
+
 	return hr;
 }
 
@@ -937,13 +965,13 @@ HRESULT DXGraphics::CreateAxis()
 	// 꼭짓점을 설명하는 정보
 	Vertex axis[] =
 	{
-		{DirectX::XMFLOAT3(0.f, 0.f, 0.f), DirectX::XMFLOAT4(Color::Red),},
+		{DirectX::XMFLOAT3(0.f, 0.f, 0.f),	DirectX::XMFLOAT4(Color::Red),},
 		{DirectX::XMFLOAT3(15.f, 0.f, 0.f), DirectX::XMFLOAT4(Color::Red),},
 
-		{DirectX::XMFLOAT3(0.f, 0.f, 0.f), DirectX::XMFLOAT4(Color::Green),},
+		{DirectX::XMFLOAT3(0.f, 0.f, 0.f),	DirectX::XMFLOAT4(Color::Green),},
 		{DirectX::XMFLOAT3(0.f ,15.f, 0.f), DirectX::XMFLOAT4(Color::Green),},
 
-		{DirectX::XMFLOAT3(0.f, 0.f, 0.f), DirectX::XMFLOAT4(Color::Blue),},
+		{DirectX::XMFLOAT3(0.f, 0.f, 0.f),	DirectX::XMFLOAT4(Color::Blue),},
 		{DirectX::XMFLOAT3(0.f ,0.f, 15.f), DirectX::XMFLOAT4(Color::Blue),},
 	};
 
@@ -1207,7 +1235,7 @@ void DXGraphics::BeginDraw()
 		m_pd3dDeviceContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		// IA에 버텍스 버퍼 설정
-		UINT stride = sizeof(Vertex);
+		UINT stride = sizeof(TextureVertex);
 		UINT offset = 0;
 		m_pd3dDeviceContext->IASetVertexBuffers(
 			0,
@@ -1228,6 +1256,9 @@ void DXGraphics::BeginDraw()
 		DirectX::XMMATRIX worldViewProj = m_constantBufferData.world * m_constantBufferData.view * m_constantBufferData.projection;
 		m_cubeMatrixVariable->SetMatrix(reinterpret_cast<float*>(&worldViewProj));
 
+		// m_cubeSampler->SetSampler(0, m_cubeSamplerState.Get());
+		m_cubeShaderResource->SetResource(m_cubeTextureView.Get());
+
 		// 테크닉
 		D3DX11_TECHNIQUE_DESC techDesc;
 		m_cubeTechnique->GetDesc(&techDesc);
@@ -1235,7 +1266,7 @@ void DXGraphics::BeginDraw()
 		for (UINT p = 0; p < techDesc.Passes; ++p)
 		{
 			m_cubeTechnique->GetPassByIndex(p)->Apply(0, m_pd3dDeviceContext.Get());
-
+			
 			m_pd3dDeviceContext->DrawIndexed(cubeIndexCount, 0, 0);
 		}
 	}

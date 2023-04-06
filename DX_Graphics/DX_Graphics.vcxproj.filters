@@ -13,6 +13,9 @@
     <Filter Include="etc">
       <UniqueIdentifier>{d9397347-f2d7-4ff6-b663-4c68c5ee2976}</UniqueIdentifier>
     </Filter>
+    <Filter Include="etc\Struct">
+      <UniqueIdentifier>{07f02d51-b009-4ad4-8fb2-e0ecebb422e1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DXGraphics.h">
@@ -33,6 +36,12 @@
     <ClInclude Include="InputManager.h">
       <Filter>etc</Filter>
     </ClInclude>
+    <ClInclude Include="Struct.h">
+      <Filter>etc\Struct</Filter>
+    </ClInclude>
+    <ClInclude Include="Vertex.h">
+      <Filter>etc\Struct</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DXGraphics.cpp">
@@ -46,6 +55,9 @@
     </ClCompile>
     <ClCompile Include="InputManager.cpp">
       <Filter>etc</Filter>
+    </ClCompile>
+    <ClCompile Include="Vertex.cpp">
+      <Filter>etc\Struct</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
