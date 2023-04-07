@@ -548,7 +548,7 @@ HRESULT DXGraphics::CreateCubeShaders()
 #if _DEBUG
 	std::ifstream cfin("../x64/debug/Texture.cso", std::ios::binary);
 #else
-	std::ifstream cfin("../x64/release/Texture.cso", std::ios::binary);
+	std::ifstream cfin("../x64/release/Texture.cso", std::ios::binary);		// 이부분 경로 다시 생각해보자...
 #endif
 
 #else
@@ -922,8 +922,9 @@ HRESULT DXGraphics::CreateCube()
 	}
 
 	ComPtr<ID3D11Resource> texture;
-	ComPtr<ID3D11ShaderResourceView> textureView;
+	ComPtr<ID3D11ShaderResourceView> textureView;				// ../ 같은 경로는 다시 생각해보자.. 실행파일 뽑을 때 많이 귀찮아 진다...
 	hr = DirectX::CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"../Texture/WoodCrate01.dds", texture.GetAddressOf(), textureView.GetAddressOf());
+	// hr = DirectX::CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"WoodCrate01.dds", texture.GetAddressOf(), textureView.GetAddressOf());
 	if (FAILED(hr))
 	{
 		return hr;

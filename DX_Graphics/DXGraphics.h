@@ -2,9 +2,6 @@
 #include "DXDefine.h"
 #include "Color.h"
 
-// #include "../DXTK/Inc/d3dx11effect.h"
-// #include "../DXTK/Inc/Effects.h"
-
 class DXGraphics : public IGraphics
 {
 public:
