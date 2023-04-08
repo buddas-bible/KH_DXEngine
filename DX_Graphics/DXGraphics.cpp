@@ -22,30 +22,35 @@ HRESULT DXGraphics::Initialize(HWND hwnd)
 	hr = CreateDevice();
 	if (FAILED(hr))
 	{
+		MessageBox(m_hWnd, L"디바이스 생성 실패", L"초기화 오류", MB_OK | MB_ICONWARNING);
 		return hr;
 	}
 
 	hr = CreateSwapChain();
 	if (FAILED(hr))
 	{
+		MessageBox(m_hWnd, L"스왑체인 생성 실패", L"초기화 오류", MB_OK | MB_ICONWARNING);
 		return hr;
 	}
 
 	hr = CreateRenderTargetView();
 	if (FAILED(hr))
 	{
+		MessageBox(m_hWnd, L"랜더타겟뷰 생성 실패", L"초기화 오류", MB_OK | MB_ICONWARNING);
 		return hr;
 	}
 
 	hr = CreateDepthStencilView();
 	if (FAILED(hr))
 	{
+		MessageBox(m_hWnd, L"뎁스스텐실뷰 생성 실패", L"초기화 오류", MB_OK | MB_ICONWARNING);
 		return hr;
 	}
 
 	hr = CreateRasterState();
 	if (FAILED(hr))
 	{
+		MessageBox(m_hWnd, L"레스터스테이트 생성 실패", L"초기화 오류", MB_OK | MB_ICONWARNING);
 		return hr;
 	}
 
@@ -59,6 +64,7 @@ HRESULT DXGraphics::Initialize(HWND hwnd)
 	hr = CreateInputLayout();
 	if (FAILED(hr))
 	{
+		MessageBox(m_hWnd, L"인풋레이아웃 생성 실패", L"초기화 오류", MB_OK | MB_ICONWARNING);
 		return hr;
 	}
 
@@ -402,24 +408,28 @@ HRESULT DXGraphics::CreateObject()
 	hr = CreateCube();
 	if (FAILED(hr))
 	{
+		MessageBox(m_hWnd, L"큐브 오브젝트 초기화 실패", L"오브젝트 설정 오류", MB_OK | MB_ICONWARNING);
 		return hr;
 	}
 
 	hr = CreateAxis();
 	if (FAILED(hr))
 	{
+		MessageBox(m_hWnd, L"축 오브젝트 초기화 실패", L"오브젝트 설정 오류", MB_OK | MB_ICONWARNING);
 		return hr;
 	}
 
 	hr = CreateGrid();
 	if (FAILED(hr))
 	{
+		MessageBox(m_hWnd, L"그리드 오브젝트 초기화 실패", L"오브젝트 설정 오류", MB_OK | MB_ICONWARNING);
 		return hr;
 	}
 
 	hr = CreateCubeShaders();
 	if (FAILED(hr))
 	{
+		MessageBox(m_hWnd, L"셰이더 초기화 실패", L"오브젝트 설정 오류", MB_OK | MB_ICONWARNING);
 		return hr;
 	}
 

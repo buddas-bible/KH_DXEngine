@@ -6,19 +6,19 @@
 #include <cmath>
 
 
-Vector2D::Vector2D() :
+Vector2D::Vector2D() noexcept :
 	x(0.f), y(0.f)
 {
 
 }
 
-Vector2D::Vector2D(float _x, float _y) : 
+Vector2D::Vector2D(float _x, float _y) noexcept :
 	x(_x), y(_y)
 {
 
 }
 
-Vector2D::Vector2D(const Vector2D& other) :
+Vector2D::Vector2D(const Vector2D& other) noexcept :
 	x(other.x), y(other.y)
 {
 
@@ -30,7 +30,7 @@ Vector2D::Vector2D(const Vector2D&& other) noexcept :
 
 }
 
-Vector2D::Vector2D(const Vector3D& other) :
+Vector2D::Vector2D(const Vector3D& other) noexcept :
 	x(other.x), y(other.y)
 {
 
@@ -42,7 +42,7 @@ Vector2D::Vector2D(const Vector3D&& other) noexcept :
 
 }
 
-Vector2D::~Vector2D()
+Vector2D::~Vector2D() noexcept
 {
 
 }

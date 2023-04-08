@@ -9,13 +9,13 @@ class Vector4D;
 class Vector2D
 {
 public:
-	Vector2D();
-	Vector2D(float, float);
-	Vector2D(const Vector2D& other);			// 복사 생성자
+	Vector2D() noexcept;
+	Vector2D(float, float) noexcept;
+	Vector2D(const Vector2D& other) noexcept;	// 복사 생성자
 	Vector2D(const Vector2D&& other) noexcept;	// 이동 생성자
-	Vector2D(const Vector3D& other);			// 복사 생성자
+	Vector2D(const Vector3D& other) noexcept;	// 복사 생성자
 	Vector2D(const Vector3D&& other) noexcept;	// 이동 생성자
-	~Vector2D();
+	~Vector2D() noexcept;
 
 public:
 	float x, y;
