@@ -38,4 +38,3 @@ public:
 	Matrix4x4 operator = (const Matrix4x4& other);
 	Matrix4x4 operator = (const Matrix4x4&& other) noexcept;
 };
-

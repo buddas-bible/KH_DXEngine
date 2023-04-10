@@ -1,5 +1,7 @@
 #pragma once
 
+class Vector3D;
+
 class Matrix3x3
 {
 public:
@@ -32,3 +34,5 @@ public:
 	Matrix3x3 operator = (const Matrix3x3& other);
 	Matrix3x3 operator = (const Matrix3x3&& other) noexcept;
 };
+
+Matrix3x3 AxisAndAngleRotation(const Vector3D& vec, float angle);

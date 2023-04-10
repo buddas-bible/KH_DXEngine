@@ -1,6 +1,8 @@
 #include "Matrix3x3.h"
 #include <cmath>
 
+#include "Vector3D.h"
+
 Matrix3x3::Matrix3x3() :
 	e{
 	(1), (0), (0),
@@ -188,3 +190,27 @@ Matrix3x3 Matrix3x3::operator=(const Matrix3x3&& other) noexcept
 }
 
 
+Matrix3x3 AxisAndAngleRotation(const Vector3D& vec, float angle)
+{
+	Vector3D axis = vec;
+
+	float cos = std::cos(angle);
+	float sin = std::sin(angle);
+	float x = vec.x;
+	float y = vec.y;
+	float z = vec.z;
+
+	return Matrix3x3(
+		cos + x * x * (1 - cos),
+		x * y * (1 - cos) - z * sin,
+		x * z * (1 - cos) + y * sin,
+
+		y * x * (1 - cos) + z * sin,
+		cos + y * y * (1 - cos),
+		y * z * (1- cos) - x * sin,
+
+		z * x * (1 - cos) - y * sin,
+		z * y * (1 - cos) + x * sin,
+		cos + z * z * (1 - cos)
+	);
+}
