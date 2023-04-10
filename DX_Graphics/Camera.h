@@ -7,7 +7,7 @@
 class Camera
 {
 public:
-	Matrix4x4 SetViewMatrix();
+	void Update();
 	Matrix4x4 GetViewMatrix();
 	Matrix4x4 GetProjMatrix();
 	Matrix4x4 GetViewProjMatrix();
