@@ -16,9 +16,8 @@ SamplerState g_Sampler;
 struct VertexIn
 {
     float3 PosL     : POSITION;
-    float3 Normal   : NORMAL;
     float2 uv       : TEXCOORD;
-    float4 Color    : COLOR;
+    float3 Normal   : NORMAL;
 };
 
 struct VertexOut

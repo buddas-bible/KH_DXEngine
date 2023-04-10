@@ -8,6 +8,8 @@
 
 using namespace Microsoft::WRL;
 
+constexpr float PI = 3.14159265f;
+
 DXGraphics::~DXGraphics()
 {
 	
@@ -80,6 +82,16 @@ void DXGraphics::Finalize()
 
 void DXGraphics::Update()
 {
+	if (GetAsyncKeyState(0x41))
+	{
+		angleX -= PI / 5 * 0.016f;
+		// m_eye.x -= 1.f * 0.016f;
+	}
+	if (GetAsyncKeyState(0x44))
+	{
+		m_pos.x -= 1.f * 0.016f;
+		// m_eye.x -= 1.f * 0.016f;
+	}
 	if (GetAsyncKeyState(VK_LEFT))
 	{
 		m_pos.x -= 1.f * 0.016f;
@@ -121,6 +133,23 @@ void DXGraphics::Update()
 		m_wireRasterizerState.As(&m_currRasterizerState);
 	}
 
+	if (angleX > 2 * PI)
+	{
+		angleX -= 2 * PI;
+	}
+	if (angleX < -2 * PI)
+	{
+		angleX += 2 * PI;
+	}
+	if (angleY > 2 * PI)
+	{
+		angleY -= 2 * PI;
+	}
+	if (angleY < -2 * PI)
+	{
+		angleY += 2 * PI;
+	}
+
 	/*
 	m_constantBufferData.world =
 	{
@@ -136,6 +165,21 @@ void DXGraphics::Update()
 
 	// 원래는 카메라 포지션에 카메라 기저에 내적한 것에 -를 붙여줘야 하지만
 	// 뷰 행렬에 임의로 넣어주기로 하자.
+	// m_constantBufferData.view.r[0].m128_f32[0] = -m_pos.x;
+	// m_constantBufferData.view.r[0].m128_f32[1] = -m_pos.y;
+	// m_constantBufferData.view.r[0].m128_f32[2] = -m_pos.z;
+	// m_constantBufferData.view.r[0].m128_f32[3] = 0.f;
+	// 
+	// m_constantBufferData.view.r[1].m128_f32[0] = -m_pos.x;
+	// m_constantBufferData.view.r[1].m128_f32[1] = -m_pos.y;
+	// m_constantBufferData.view.r[1].m128_f32[2] = -m_pos.z;
+	// m_constantBufferData.view.r[1].m128_f32[3] = 0.f;
+	// 
+	// m_constantBufferData.view.r[2].m128_f32[0] = -m_pos.x;
+	// m_constantBufferData.view.r[2].m128_f32[1] = -m_pos.y;
+	// m_constantBufferData.view.r[2].m128_f32[2] = -m_pos.z;
+	// m_constantBufferData.view.r[2].m128_f32[3] = 0.f;
+
 	m_constantBufferData.view.r[3].m128_f32[0] = -m_pos.x;
 	m_constantBufferData.view.r[3].m128_f32[1] = -m_pos.y;
 	m_constantBufferData.view.r[3].m128_f32[2] = -m_pos.z;
@@ -445,14 +489,11 @@ HRESULT DXGraphics::CreateInputLayout()
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
 		0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,
 		0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,
-		0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT,
-		0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,
+		0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
 	// 인풋 레이아웃 만듬
@@ -500,7 +541,7 @@ HRESULT DXGraphics::CreateInputLayout()
 	m_gridTechnique->GetPassByIndex(0)->GetDesc(&passDesc);
 	hr = m_pd3dDevice->CreateInputLayout(
 		iaDesc,
-		2,										// 버텍스에 들어간 데이터 갯수
+		ARRAYSIZE(iaDesc),						// 버텍스에 들어간 데이터 갯수
 		passDesc.pIAInputSignature,				// 셰이더 코드 포인터
 		passDesc.IAInputSignatureSize,			// 셰이더 크기
 		m_gridInputLayout.GetAddressOf()
@@ -842,19 +883,44 @@ HRESULT DXGraphics::CreateCubeShaders()
 HRESULT DXGraphics::CreateCube()
 {
 	HRESULT hr = S_OK;
+	DirectX::XMFLOAT3 a[800] =
+	{
+
+	};
 
 	// 꼭짓점을 설명하는 정보
 	TextureVertex cube[] =
 	{
-		{DirectX::XMFLOAT3(-0.5f,-0.5f,-0.5f),	DirectX::XMFLOAT3(0.f, 0.f, 0.f), DirectX::XMFLOAT2(0.f, 1.f),	 DirectX::XMFLOAT4(Color::Black),},
-		{DirectX::XMFLOAT3(0.5f,-0.5f,-0.5f),	DirectX::XMFLOAT3(0.f, 0.f, 0.f), DirectX::XMFLOAT2(1.f, 1.f),  DirectX::XMFLOAT4(Color::Red),},
-		{DirectX::XMFLOAT3(0.5f,-0.5f, 0.5f),	DirectX::XMFLOAT3(0.f, 0.f, 0.f), DirectX::XMFLOAT2(1.f, 1.f),	 DirectX::XMFLOAT4(Color::Magenta),},
-		{DirectX::XMFLOAT3(-0.5f,-0.5f, 0.5f),	DirectX::XMFLOAT3(0.f, 0.f, 0.f), DirectX::XMFLOAT2(0.5f, 1.f),  DirectX::XMFLOAT4(Color::Blue),},
+		// POSITION								UV								NORMAL
+		{ DirectX::XMFLOAT3(-0.5f,-0.5f,-0.5f),	DirectX::XMFLOAT2(0.f, 0.f),	DirectX::XMFLOAT3(0.f, -1.f, 0.f), },	// 0	0
+		{ DirectX::XMFLOAT3(0.5f,-0.5f,-0.5f),	DirectX::XMFLOAT2(1.f, 0.f),	DirectX::XMFLOAT3(0.f, -1.f, 0.f), },	// 1	1
+		{ DirectX::XMFLOAT3(0.5f,-0.5f, 0.5f),	DirectX::XMFLOAT2(1.f, 1.f),	DirectX::XMFLOAT3(0.f, -1.f, 0.f), },	// 2	2
+		{ DirectX::XMFLOAT3(-0.5f,-0.5f, 0.5f),	DirectX::XMFLOAT2(0.f, 1.f),	DirectX::XMFLOAT3(0.f, -1.f, 0.f), },	// 3	3
+		  
+		{ DirectX::XMFLOAT3(-0.5f, 0.5f,-0.5f),	DirectX::XMFLOAT2(0.f, 0.f),	DirectX::XMFLOAT3(0.f, 0.f, -1.f), },	// 4	4
+		{ DirectX::XMFLOAT3(0.5f, 0.5f,-0.5f),	DirectX::XMFLOAT2(1.f, 0.f),	DirectX::XMFLOAT3(0.f, 0.f, -1.f), },	// 5	5
+		{ DirectX::XMFLOAT3(0.5f,-0.5f,-0.5f),	DirectX::XMFLOAT2(1.f, 1.f),	DirectX::XMFLOAT3(0.f, 0.f, -1.f), },	// 1	6
+		{ DirectX::XMFLOAT3(-0.5f,-0.5f,-0.5f),	DirectX::XMFLOAT2(0.f, 1.f),	DirectX::XMFLOAT3(0.f, 0.f, -1.f), },	// 0	7
 
-		{DirectX::XMFLOAT3(-0.5f, 0.5f,-0.5f),	DirectX::XMFLOAT3(0.f, 0.f, 0.f), DirectX::XMFLOAT2(0.f, 0.f),  DirectX::XMFLOAT4(Color::Green),},
-		{DirectX::XMFLOAT3(0.5f, 0.5f,-0.5f),	DirectX::XMFLOAT3(0.f, 0.f, 0.f), DirectX::XMFLOAT2(1.f, 0.f),	 DirectX::XMFLOAT4(Color::Yellow),},
-		{DirectX::XMFLOAT3(0.5f, 0.5f, 0.5f),	DirectX::XMFLOAT3(0.f, 0.f, 0.f), DirectX::XMFLOAT2(0.7f, 0.7f), DirectX::XMFLOAT4(Color::White),},
-		{DirectX::XMFLOAT3(-0.5f, 0.5f, 0.5f),	DirectX::XMFLOAT3(0.f, 0.f, 0.f), DirectX::XMFLOAT2(0.f, 0.f),	 DirectX::XMFLOAT4(Color::Cyan),},
+		{ DirectX::XMFLOAT3(0.5f, 0.5f,-0.5f),	DirectX::XMFLOAT2(0.f, 0.f),	DirectX::XMFLOAT3(1.f, 0.f, 0.f), },	// 5	8
+		{ DirectX::XMFLOAT3(0.5f, 0.5f, 0.5f),	DirectX::XMFLOAT2(1.f, 0.f),	DirectX::XMFLOAT3(1.f, 0.f, 0.f), },	// 6	9
+		{ DirectX::XMFLOAT3(0.5f,-0.5f, 0.5f),	DirectX::XMFLOAT2(1.f, 1.f),	DirectX::XMFLOAT3(1.f, 0.f, 0.f), },	// 2	10
+		{ DirectX::XMFLOAT3(0.5f,-0.5f,-0.5f),	DirectX::XMFLOAT2(0.f, 1.f),	DirectX::XMFLOAT3(1.f, 0.f, 0.f), },	// 1	11
+
+		{ DirectX::XMFLOAT3(0.5f, 0.5f, 0.5f),	DirectX::XMFLOAT2(0.f, 0.f),	DirectX::XMFLOAT3(0.f, 0.f, 1.f), },	// 6	12
+		{ DirectX::XMFLOAT3(-0.5f, 0.5f, 0.5f),	DirectX::XMFLOAT2(0.f, 1.f),	DirectX::XMFLOAT3(0.f, 0.f, 1.f), },	// 7	13
+		{ DirectX::XMFLOAT3(-0.5f,-0.5f, 0.5f),	DirectX::XMFLOAT2(1.f, 1.f),	DirectX::XMFLOAT3(0.f, 0.f, 1.f), },	// 3	14
+		{ DirectX::XMFLOAT3(0.5f,-0.5f, 0.5f),	DirectX::XMFLOAT2(0.f, 1.f),	DirectX::XMFLOAT3(0.f, 0.f, 1.f), },	// 2	15
+		
+		{ DirectX::XMFLOAT3(-0.5f, 0.5f, 0.5f),	DirectX::XMFLOAT2(0.f, 0.f),	DirectX::XMFLOAT3(-1.f, 0.f, 0.f), },	// 7	16
+		{ DirectX::XMFLOAT3(-0.5f, 0.5f,-0.5f),	DirectX::XMFLOAT2(1.f, 0.f),	DirectX::XMFLOAT3(-1.f, 0.f, 0.f), },	// 4	17
+		{ DirectX::XMFLOAT3(-0.5f,-0.5f,-0.5f),	DirectX::XMFLOAT2(1.f, 1.f),	DirectX::XMFLOAT3(-1.f, 0.f, 0.f), },	// 0	18
+		{ DirectX::XMFLOAT3(-0.5f,-0.5f, 0.5f),	DirectX::XMFLOAT2(0.f, 1.f),	DirectX::XMFLOAT3(-1.f, 0.f, 0.f), },	// 3	19
+
+		{ DirectX::XMFLOAT3(-0.5f, 0.5f, 0.5f),	DirectX::XMFLOAT2(0.f, 0.f),	DirectX::XMFLOAT3(0.f, 1.f, 0.f), },	// 7	20
+		{ DirectX::XMFLOAT3(0.5f, 0.5f, 0.5f),	DirectX::XMFLOAT2(1.f, 0.f),	DirectX::XMFLOAT3(0.f, 1.f, 0.f), },	// 6	21
+		{ DirectX::XMFLOAT3(0.5f, 0.5f,-0.5f),	DirectX::XMFLOAT2(1.f, 1.f),	DirectX::XMFLOAT3(0.f, 1.f, 0.f), },	// 5	22
+		{ DirectX::XMFLOAT3(-0.5f, 0.5f,-0.5f),	DirectX::XMFLOAT2(0.f, 1.f),	DirectX::XMFLOAT3(0.f, 1.f, 0.f), },	// 4	23
 	};
 
 	// 버퍼를 설정하는 구조체
@@ -886,23 +952,23 @@ HRESULT DXGraphics::CreateCube()
 
 	UINT indices[] =
 	{
-			0, 1, 3,		// 밑
-			3, 1, 2,
+		0, 1, 2,		// 하
+		0, 2, 3,
 
-			4, 5, 0,		// 전
-			0, 5, 1,
+		4, 5, 6,
+		4, 6, 7,
 
-			7, 4, 3,		// 좌
-			3, 4, 0,
+		8, 9, 10,
+		8, 10, 11,
 
-			6, 7, 2,		// 후 
-			2, 7, 3,
+		12, 13, 14,
+		12, 14, 15,
 
-			5, 6, 1,		// 우
-			1, 6, 2,
+		16, 17, 18,
+		16, 18, 19,
 
-			7, 6, 5,		// 상
-			7, 5, 4,
+		20, 21, 22,
+		20, 22, 23,
 	};
 
 	cubeIndexCount = ARRAYSIZE(indices);
