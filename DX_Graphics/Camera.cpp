@@ -3,6 +3,11 @@
 #include "../KH_Math/Matrix4x4.h"
 
 
+Matrix4x4 Camera::SetViewMatrix()
+{
+
+}
+
 Matrix4x4 Camera::GetViewMatrix()
 {
 	return m_View;
