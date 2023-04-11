@@ -15,7 +15,7 @@ public:
 	void CameraLookAtLH(const Vector3D& eyePos, const Vector3D& focus, const Vector3D& worldUp);
 	void CameraLookToLH(const Vector3D& eyePos, const Vector3D& direction, const Vector3D& worldUp);
 	void CameraPerspectiveFovLH(float angleY, float ratio, float near, float far);
-	void CameraOrthographicLH();
+	void CameraOrthographicLH(float width, float height, float near, float far);
 
 	void moveX(const float& d);			// 월드 X 방향 이동
 	void moveY(const float& d);			// 월드 Y 방향 이동
