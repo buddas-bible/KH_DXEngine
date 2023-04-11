@@ -33,6 +33,9 @@ public:
 	void Pitch(const float& a);			// 카메라 위아래 회전
 	void Yaw(const float& a);			// 카메라 좌우 회전
 
+	void SetPerspectiveView();
+	void SetOrthographicView();
+
 private:
 	Vector3D worldUp{0.f, 1.f, 0.f};
 
@@ -43,5 +46,10 @@ private:
 
 	Matrix4x4 m_View{};
 	Matrix4x4 m_Proj{};
+
+	float m_height;
+	float m_width;
+	float m_near;
+	float m_far;
 };
 

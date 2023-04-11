@@ -101,11 +101,11 @@ void DXGraphics::Update()
 
 	if (!GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_A))
 	{
-		camera.moveR(4 * dt);
+		camera.moveR(-4 * dt);
 	}
 	if (!GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_D))
 	{
-		camera.moveR(-4 * dt);
+		camera.moveR(4 * dt);
 	}
 	if (!GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_W))
 	{
@@ -148,6 +148,14 @@ void DXGraphics::Update()
 	if (GetAsyncKeyState(VK_F2))
 	{
 		m_wireRasterizerState.As(&m_currRasterizerState);
+	}
+	if (GetAsyncKeyState(VK_F5))
+	{
+		camera.SetPerspectiveView();
+	}
+	if (GetAsyncKeyState(VK_F6))
+	{
+		camera.SetOrthographicView();
 	}
 
 	camera.Update();

@@ -106,6 +106,11 @@ void Camera::CameraPerspectiveFovLH(float angleY, float ratio, float near, float
 	float scaleZ = far / (far - near);					// f / f - n
 	float translate = -(near * far) / (far - near);		// - nf / f - n
 
+	m_height = nearH;
+	m_width = nearW;
+	m_near = near;
+	m_far = far;
+
 	m_Proj = Matrix4x4
 	(
 		scaleX, 0.f, 0.f, 0.f,
@@ -129,6 +134,11 @@ void Camera::CameraOrthographicLH(float width, float height, float near, float f
 	float scaleX = 2.f / width;
 	float scaleZ = 1.f / (far - near);
 	float translate = -near / (far - near);
+
+	m_height = height;
+	m_width = width;
+	m_near = near;
+	m_far = far;
 
 	m_Proj = Matrix4x4
 	(
@@ -195,4 +205,36 @@ void Camera::Yaw(const float& a)
 
 	m_look = m_look.Normalize() * rotate;
 	// m_right = m_right.Normalize() * rotate;
+}
+
+void Camera::SetPerspectiveView()
+{
+	float scaleX = 2.f * m_near / m_width;					// 2 * n / w
+	float scaleY = 2.f * m_near / m_height;					// 2 * n / h
+	float scaleZ = m_far / (m_far - m_near);					// f / f - n
+	float translate = -(m_near * m_far) / (m_far - m_near);		// - nf / f - n
+
+	m_Proj = Matrix4x4
+	(
+		scaleX, 0.f, 0.f, 0.f,
+		0.f, scaleY, 0.f, 0.f,
+		0.f, 0.f, scaleZ, 1.f,
+		0.f, 0.f, translate, 0.f
+	);
+}
+
+void Camera::SetOrthographicView()
+{
+	float scaleY = 2.f / (m_height);
+	float scaleX = 2.f / (m_width);
+	float scaleZ = 1.f / (m_far - m_near);
+	float translate = -m_near / (m_far - m_near);
+
+	m_Proj = Matrix4x4
+	(
+		scaleX, 0.f, 0.f, 0.f,
+		0.f, scaleY, 0.f, 0.f,
+		0.f, 0.f, scaleZ, 1.f,
+		0.f, 0.f, translate, 0.f
+	);
 }
