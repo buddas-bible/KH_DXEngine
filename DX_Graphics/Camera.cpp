@@ -1,6 +1,8 @@
 #include "Camera.h"
 #include "../KH_Math/Matrix3x3.h"
 
+#include <utility>;
+
 
 /// <summary>
 /// 매 프레임 뷰 행렬을 업데이트 함
@@ -13,29 +15,24 @@ void Camera::Update()
 	
 	// 월드 up을 look을 외적 = right
 	// look에 right를 외적 = up
+	m_View = UpdateViewMatrix();
+}
+
+Matrix4x4 Camera::UpdateViewMatrix()
+{
 	m_look = m_look.Normalize();
 	m_right = (worldUp.Cross(m_look)).Normalize();
 	m_up = (m_look.Cross(m_right)).Normalize();
 
-	m_View.e[0][0] = m_right.x;
-	m_View.e[0][1] = m_up.x;
-	m_View.e[0][2] = m_look.x;
-	m_View.e[0][3] = 0.f;
+	Matrix4x4 view
+	(
+		m_right.x, m_up.x, m_look.x, 0.f,
+		m_right.y, m_up.y, m_look.y, 0.f,
+		m_right.z, m_up.z, m_look.z, 0.f,
+		-(m_pos.Dot(m_right)), -(m_pos.Dot(m_up)), -(m_pos.Dot(m_look)), 1.f
+	);
 
-	m_View.e[1][0] = m_right.y;
-	m_View.e[1][1] = m_up.y;
-	m_View.e[1][2] = m_look.y;
-	m_View.e[1][3] = 0.f;
-
-	m_View.e[2][0] = m_right.z;
-	m_View.e[2][1] = m_up.z;
-	m_View.e[2][2] = m_look.z;
-	m_View.e[2][3] = 0.f;
-
-	m_View.e[3][0] = -(m_pos.Dot(m_right));
-	m_View.e[3][1] = -(m_pos.Dot(m_up));
-	m_View.e[3][2] = -(m_pos.Dot(m_look));
-	m_View.e[3][3] = 1.f;
+	return view;
 }
 
 Matrix4x4 Camera::GetViewMatrix()
@@ -67,25 +64,12 @@ void Camera::CameraLookAtLH(const Vector3D& eyePos, const Vector3D& focus, const
 	m_up = up;
 	m_pos = eyePos;
 
-	m_View.e[0][0] = m_right.x;
-	m_View.e[0][1] = m_up.x;
-	m_View.e[0][2] = m_look.x;
-	m_View.e[0][3] = 0.f;
+	m_View = UpdateViewMatrix();
+}
 
-	m_View.e[1][0] = m_right.y;
-	m_View.e[1][1] = m_up.y;
-	m_View.e[1][2] = m_look.y;
-	m_View.e[1][3] = 0.f;
+void Camera::XMLookAtLH(const Vector3D& eyePos, const Vector3D& focus, const Vector3D& worldUp)
+{
 
-	m_View.e[2][0] = m_right.z;
-	m_View.e[2][1] = m_up.z;
-	m_View.e[2][2] = m_look.z;
-	m_View.e[2][3] = 0.f;
-
-	m_View.e[3][0] = -(m_pos.Dot(m_right));
-	m_View.e[3][1] = -(m_pos.Dot(m_up));
-	m_View.e[3][2] = -(m_pos.Dot(m_look));
-	m_View.e[3][3] = 1.f;
 }
 
 /// <summary>
@@ -102,25 +86,12 @@ void Camera::CameraLookToLH(const Vector3D& eyePos, const Vector3D& direction, c
 	m_up = up;
 	m_pos = eyePos;
 
-	m_View.e[0][0] = m_right.x;
-	m_View.e[0][1] = m_up.x;
-	m_View.e[0][2] = m_look.x;
-	m_View.e[0][3] = 0.f;
+	m_View = UpdateViewMatrix();
+}
 
-	m_View.e[1][0] = m_right.y;
-	m_View.e[1][1] = m_up.y;
-	m_View.e[1][2] = m_look.y;
-	m_View.e[1][3] = 0.f;
+void Camera::XMLookToLH(const Vector3D& eyePos, const Vector3D& direction, const Vector3D& worldUp)
+{
 
-	m_View.e[2][0] = m_right.z;
-	m_View.e[2][1] = m_up.z;
-	m_View.e[2][2] = m_look.z;
-	m_View.e[2][3] = 0.f;
-
-	m_View.e[3][0] = -(m_pos.Dot(m_right));
-	m_View.e[3][1] = -(m_pos.Dot(m_up));
-	m_View.e[3][2] = -(m_pos.Dot(m_look));
-	m_View.e[3][3] = 1.f;
 }
 
 /// <summary>
@@ -128,13 +99,47 @@ void Camera::CameraLookToLH(const Vector3D& eyePos, const Vector3D& direction, c
 /// </summary>
 void Camera::CameraPerspectiveFovLH(float angleY, float ratio, float near, float far)
 {
-	
+	float nearH = 2.f * near * tanf(angleY * 0.5f);		// 니어까지의 거리 * 탄젠트 시야각 (높이니까 * 2)
+	float nearW = nearH * ratio;						// 화면 비율에 높이를 곱하니까 너비가 나옴
+	float scaleX = 2.f * near / nearW;					// 2 * n / w
+	float scaleY = 2.f * near / nearH;					// 2 * n / h
+	float scaleZ = far / (far - near);					// f / f - n
+	float translate = -(near * far) / (far - near);		// - nf / f - n
+
+	m_Proj = Matrix4x4
+	(
+		scaleX, 0.f, 0.f, 0.f,
+		0.f, scaleY, 0.f, 0.f,
+		0.f, 0.f, scaleZ, 1.f,
+		0.f, 0.f, translate, 0.f
+	);
+}
+
+void Camera::XMPerspectiveFovLH(float angleY, float ratio, float near, float far)
+{
+	// DirectX::XMMatrixPerspectiveFovLH(angleY, ratio, near, far);
 }
 
 /// <summary>
 /// 왼손 좌표계 기준으로 투영 행렬을 만듬
 /// </summary>
 void Camera::CameraOrthographicLH(float width, float height, float near, float far)
+{
+	float scaleY = 2.f / height;
+	float scaleX = 2.f / width;
+	float scaleZ = 1.f / (far - near);
+	float translate = -near / (far - near);
+
+	m_Proj = Matrix4x4
+	(
+		scaleX, 0.f, 0.f, 0.f,
+		0.f, scaleY, 0.f, 0.f,
+		0.f, 0.f, scaleZ, 1.f,
+		0.f, 0.f, translate, 0.f
+	);
+}
+
+void Camera::XMOrthographicLH(float width, float height, float near, float far)
 {
 
 }

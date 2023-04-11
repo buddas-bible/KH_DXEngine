@@ -80,47 +80,66 @@ void DXGraphics::Finalize()
 
 void DXGraphics::Update()
 {
-	if (GetAsyncKeyState(VK_A))
+
+	float dt = 0.005;
+	if (GetAsyncKeyState(VK_Q))
 	{
-		camera.Yaw(-10);
+		camera.Yaw(4 * dt);
 	}
-	if (GetAsyncKeyState(VK_D))
+	if (GetAsyncKeyState(VK_E))
 	{
-		camera.Yaw(10);
+		camera.Yaw(-4 * dt);
 	}
-	if (GetAsyncKeyState(VK_W))
+	if (GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_W))
 	{
-		camera.Pitch(10);
+		camera.Pitch(4 * dt);
 	}
-	if (GetAsyncKeyState(VK_S))
+	if (GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_S))
 	{
-		camera.Pitch(10);
+		camera.Pitch(-4 * dt);
 	}
+
+	if (!GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_A))
+	{
+		camera.moveR(4 * dt);
+	}
+	if (!GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_D))
+	{
+		camera.moveR(-4 * dt);
+	}
+	if (!GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_W))
+	{
+		camera.moveL(4 * dt);
+	}
+	if (!GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_S))
+	{
+		camera.moveL(-4 * dt);
+	}
+
 	if (GetAsyncKeyState(VK_LEFT))
 	{
-		camera.moveX(-1.f);
+		camera.moveX(-3.f * dt);
 	}
 	if (GetAsyncKeyState(VK_RIGHT))
 	{
-		camera.moveX(1.f);
+		camera.moveX(3.f * dt);
 	}
 	if (GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_UP))
 	{
-		camera.moveY(1.f);
+		camera.moveY(3.f * dt);
 	}
 	if (GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_DOWN))
 	{
-		camera.moveY(-1.f);
+		camera.moveY(-3.f * dt);
 	}
 	if (GetAsyncKeyState(VK_UP) && !GetAsyncKeyState(VK_SHIFT))
 	{
-		camera.moveZ(1.f);
+		camera.moveZ(3.f * dt);
 	}
 	if (GetAsyncKeyState(VK_DOWN) && !GetAsyncKeyState(VK_SHIFT))
 	{
-		camera.moveZ(-1.f);
+		camera.moveZ(-3.f * dt);
 	}
-
 
 	if (GetAsyncKeyState(VK_F1))
 	{
@@ -129,23 +148,6 @@ void DXGraphics::Update()
 	if (GetAsyncKeyState(VK_F2))
 	{
 		m_wireRasterizerState.As(&m_currRasterizerState);
-	}
-
-	if (angleX > 2 * PI)
-	{
-		angleX -= 2 * PI;
-	}
-	if (angleX < -2 * PI)
-	{
-		angleX += 2 * PI;
-	}
-	if (angleY > 2 * PI)
-	{
-		angleY -= 2 * PI;
-	}
-	if (angleY < -2 * PI)
-	{
-		angleY += 2 * PI;
 	}
 
 	camera.Update();
@@ -759,13 +761,22 @@ HRESULT DXGraphics::CreateCubeShaders()
 	float aspectRatioY = aspectRatioX < (16.0f / 9.0f) ? aspectRatioX / (16.0f / 9.0f) : 1.0f;
 
 	// 투영 매트릭스
-	m_constantBufferData.projection =
+	camera.CameraPerspectiveFovLH(
+		2.0f * std::atan(std::tan(DirectX::XMConvertToRadians(70) * 0.5f) / aspectRatioY),
+		aspectRatioX,
+		0.01f,
+		100.0f
+	);
+
+	m_constantBufferData.projection = ConvertToXMMATRIX(camera.GetProjMatrix());
+		/*
 			DirectX::XMMatrixPerspectiveFovLH(
 				2.0f * std::atan(std::tan(DirectX::XMConvertToRadians(70) * 0.5f) / aspectRatioY),
 				aspectRatioX,
 				0.01f,
 				100.0f
 		);
+		*/
 
 	/*
 	std::ifstream psfin("CubePixelShader.cso", std::ios::binary);
@@ -1188,6 +1199,9 @@ void DXGraphics::BeginDraw()
 		0
 	);
 
+	Matrix4x4 wvp = camera.GetViewProjMatrix();
+
+	DirectX::XMMATRIX worldViewProj = ConvertToXMMATRIX(wvp);
 
 	/// 쉐이더 코드 자리?? 인듯??	
 	{
@@ -1216,7 +1230,6 @@ void DXGraphics::BeginDraw()
 		);
 
 		// 상수 버퍼 설정
-		DirectX::XMMATRIX worldViewProj = m_constantBufferData.world * m_constantBufferData.view * m_constantBufferData.projection;
 		m_axisMatrixVariable->SetMatrix(reinterpret_cast<float*>(&worldViewProj));
 
 		// 테크닉
@@ -1257,7 +1270,6 @@ void DXGraphics::BeginDraw()
 		);
 
 		// 상수 버퍼 설정
-		DirectX::XMMATRIX worldViewProj = m_constantBufferData.world * m_constantBufferData.view * m_constantBufferData.projection;
 		m_gridMatrixVariable->SetMatrix(reinterpret_cast<float*>(&worldViewProj));
 
 		// 테크닉
@@ -1298,7 +1310,7 @@ void DXGraphics::BeginDraw()
 		);
 
 		// 상수 버퍼 설정
-		DirectX::XMMATRIX worldViewProj = m_constantBufferData.world * m_constantBufferData.view * m_constantBufferData.projection;
+		// DirectX::XMMATRIX worldViewProj = m_constantBufferData.world * m_constantBufferData.view * m_constantBufferData.projection;
 		m_cubeMatrixVariable->SetMatrix(reinterpret_cast<float*>(&worldViewProj));
 
 		// m_cubeSampler->SetSampler(0, m_cubeSamplerState.Get());

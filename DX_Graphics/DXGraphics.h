@@ -140,9 +140,6 @@ private:
 	DirectX::XMFLOAT4 m_z;
 	DirectX::XMFLOAT4 m_y;
 
-	float angleX;
-	float angleY;
-
 	DirectX::XMFLOAT4 m_pos;
 
 	Camera camera;
