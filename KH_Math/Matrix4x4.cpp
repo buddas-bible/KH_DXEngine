@@ -45,6 +45,11 @@ Matrix4x4::Matrix4x4(const Matrix4x4&& mat) noexcept :
 
 }
 
+DirectX::XMMATRIX ConvertToXMMATRIX(const Matrix4x4& matrix)
+{
+	return DirectX::XMLoadFloat4x4((DirectX::XMFLOAT4X4*) matrix.e);
+}
+
 Matrix4x4::~Matrix4x4()
 {
 

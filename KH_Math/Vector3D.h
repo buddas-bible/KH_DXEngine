@@ -32,7 +32,8 @@ public:
 
 	float Projection(const Vector3D&);					// 벡터 투영 (스칼라 값 반환)
 	float FindTheta(const Vector3D&) const;				// other 벡터와의 radian 반환
-	Vector3D Normalize() const;							// 정규화된 벡터를 반환
+	Vector3D Normalize() const &;							// 정규화된 벡터를 반환
+	Vector3D Normalize() &&;							// 정규화된 벡터를 반환
 
 public:
 	Vector3D& operator = (const Vector3D&);				// 복사 대입 연산자

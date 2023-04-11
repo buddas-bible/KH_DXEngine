@@ -2,15 +2,20 @@
 
 #include "../KH_Math/Vector3D.h"
 #include "../KH_Math/Vector4D.h"
-
+#include "../KH_Math/Matrix4x4.h"
 
 class Camera
 {
 public:
-	Matrix4x4 SetViewMatrix();
+	void Update();
 	Matrix4x4 GetViewMatrix();
 	Matrix4x4 GetProjMatrix();
 	Matrix4x4 GetViewProjMatrix();
+
+	void CameraLookAtLH(const Vector3D& eyePos, const Vector3D& focus, const Vector3D& worldUp);
+	void CameraLookToLH(const Vector3D& eyePos, const Vector3D& direction, const Vector3D& worldUp);
+	void CameraPerspectiveFovLH(float angleY, float ratio, float near, float far);
+	void CameraOrthographicLH();
 
 	void moveX(const float& d);			// 월드 X 방향 이동
 	void moveY(const float& d);			// 월드 Y 방향 이동
@@ -24,12 +29,14 @@ public:
 	void Yaw(const float& a);			// 카메라 좌우 회전
 
 private:
-	Vector3D m_pos;			// 카메라 위치
-	Vector3D m_look;		// 카메라 z
-	Vector3D m_up;			// 카메라 y
-	Vector3D m_right;		// 카메라 x
+	Vector3D worldUp{0.f, 1.f, 0.f};
 
-	Matrix4x4 m_View;
-	Matrix4x4 m_Proj;
+	Vector3D m_pos{};			// 카메라 위치
+	Vector3D m_look{};		// 카메라 z
+	Vector3D m_up{};			// 카메라 y
+	Vector3D m_right{};		// 카메라 x
+
+	Matrix4x4 m_View{};
+	Matrix4x4 m_Proj{};
 };
 

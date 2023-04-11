@@ -1,4 +1,5 @@
 #pragma once
+#include <DirectXMath.h>
 
 class Quaternion;
 
@@ -38,3 +39,5 @@ public:
 	Matrix4x4 operator = (const Matrix4x4& other);
 	Matrix4x4 operator = (const Matrix4x4&& other) noexcept;
 };
+
+DirectX::XMMATRIX ConvertToXMMATRIX(const Matrix4x4& matrix);

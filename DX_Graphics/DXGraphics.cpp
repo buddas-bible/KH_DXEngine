@@ -8,8 +8,6 @@
 
 using namespace Microsoft::WRL;
 
-constexpr float PI = 3.14159265f;
-
 DXGraphics::~DXGraphics()
 {
 	
@@ -82,45 +80,45 @@ void DXGraphics::Finalize()
 
 void DXGraphics::Update()
 {
-	if (GetAsyncKeyState(0x41))
+	if (GetAsyncKeyState(VK_A))
 	{
-		angleX -= PI / 5 * 0.016f;
-		// m_eye.x -= 1.f * 0.016f;
+		camera.Yaw(-10);
 	}
-	if (GetAsyncKeyState(0x44))
+	if (GetAsyncKeyState(VK_D))
 	{
-		m_pos.x -= 1.f * 0.016f;
-		// m_eye.x -= 1.f * 0.016f;
+		camera.Yaw(10);
+	}
+	if (GetAsyncKeyState(VK_W))
+	{
+		camera.Pitch(10);
+	}
+	if (GetAsyncKeyState(VK_S))
+	{
+		camera.Pitch(10);
 	}
 	if (GetAsyncKeyState(VK_LEFT))
 	{
-		m_pos.x -= 1.f * 0.016f;
-		// m_eye.x -= 1.f * 0.016f;
+		camera.moveX(-1.f);
 	}
 	if (GetAsyncKeyState(VK_RIGHT))
 	{
-		m_pos.x += 1.f * 0.016f;
-		// m_eye.x += 1.f * 0.016f;
+		camera.moveX(1.f);
 	}
 	if (GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_UP))
 	{
-		m_pos.y += 1.f * 0.016f;
-		// m_eye.y += 1.f * 0.016f;
+		camera.moveY(1.f);
 	}
 	if (GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_DOWN))
 	{
-		m_pos.y -= 1.f * 0.016f;
-		// m_eye.y -= 1.f * 0.016f;
+		camera.moveY(-1.f);
 	}
 	if (GetAsyncKeyState(VK_UP) && !GetAsyncKeyState(VK_SHIFT))
 	{
-		m_pos.z += 1.f * 0.016f;
-		// m_eye.z += 1.f * 0.016f;
+		camera.moveZ(1.f);
 	}
 	if (GetAsyncKeyState(VK_DOWN) && !GetAsyncKeyState(VK_SHIFT))
 	{
-		m_pos.z -= 1.f * 0.016f;
-		// m_eye.z -= 1.f * 0.016f;
+		camera.moveZ(-1.f);
 	}
 
 
@@ -150,40 +148,7 @@ void DXGraphics::Update()
 		angleY += 2 * PI;
 	}
 
-	/*
-	m_constantBufferData.world =
-	{
-		1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, 1, 0,
-		m_pos.x, m_pos.y, m_pos.z, 1.f
-	};
-	*/
-	// DirectX::XMVECTOR eye = DirectX::XMVectorSet(m_eye.x, m_eye.y, m_eye.z, m_eye.w);
-	// DirectX::XMVECTOR at = DirectX::XMVectorSet(m_eye.x + m_at.x, m_eye.y + m_at.y, m_eye.z + m_at.z, m_eye.w);
-	// DirectX::XMVECTOR up = DirectX::XMVectorSet(m_up.x, m_up.y, m_up.z, m_up.w);
-
-	// 원래는 카메라 포지션에 카메라 기저에 내적한 것에 -를 붙여줘야 하지만
-	// 뷰 행렬에 임의로 넣어주기로 하자.
-	// m_constantBufferData.view.r[0].m128_f32[0] = -m_pos.x;
-	// m_constantBufferData.view.r[0].m128_f32[1] = -m_pos.y;
-	// m_constantBufferData.view.r[0].m128_f32[2] = -m_pos.z;
-	// m_constantBufferData.view.r[0].m128_f32[3] = 0.f;
-	// 
-	// m_constantBufferData.view.r[1].m128_f32[0] = -m_pos.x;
-	// m_constantBufferData.view.r[1].m128_f32[1] = -m_pos.y;
-	// m_constantBufferData.view.r[1].m128_f32[2] = -m_pos.z;
-	// m_constantBufferData.view.r[1].m128_f32[3] = 0.f;
-	// 
-	// m_constantBufferData.view.r[2].m128_f32[0] = -m_pos.x;
-	// m_constantBufferData.view.r[2].m128_f32[1] = -m_pos.y;
-	// m_constantBufferData.view.r[2].m128_f32[2] = -m_pos.z;
-	// m_constantBufferData.view.r[2].m128_f32[3] = 0.f;
-
-	m_constantBufferData.view.r[3].m128_f32[0] = -m_pos.x;
-	m_constantBufferData.view.r[3].m128_f32[1] = -m_pos.y;
-	m_constantBufferData.view.r[3].m128_f32[2] = -m_pos.z;
-	m_constantBufferData.view.r[3].m128_f32[3] = 1.f;
+	camera.Update();
 }
 
 HRESULT DXGraphics::CreateDevice()
@@ -764,22 +729,25 @@ HRESULT DXGraphics::CreateCubeShaders()
 
 	/// 지금은 상수로 매트릭스를 구성했지만
 	/// 꾸준히 업데이트 되는 요소로 봐야할 것
-	DirectX::XMVECTOR eye = DirectX::XMVectorSet(0.0f, 0.7f, -1.5f, 1.f);
-	DirectX::XMVECTOR at = DirectX::XMVectorSet(0.0f, 0.1f, 0.0f, 1.f);
-	DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 1.f);
-
-	m_pos = { 0.0f, 0.7f, -1.5f, 1.f };
 
 	// 월드 행렬
 	m_constantBufferData.world = DirectX::XMMatrixIdentity();
 
+	Vector3D eye{ 0.0f, 0.7f, -1.5f };
+	Vector3D at{ 0.0f, 0.1f, 0.0f };
+	Vector3D up{ 0.0f, 1.0f, 0.0f };
+	camera.CameraLookAtLH(eye, at, up);
+
 	// 뷰 매트릭스
+	/*
 	m_constantBufferData.view = 
 		DirectX::XMMatrixLookAtLH(
 			eye,							// 카메라 위치
 			at,								// 카메라 초점
 			up								// 카메라 업벡터
 		);
+	*/
+	m_constantBufferData.view = ConvertToXMMATRIX(camera.GetViewMatrix());
 
 	// 백버퍼에서 정보를 가져옴
 	D3D11_TEXTURE2D_DESC backBufferDesc{};

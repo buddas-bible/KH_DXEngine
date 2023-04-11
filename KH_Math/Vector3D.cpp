@@ -1,6 +1,7 @@
 #include "Vector3D.h"
 #include "Matrix3x3.h"
 #include <cmath>
+#include <utility>
 
 #include "Vector2D.h"
 #include "Vector4D.h"
@@ -158,16 +159,34 @@ float Vector3D::FindTheta(const Vector3D& other) const
 /// ¡§±‘»≠
 /// </summary>
 /// <returns></returns>
-Vector3D Vector3D::Normalize() const
+Vector3D Vector3D::Normalize() const &
 {
-	if (Size() == 0)
+	float temp = x * x + y * y + z * z;
+	if (temp == 0)
 	{
 		return Vector3D(0.f, 0.f, 0.f);
 	}
 	else
 	{
-		float temp = x * x + y * y + z * z;
-		return Vector3D(x * FastInvSqrt(temp), y * FastInvSqrt(temp), z * FastInvSqrt(temp));
+		float invSqrt = FastInvSqrt(temp);
+		return Vector3D(x * invSqrt, y * invSqrt, z * invSqrt);
+	}
+}
+
+Vector3D Vector3D::Normalize() &&
+{
+	float temp = x * x + y * y + z * z;
+	if (temp == 0)
+	{
+		return Vector3D(0.f, 0.f, 0.f);
+	}
+	else
+	{
+		float invSqrt = FastInvSqrt(temp);
+		x *= invSqrt;
+		y *= invSqrt;
+		z *= invSqrt;
+		return std::move(*this);
 	}
 }
 

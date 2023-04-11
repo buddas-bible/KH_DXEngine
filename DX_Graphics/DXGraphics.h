@@ -1,6 +1,7 @@
 #pragma once
 #include "DXDefine.h"
 #include "Color.h"
+#include "Camera.h"
 
 class DXGraphics : public IGraphics
 {
@@ -143,6 +144,8 @@ private:
 	float angleY;
 
 	DirectX::XMFLOAT4 m_pos;
+
+	Camera camera;
 
 	ConstantBuffer m_constantBufferData;	// 상수 버퍼 데이터 (월드 뷰 투영 매트릭스 정보)
 };
