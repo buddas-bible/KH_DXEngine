@@ -147,7 +147,8 @@ private:
 	DirectX::XMFLOAT4 m_pos;
 
 	Camera camera;
-	Vector4D directionalLight{0.f, -1.f, 0.f, 1.f};
+	Vector4D directionalLight = Vector4D{ 1.f, 1.f, 0.f, 1.f }.Normalize();
+	Vector3D pointLight;
 
 	ConstantBuffer m_constantBufferData;	// 상수 버퍼 데이터 (월드 뷰 투영 매트릭스 정보)
 };
