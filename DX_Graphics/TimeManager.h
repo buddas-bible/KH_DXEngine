@@ -2,11 +2,11 @@
 
 #include "windows.h"
 
-class TimeController
+class TimeManager
 {
 private:
-	TimeController();
-	~TimeController();
+	TimeManager();
+	~TimeManager();
 
 	LARGE_INTEGER currCount;
 	LARGE_INTEGER prevCount;
@@ -19,7 +19,7 @@ private:
 	unsigned int FPS;		// 초당 호출된 횟수
 
 public:
-	static TimeController& GetInstance();
+	static TimeManager& GetInstance();
 
 	void Update();
 

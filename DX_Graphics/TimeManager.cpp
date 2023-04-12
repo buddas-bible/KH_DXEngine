@@ -1,7 +1,7 @@
-#include "TimeController.h"
+#include "TimeManager.h"
 
 
-TimeController::TimeController() :
+TimeManager::TimeManager() :
 	currCount{},
 	prevCount{},
 	Frequency{},
@@ -12,18 +12,18 @@ TimeController::TimeController() :
 	QueryPerformanceFrequency(&Frequency);
 }
 
-TimeController::~TimeController()
+TimeManager::~TimeManager()
 {
 
 }
 
-TimeController& TimeController::GetInstance()
+TimeManager& TimeManager::GetInstance()
 {
-	static TimeController instance;
+	static TimeManager instance;
 	return instance;
 }
 
-void TimeController::Update()
+void TimeManager::Update()
 {
 	QueryPerformanceCounter(&currCount);
 

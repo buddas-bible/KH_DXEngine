@@ -3,9 +3,6 @@
 #include <fstream>
 #include <vector>
 
-#include "InputManager.h"
-#include "TimeController.h"
-
 using namespace Microsoft::WRL;
 
 DXGraphics::~DXGraphics()
@@ -80,47 +77,70 @@ void DXGraphics::Finalize()
 
 void DXGraphics::Update()
 {
-	if (GetAsyncKeyState(VK_A))
+	static TimeManager& time = TimeManager::GetInstance();
+
+	time.Update();
+	camera.Update();
+
+	float dt = time.GetfDeltaTime();
+	if (GetAsyncKeyState(VK_Q))
 	{
-		camera.Yaw(-10);
+		camera.Yaw(4 * dt);
 	}
-	if (GetAsyncKeyState(VK_D))
+	if (GetAsyncKeyState(VK_E))
 	{
-		camera.Yaw(10);
+		camera.Yaw(-4 * dt);
 	}
-	if (GetAsyncKeyState(VK_W))
+	if (GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_W))
 	{
-		camera.Pitch(10);
+		camera.Pitch(4 * dt);
 	}
-	if (GetAsyncKeyState(VK_S))
+	if (GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_S))
 	{
-		camera.Pitch(10);
+		camera.Pitch(-4 * dt);
 	}
+
+	if (!GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_A))
+	{
+		camera.moveR(-4 * dt);
+	}
+	if (!GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_D))
+	{
+		camera.moveR(4 * dt);
+	}
+	if (!GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_W))
+	{
+		camera.moveL(4 * dt);
+	}
+	if (!GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_S))
+	{
+		camera.moveL(-4 * dt);
+	}
+
 	if (GetAsyncKeyState(VK_LEFT))
 	{
-		camera.moveX(-1.f);
+		camera.moveX(-3.f * dt);
 	}
 	if (GetAsyncKeyState(VK_RIGHT))
 	{
-		camera.moveX(1.f);
+		camera.moveX(3.f * dt);
 	}
 	if (GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_UP))
 	{
-		camera.moveY(1.f);
+		camera.moveY(3.f * dt);
 	}
 	if (GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_DOWN))
 	{
-		camera.moveY(-1.f);
+		camera.moveY(-3.f * dt);
 	}
 	if (GetAsyncKeyState(VK_UP) && !GetAsyncKeyState(VK_SHIFT))
 	{
-		camera.moveZ(1.f);
+		camera.moveZ(3.f * dt);
 	}
 	if (GetAsyncKeyState(VK_DOWN) && !GetAsyncKeyState(VK_SHIFT))
 	{
-		camera.moveZ(-1.f);
+		camera.moveZ(-3.f * dt);
 	}
-
 
 	if (GetAsyncKeyState(VK_F1))
 	{
@@ -130,25 +150,53 @@ void DXGraphics::Update()
 	{
 		m_wireRasterizerState.As(&m_currRasterizerState);
 	}
-
-	if (angleX > 2 * PI)
+	if (GetAsyncKeyState(VK_F5))
 	{
-		angleX -= 2 * PI;
+		camera.SetPerspectiveView();
 	}
-	if (angleX < -2 * PI)
+	if (GetAsyncKeyState(VK_F6))
 	{
-		angleX += 2 * PI;
-	}
-	if (angleY > 2 * PI)
-	{
-		angleY -= 2 * PI;
-	}
-	if (angleY < -2 * PI)
-	{
-		angleY += 2 * PI;
+		camera.SetOrthographicView();
 	}
 
-	camera.Update();
+	if (GetAsyncKeyState(0x31) && !GetAsyncKeyState(VK_SHIFT))
+	{
+		directionalLight = Vector4D{ 1.f, 1.f, 0.f, 1.f }.Normalize();
+	}
+	if (GetAsyncKeyState(0x32) && !GetAsyncKeyState(VK_SHIFT))
+	{
+		directionalLight = Vector4D{ 0.f, 1.f, 1.f, 1.f }.Normalize();
+	}
+	if (GetAsyncKeyState(0x33) && !GetAsyncKeyState(VK_SHIFT))
+	{
+		directionalLight = Vector4D{ 1.f, 0.f, 1.f, 1.f }.Normalize();
+	}
+
+	if (GetAsyncKeyState(0x34) && !GetAsyncKeyState(VK_SHIFT))
+	{
+		directionalLight = Vector4D{ -1.f, 1.f, 1.f, 1.f }.Normalize();
+	}
+	if (GetAsyncKeyState(0x35) && !GetAsyncKeyState(VK_SHIFT))
+	{
+		directionalLight = Vector4D{ 1.f, -1.f, 1.f, 1.f }.Normalize();
+	}
+	if (GetAsyncKeyState(0x36) && !GetAsyncKeyState(VK_SHIFT))
+	{
+		directionalLight = Vector4D{ 1.f, 1.f, -1.f, 1.f }.Normalize();
+	}
+
+	if (GetAsyncKeyState(0x37) && !GetAsyncKeyState(VK_SHIFT))
+	{
+		directionalLight = Vector4D{ -1.f, -1.f, 1.f, 0.f }.Normalize();
+	}
+	if (GetAsyncKeyState(0x38) && !GetAsyncKeyState(VK_SHIFT))
+	{
+		directionalLight = Vector4D{ 1.f, -1.f, -1.f, 0.f }.Normalize();
+	}
+	if (GetAsyncKeyState(0x39) && !GetAsyncKeyState(VK_SHIFT))
+	{
+		directionalLight = Vector4D{ -1.f, 1.f, -1.f, 0.f }.Normalize();
+	}
 }
 
 HRESULT DXGraphics::CreateDevice()
@@ -303,6 +351,9 @@ HRESULT DXGraphics::CreateRenderTargetView()
 	m_d3dViewport.Height = static_cast<float>(m_d3dBackBufferDesc.Height);
 	m_d3dViewport.MinDepth = D3D11_MIN_DEPTH;
 	m_d3dViewport.MaxDepth = D3D11_MAX_DEPTH;
+
+	camera.SetViewportHW(3.f, 3.5f);
+	// camera.SetViewportHW(m_d3dViewport.Width, m_d3dViewport.Height);
 
 	m_pd3dDeviceContext->RSSetViewports(1, &m_d3dViewport);
 
@@ -637,6 +688,8 @@ HRESULT DXGraphics::CreateCubeShaders()
 		// 이펙트로 셰이더 리소스랑 샘플러가 필요하지 않을까?
 		m_cubeShaderResource = m_cubeEffect->GetVariableByName("g_Texture")->AsShaderResource();	// 
 		m_cubeSampler = m_cubeEffect->GetVariableByName("g_Sampler")->AsSampler();
+
+		m_directionalLight = m_cubeEffect->GetVariableByName("fLight")->AsVector();
 	}
 
 	if (FAILED(hr))
@@ -759,13 +812,22 @@ HRESULT DXGraphics::CreateCubeShaders()
 	float aspectRatioY = aspectRatioX < (16.0f / 9.0f) ? aspectRatioX / (16.0f / 9.0f) : 1.0f;
 
 	// 투영 매트릭스
-	m_constantBufferData.projection =
+	camera.CameraPerspectiveFovLH(
+		2.0f * std::atan(std::tan(DirectX::XMConvertToRadians(70) * 0.5f) / aspectRatioY),
+		aspectRatioX,
+		0.01f,
+		100.0f
+	);
+
+	m_constantBufferData.projection = ConvertToXMMATRIX(camera.GetProjMatrix());
+		/*
 			DirectX::XMMatrixPerspectiveFovLH(
 				2.0f * std::atan(std::tan(DirectX::XMConvertToRadians(70) * 0.5f) / aspectRatioY),
 				aspectRatioX,
 				0.01f,
 				100.0f
 		);
+		*/
 
 	/*
 	std::ifstream psfin("CubePixelShader.cso", std::ios::binary);
@@ -851,10 +913,13 @@ HRESULT DXGraphics::CreateCubeShaders()
 HRESULT DXGraphics::CreateCube()
 {
 	HRESULT hr = S_OK;
+
+	/*
 	DirectX::XMFLOAT3 a[800] =
 	{
 
 	};
+	*/
 
 	// 꼭짓점을 설명하는 정보
 	TextureVertex cube[] =
@@ -1177,7 +1242,7 @@ void DXGraphics::BeginDraw()
 	// 랜더 타겟 뷰 클리어
 	m_pd3dDeviceContext->ClearRenderTargetView(
 		m_pd3dRenderTargetView.Get(), 
-		Color::SaddleBrown
+		Color::Black
 	);
 
 	// 뎁스 스텐실 뷰 클리어
@@ -1188,6 +1253,9 @@ void DXGraphics::BeginDraw()
 		0
 	);
 
+	Matrix4x4 wvp = camera.GetViewProjMatrix();
+
+	DirectX::XMMATRIX worldViewProj = ConvertToXMMATRIX(wvp);
 
 	/// 쉐이더 코드 자리?? 인듯??	
 	{
@@ -1216,7 +1284,6 @@ void DXGraphics::BeginDraw()
 		);
 
 		// 상수 버퍼 설정
-		DirectX::XMMATRIX worldViewProj = m_constantBufferData.world * m_constantBufferData.view * m_constantBufferData.projection;
 		m_axisMatrixVariable->SetMatrix(reinterpret_cast<float*>(&worldViewProj));
 
 		// 테크닉
@@ -1257,7 +1324,6 @@ void DXGraphics::BeginDraw()
 		);
 
 		// 상수 버퍼 설정
-		DirectX::XMMATRIX worldViewProj = m_constantBufferData.world * m_constantBufferData.view * m_constantBufferData.projection;
 		m_gridMatrixVariable->SetMatrix(reinterpret_cast<float*>(&worldViewProj));
 
 		// 테크닉
@@ -1298,10 +1364,9 @@ void DXGraphics::BeginDraw()
 		);
 
 		// 상수 버퍼 설정
-		DirectX::XMMATRIX worldViewProj = m_constantBufferData.world * m_constantBufferData.view * m_constantBufferData.projection;
 		m_cubeMatrixVariable->SetMatrix(reinterpret_cast<float*>(&worldViewProj));
-
-		// m_cubeSampler->SetSampler(0, m_cubeSamplerState.Get());
+		float light[4] = { directionalLight.x, directionalLight.y, directionalLight.z, directionalLight.w };
+		m_directionalLight->SetFloatVector(light);
 		m_cubeShaderResource->SetResource(m_cubeTextureView.Get());
 
 		// 테크닉

@@ -30,7 +30,7 @@
     <ClInclude Include="DXDefine.h">
       <Filter>etc</Filter>
     </ClInclude>
-    <ClInclude Include="TimeController.h">
+    <ClInclude Include="TimeManager.h">
       <Filter>etc</Filter>
     </ClInclude>
     <ClInclude Include="InputManager.h">
@@ -50,7 +50,7 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Camera</Filter>
     </ClCompile>
-    <ClCompile Include="TimeController.cpp">
+    <ClCompile Include="TimeManager.cpp">
       <Filter>etc</Filter>
     </ClCompile>
     <ClCompile Include="InputManager.cpp">

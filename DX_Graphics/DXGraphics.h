@@ -3,6 +3,8 @@
 #include "Color.h"
 #include "Camera.h"
 
+#include "TimeManager.h"
+
 class DXGraphics : public IGraphics
 {
 public:
@@ -81,6 +83,8 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Resource>				m_cubeTexture;		/// 초기화 당시에만 필요하고 가지고 있을 필요는 없을듯
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>	m_cubeTextureView;	// 텍스쳐 들고 있을 친구
 
+	Microsoft::WRL::ComPtr<ID3DX11EffectVectorVariable> m_directionalLight;
+
 private:
 	HRESULT CreateAxis();
 	UINT axisIndexCount;					// 축 인덱스 개수
@@ -140,12 +144,10 @@ private:
 	DirectX::XMFLOAT4 m_z;
 	DirectX::XMFLOAT4 m_y;
 
-	float angleX;
-	float angleY;
-
 	DirectX::XMFLOAT4 m_pos;
 
 	Camera camera;
+	Vector4D directionalLight{0.f, -1.f, 0.f, 1.f};
 
 	ConstantBuffer m_constantBufferData;	// 상수 버퍼 데이터 (월드 뷰 투영 매트릭스 정보)
 };
