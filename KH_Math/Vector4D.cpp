@@ -9,7 +9,7 @@ Vector4D::Vector4D() :
 
 }
 
-Vector4D::Vector4D(float _x, float _y, float _z, float _w) :
+constexpr Vector4D::Vector4D(float _x, float _y, float _z, float _w) :
 	x(_x), y(_y), z(_z), w(_w)
 {
 
@@ -35,6 +35,12 @@ Vector4D::Vector4D(const Vector3D& other, const float _w) :
 
 Vector4D::Vector4D(const Vector3D&& other, const float _w) noexcept :
 	x(other.x), y(other.y), z(other.y), w(_w)
+{
+
+}
+
+Vector4D::Vector4D(_In_reads_(4) const float* pArr) noexcept :
+	x(pArr[0]), y(pArr[1]), z(pArr[2]), w(pArr[4])
 {
 
 }

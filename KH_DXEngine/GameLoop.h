@@ -17,6 +17,8 @@ private:
 	HRESULT SetWindow(HINSTANCE hInstance);
 
 public:
+	static CoreEngine* g_pCoreEngine;
+
 	// √ ±‚»≠
 	HRESULT Initialize(HINSTANCE hInstance);
 	

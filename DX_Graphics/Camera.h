@@ -9,16 +9,23 @@ class Camera
 public:
 	void Update();
 	Matrix4x4 UpdateViewMatrix();
-	Matrix4x4 GetViewMatrix();
-	Matrix4x4 GetProjMatrix();
-	Matrix4x4 GetViewProjMatrix();
+	Matrix4x4 GetViewMatrix() const;
+	Matrix4x4 GetProjMatrix() const;
+	Matrix4x4 GetViewProjMatrix() const;
 
+	// 카메라 위치와 보고있는 위치로 카메라 세팅
 	void CameraLookAtLH(const Vector3D& eyePos, const Vector3D& focus, const Vector3D& worldUp);
 	void XMLookAtLH(const Vector3D& eyePos, const Vector3D& focus, const Vector3D& worldUp);
+	
+	// 카메라 위치와 보는 방향으로 카메라 세팅
 	void CameraLookToLH(const Vector3D& eyePos, const Vector3D& direction, const Vector3D& worldUp);
 	void XMLookToLH(const Vector3D& eyePos, const Vector3D& direction, const Vector3D& worldUp);
+	
+	// 카메라를 원근 투영으로 세팅
 	void CameraPerspectiveFovLH(float angleY, float ratio, float near, float far);
 	void XMPerspectiveFovLH(float angleY, float ratio, float near, float far);
+	
+	// 카메라를 직교 투영으로 세팅
 	void CameraOrthographicLH(float width, float height, float near, float far);
 	void XMOrthographicLH(float width, float height, float near, float far);
 
@@ -32,12 +39,14 @@ public:
 
 	void Pitch(const float& a);			// 카메라 위아래 회전
 	void Yaw(const float& a);			// 카메라 좌우 회전
+	void roll(const float a);
 
-	void SetViewportHW(float height, float width);
 	void SetPerspectiveView();
 	void SetOrthographicView();
 
 private:
+	bool isPerspective{true};
+
 	Vector3D worldUp{0.f, 1.f, 0.f};
 
 	Vector3D m_pos{};			// 카메라 위치
@@ -47,6 +56,8 @@ private:
 
 	Matrix4x4 m_View{};
 	Matrix4x4 m_Proj{};
+	Matrix4x4 m_persProj{};
+	Matrix4x4 m_orthProj{};
 
 	float m_angle;
 	float m_ratio;

@@ -4,6 +4,8 @@
 #pragma comment(lib, "KH_Math.lib")
 #include <cmath>
 
+CoreEngine* GameLoop::g_pCoreEngine = nullptr;
+
 HRESULT GameLoop::SetWindow(HINSTANCE hInstance)
 {
 	WNDCLASSEXW wcex;
@@ -78,6 +80,8 @@ HRESULT GameLoop::Initialize(HINSTANCE hInstance)
 		return hr;
 	}
 
+	g_pCoreEngine = m_pCoreEngine;
+
 	return hr;
 }
 
@@ -110,6 +114,20 @@ LRESULT CALLBACK GameLoop::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 {
 	switch (msg)
 	{
+		case WM_ACTIVATE:
+		{
+
+		}
+		break;
+
+		case WM_SIZE:
+		{
+			if (g_pCoreEngine != nullptr)
+			{
+				g_pCoreEngine->OnResize();
+			}
+		}
+		break;
 
 		case WM_DESTROY:
 		{

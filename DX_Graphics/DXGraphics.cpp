@@ -3,6 +3,9 @@
 #include <fstream>
 #include <vector>
 
+#include "Axis.h"
+#include "Grid.h"
+
 using namespace Microsoft::WRL;
 
 DXGraphics::~DXGraphics()
@@ -65,7 +68,8 @@ HRESULT DXGraphics::Initialize(HWND hwnd)
 		return hr;
 	}
 
-	// Test();
+	directionalLight = Vector3D(1.f, 1.f, 0.f).Normalize();
+	pointLight; // 이건 월드에서의 위치를 가지고 있어야함.
 
 	return hr;
 }
@@ -75,12 +79,61 @@ void DXGraphics::Finalize()
 
 }
 
+HRESULT DXGraphics::OnResize()
+{
+	HRESULT hr = S_OK;
+
+	int ref = 0;
+	ref = m_backBuffer.Reset();
+	ref = m_pd3dRenderTargetView.Reset();
+	ref = m_pDepthStencil.Reset();
+	ref = m_pd3dDepthStencilView.Reset();
+
+	DXGI_SWAP_CHAIN_DESC1 scDesc;
+	hr = m_pDXGISwapChain1->GetDesc1(&scDesc);
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+
+	hr = m_pDXGISwapChain1->ResizeBuffers(
+		NULL,
+		NULL,
+		NULL,
+		DXGI_FORMAT_UNKNOWN,
+		0
+	);
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+	
+	hr = CreateRenderTargetView();
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+
+	hr = CreateDepthStencilView();
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+
+	return hr;
+}
+
 void DXGraphics::Update()
 {
 	static TimeManager& time = TimeManager::GetInstance();
 
 	time.Update();
 	camera.Update();
+
+	m_view = camera.GetViewMatrix();
+	m_projection = camera.GetProjMatrix();
+	grid->Update(m_view, m_projection);
+	axis->Update(m_view, m_projection);
 
 	float dt = time.GetfDeltaTime();
 	if (GetAsyncKeyState(VK_Q))
@@ -352,10 +405,7 @@ HRESULT DXGraphics::CreateRenderTargetView()
 	m_d3dViewport.MinDepth = D3D11_MIN_DEPTH;
 	m_d3dViewport.MaxDepth = D3D11_MAX_DEPTH;
 
-	camera.SetViewportHW(3.f, 3.5f);
-	// camera.SetViewportHW(m_d3dViewport.Width, m_d3dViewport.Height);
-
-	m_pd3dDeviceContext->RSSetViewports(1, &m_d3dViewport);
+	SetCamera();
 
 	return hr;
 }
@@ -418,6 +468,37 @@ HRESULT DXGraphics::CreateDepthStencilView()
 	depthStencilView.As(&m_pd3dDepthStencilView);
 
 	return hr;
+}
+
+void DXGraphics::SetCamera()
+{
+	// 월드 행렬
+	// 이건 오브젝트마다 가지고 있을것.
+	m_world = Matrix4x4::IdentityMatrix();
+
+	Vector3D eye{ 0.0f, 0.7f, -1.5f };
+	Vector3D at{ 0.0f, 0.1f, 0.0f };
+	Vector3D up{ 0.0f, 1.0f, 0.0f };
+	camera.CameraLookAtLH(eye, at, up);
+
+	m_view = camera.GetViewMatrix();
+
+	// 화면 비율
+	float aspectRatioX = static_cast<float>(m_d3dBackBufferDesc.Width) / static_cast<float>(m_d3dBackBufferDesc.Height);
+	float aspectRatioY = aspectRatioX < (16.0f / 9.0f) ? aspectRatioX / (16.0f / 9.0f) : 1.0f;
+
+	// 투영 매트릭스
+	camera.CameraPerspectiveFovLH(
+		2.0f * std::atan(std::tan(DirectX::XMConvertToRadians(70) * 0.5f) / aspectRatioY),
+		aspectRatioX,
+		0.01f,
+		100.0f
+	);
+	camera.CameraOrthographicLH(4.5f, 3.f, 0.01f, 100.f);
+
+	m_projection = camera.GetProjMatrix();
+
+	m_pd3dDeviceContext->RSSetViewports(1, &m_d3dViewport);
 }
 
 HRESULT DXGraphics::CreateRasterState()
@@ -526,48 +607,7 @@ HRESULT DXGraphics::CreateInputLayout()
 	if (FAILED(hr))
 	{
 		return hr;
-	}
-
-	// 버텍스 정보가 어떻게 되어있는지 설정
-	D3D11_INPUT_ELEMENT_DESC iaDesc[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
-		0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT,
-		0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-
-
-	D3DX11_PASS_DESC passDesc;
-	m_axisTechnique->GetPassByIndex(0)->GetDesc(&passDesc);
-	hr = m_pd3dDevice->CreateInputLayout(
-		iaDesc,
-		ARRAYSIZE(iaDesc),						// 버텍스에 들어간 데이터 갯수
-		passDesc.pIAInputSignature,				// 셰이더 코드 포인터
-		passDesc.IAInputSignatureSize,			// 셰이더 크기
-		m_axisInputLayout.GetAddressOf()
-	);
-
-	if (FAILED(hr))
-	{
-		return hr;
-	}
-	
-	m_gridTechnique->GetPassByIndex(0)->GetDesc(&passDesc);
-	hr = m_pd3dDevice->CreateInputLayout(
-		iaDesc,
-		ARRAYSIZE(iaDesc),						// 버텍스에 들어간 데이터 갯수
-		passDesc.pIAInputSignature,				// 셰이더 코드 포인터
-		passDesc.IAInputSignatureSize,			// 셰이더 크기
-		m_gridInputLayout.GetAddressOf()
-	);
-
-	if (FAILED(hr))
-	{
-		return hr;
-	}
-	
+	}	
 
 	return hr;
 }
@@ -636,41 +676,6 @@ HRESULT DXGraphics::CreateCubeShaders()
 	cfin.read(&cCompiledShader[0], size);
 	cfin.close();
 
-	/*
-	ComPtr<ID3D11VertexShader> vertexShader;
-	hr = m_pd3dDevice->CreateVertexShader(
-		&vsCompiledShader[0],
-		size,
-		0,
-		vertexShader.GetAddressOf()
-	);
-	*/
-
-	/*
-	UINT flags = 0;
-	flags |= D3DCOMPILE_DEBUG;
-	flags |= D3D10_SHADER_SKIP_OPTIMIZATION;
-
-	ComPtr<ID3DBlob> shaderBlob;
-	ComPtr<ID3DBlob> errorBlob;
-	hr = D3DCompileFromFile(
-		L"./VertexShader.fx",					// 셰이더 파일 이름
-		0,										// 셰이더 매크로
-		0,										//
-		0,										// 진입점
-		"fx_5_0",								// 셰이더 기능
-		flags,
-		0,
-		&shaderBlob,
-		&errorBlob
-	);
-
-	if (FAILED(hr))
-	{
-		return hr;
-	}
-	*/
-
 	/// 파일로부터 이펙트 정보를 읽어옴
 	// 큐브 이펙트
 	{
@@ -697,216 +702,6 @@ HRESULT DXGraphics::CreateCubeShaders()
 		return hr;
 	}
 
-#if _WIN64
-
-#if _DEBUG
-	std::ifstream fin("../x64/debug/Color.cso", std::ios::binary);
-#else
-	std::ifstream fin("../x64/release/Color.cso", std::ios::binary);
-#endif
-
-#else
-
-#if _DEBUG
-	std::ifstream fin("../WIN32/debug/Color.cso", std::ios::binary);
-#else
-	std::ifstream fin("../WIN32/release/Color.cso", std::ios::binary);
-#endif
-
-#endif
-
-	fin.seekg(0, std::ios_base::end);
-	int cSize = (int)fin.tellg();
-	fin.seekg(0, std::ios_base::beg);
-	std::vector<char> vsCompiledShader(cSize);
-
-	fin.read(&vsCompiledShader[0], cSize);
-	fin.close();
-
-	// 축 이펙트
-	{
-		hr = D3DX11CreateEffectFromMemory(
-			&vsCompiledShader[0],
-			cSize,
-			0,
-			m_pd3dDevice.Get(),
-			m_axisEffect.GetAddressOf()
-		);
-
-		m_axisTechnique = m_axisEffect->GetTechniqueByName("Tech");							// 파일에 Tech 이름의 데이터를 읽어옴
-		m_axisMatrixVariable = m_axisEffect->GetVariableByName("worldViewProj")->AsMatrix();	// 파일에 worldViewProj 이름의 데이터를 읽어옴
-	}
-
-	if (FAILED(hr))
-	{
-		return hr;
-	}
-
-	// 그리드 이펙트
-	{
-		hr = D3DX11CreateEffectFromMemory(
-			&vsCompiledShader[0],
-			size,
-			0,
-			m_pd3dDevice.Get(),
-			m_gridEffect.GetAddressOf()
-		);
-
-		m_gridTechnique = m_gridEffect->GetTechniqueByName("Tech");							// 파일에 Tech 이름의 데이터를 읽어옴
-		m_gridMatrixVariable = m_gridEffect->GetVariableByName("worldViewProj")->AsMatrix();	// 파일에 worldViewProj 이름의 데이터를 읽어옴
-	}
-	
-	if (FAILED(hr))
-	{
-		return hr;
-	}
-
-	// vertexShader.As(&m_vertexShader);
-	/*
-	Vector4D _eye(0.0f, 0.7f, -1.5f, 1.f);
-	Vector4D _at(0.0f, 0.1f, 0.0f, 1.f);
-	Vector4D _up(0.0f, 0.7f, -1.5f, 1.f);
-
-	Vector4D z = _at = _eye;
-	Vector4D x = _up.Cross(z);
-	Vector4D y = z.Cross(y);
-
-	z = z.Normalize();
-	y = y.Normalize();
-	x = x.Normalize();
-
-	m_x = { x.x, x.y, x.z, x.w };
-	m_y = { y.x, y.y, y.z, y.w };
-	m_z = { z.x, z.y, z.z, z.w };
-	*/
-
-	/// 지금은 상수로 매트릭스를 구성했지만
-	/// 꾸준히 업데이트 되는 요소로 봐야할 것
-
-	// 월드 행렬
-	m_constantBufferData.world = DirectX::XMMatrixIdentity();
-
-	Vector3D eye{ 0.0f, 0.7f, -1.5f };
-	Vector3D at{ 0.0f, 0.1f, 0.0f };
-	Vector3D up{ 0.0f, 1.0f, 0.0f };
-	camera.CameraLookAtLH(eye, at, up);
-
-	// 뷰 매트릭스
-	/*
-	m_constantBufferData.view = 
-		DirectX::XMMatrixLookAtLH(
-			eye,							// 카메라 위치
-			at,								// 카메라 초점
-			up								// 카메라 업벡터
-		);
-	*/
-	m_constantBufferData.view = ConvertToXMMATRIX(camera.GetViewMatrix());
-
-	// 백버퍼에서 정보를 가져옴
-	D3D11_TEXTURE2D_DESC backBufferDesc{};
-	ZeroMemory(&backBufferDesc, sizeof(backBufferDesc));
-	m_backBuffer->GetDesc(&backBufferDesc);
-
-	// 화면 비율
-	float aspectRatioX = static_cast<float>(backBufferDesc.Width) / static_cast<float>(backBufferDesc.Height);
-	float aspectRatioY = aspectRatioX < (16.0f / 9.0f) ? aspectRatioX / (16.0f / 9.0f) : 1.0f;
-
-	// 투영 매트릭스
-	camera.CameraPerspectiveFovLH(
-		2.0f * std::atan(std::tan(DirectX::XMConvertToRadians(70) * 0.5f) / aspectRatioY),
-		aspectRatioX,
-		0.01f,
-		100.0f
-	);
-
-	m_constantBufferData.projection = ConvertToXMMATRIX(camera.GetProjMatrix());
-		/*
-			DirectX::XMMatrixPerspectiveFovLH(
-				2.0f * std::atan(std::tan(DirectX::XMConvertToRadians(70) * 0.5f) / aspectRatioY),
-				aspectRatioX,
-				0.01f,
-				100.0f
-		);
-		*/
-
-	/*
-	std::ifstream psfin("CubePixelShader.cso", std::ios::binary);
-
-	psfin.seekg(0, std::ios_base::end);
-	int pssize = (int)psfin.tellg();
-	psfin.seekg(0, std::ios_base::beg);
-	std::vector<char> psCompiledShader(pssize);
-
-	psfin.read(&psCompiledShader[0], pssize);
-	psfin.close();
-
-	ComPtr<ID3D11PixelShader> pixelShader;
-	hr = m_pd3dDevice->CreatePixelShader(
-		&psCompiledShader[0], 
-		pssize,
-		0, 
-		pixelShader.GetAddressOf()
-	);
-
-	if (FAILED(hr))
-	{
-		return hr;
-	}
-
-	pixelShader.As(&m_pixelShader);
-
-	CD3D11_BUFFER_DESC constantBufferDesc(
-		sizeof(ConstantBuffer),
-		D3D11_BIND_CONSTANT_BUFFER
-	);
-
-	hr = m_pd3dDevice->CreateBuffer(
-		&constantBufferDesc, 
-		nullptr, 
-		m_constantBuffer.GetAddressOf()
-	);
-
-	if (FAILED(hr))
-	{
-		return hr;
-	}
-
-	/// 상수 버퍼 설정하기 위한 것
-	DirectX::XMVECTOR eye = DirectX::XMVectorSet(0.0f, 0.7f, 1.5f, 0.f);
-	DirectX::XMVECTOR at = DirectX::XMVectorSet(0.0f, -0.1f, 0.0f, 0.f);
-	DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.f);
-
-	DirectX::XMStoreFloat4x4(
-		&m_constantBufferData.view,
-		DirectX::XMMatrixTranspose(
-			DirectX::XMMatrixLookAtRH(
-				eye,
-				at,
-				up
-			)
-		)
-	);
-
-	D3D11_TEXTURE2D_DESC backBufferDesc{};
-	ZeroMemory(&backBufferDesc, sizeof(backBufferDesc));
-	m_backBuffer->GetDesc(&backBufferDesc);
-
-	float aspectRatioX = static_cast<float>(backBufferDesc.Width) / static_cast<float>(backBufferDesc.Height);
-	float aspectRatioY = aspectRatioX < (16.0f / 9.0f) ? aspectRatioX / (16.0f / 9.0f) : 1.0f;
-
-	DirectX::XMStoreFloat4x4(
-		&m_constantBufferData.projection,
-		DirectX::XMMatrixTranspose(
-			DirectX::XMMatrixPerspectiveFovRH(
-				2.0f * std::atan(std::tan(DirectX::XMConvertToRadians(70) * 0.5f) / aspectRatioY),
-				aspectRatioX,
-				0.01f,
-				100.0f
-			)
-		)
-	);
-	*/
-
 	return hr;
 }
 
@@ -914,46 +709,39 @@ HRESULT DXGraphics::CreateCube()
 {
 	HRESULT hr = S_OK;
 
-	/*
-	DirectX::XMFLOAT3 a[800] =
-	{
-
-	};
-	*/
-
 	// 꼭짓점을 설명하는 정보
-	TextureVertex cube[] =
+	PTNVertex cube[] =
 	{
 		// POSITION								UV								NORMAL
-		{ DirectX::XMFLOAT3(-0.5f,-0.5f,-0.5f),	DirectX::XMFLOAT2(0.f, 0.f),	DirectX::XMFLOAT3(0.f, -1.f, 0.f), },	// 0	0
-		{ DirectX::XMFLOAT3(0.5f,-0.5f,-0.5f),	DirectX::XMFLOAT2(1.f, 0.f),	DirectX::XMFLOAT3(0.f, -1.f, 0.f), },	// 1	1
-		{ DirectX::XMFLOAT3(0.5f,-0.5f, 0.5f),	DirectX::XMFLOAT2(1.f, 1.f),	DirectX::XMFLOAT3(0.f, -1.f, 0.f), },	// 2	2
-		{ DirectX::XMFLOAT3(-0.5f,-0.5f, 0.5f),	DirectX::XMFLOAT2(0.f, 1.f),	DirectX::XMFLOAT3(0.f, -1.f, 0.f), },	// 3	3
+		{ Vector3D(-0.5f,-0.5f,-0.5f),	Vector2D(0.f, 0.f),	Vector3D(0.f, -1.f, 0.f), },	// 0	0
+		{ Vector3D(0.5f,-0.5f,-0.5f),	Vector2D(1.f, 0.f),	Vector3D(0.f, -1.f, 0.f), },	// 1	1
+		{ Vector3D(0.5f,-0.5f, 0.5f),	Vector2D(1.f, 1.f),	Vector3D(0.f, -1.f, 0.f), },	// 2	2
+		{ Vector3D(-0.5f,-0.5f, 0.5f),	Vector2D(0.f, 1.f),	Vector3D(0.f, -1.f, 0.f), },	// 3	3
 		  
-		{ DirectX::XMFLOAT3(-0.5f, 0.5f,-0.5f),	DirectX::XMFLOAT2(0.f, 0.f),	DirectX::XMFLOAT3(0.f, 0.f, -1.f), },	// 4	4
-		{ DirectX::XMFLOAT3(0.5f, 0.5f,-0.5f),	DirectX::XMFLOAT2(1.f, 0.f),	DirectX::XMFLOAT3(0.f, 0.f, -1.f), },	// 5	5
-		{ DirectX::XMFLOAT3(0.5f,-0.5f,-0.5f),	DirectX::XMFLOAT2(1.f, 1.f),	DirectX::XMFLOAT3(0.f, 0.f, -1.f), },	// 1	6
-		{ DirectX::XMFLOAT3(-0.5f,-0.5f,-0.5f),	DirectX::XMFLOAT2(0.f, 1.f),	DirectX::XMFLOAT3(0.f, 0.f, -1.f), },	// 0	7
+		{ Vector3D(-0.5f, 0.5f,-0.5f),	Vector2D(0.f, 0.f),	Vector3D(0.f, 0.f, -1.f), },	// 4	4
+		{ Vector3D(0.5f, 0.5f,-0.5f),	Vector2D(1.f, 0.f),	Vector3D(0.f, 0.f, -1.f), },	// 5	5
+		{ Vector3D(0.5f,-0.5f,-0.5f),	Vector2D(1.f, 1.f),	Vector3D(0.f, 0.f, -1.f), },	// 1	6
+		{ Vector3D(-0.5f,-0.5f,-0.5f),	Vector2D(0.f, 1.f),	Vector3D(0.f, 0.f, -1.f), },	// 0	7
 
-		{ DirectX::XMFLOAT3(0.5f, 0.5f,-0.5f),	DirectX::XMFLOAT2(0.f, 0.f),	DirectX::XMFLOAT3(1.f, 0.f, 0.f), },	// 5	8
-		{ DirectX::XMFLOAT3(0.5f, 0.5f, 0.5f),	DirectX::XMFLOAT2(1.f, 0.f),	DirectX::XMFLOAT3(1.f, 0.f, 0.f), },	// 6	9
-		{ DirectX::XMFLOAT3(0.5f,-0.5f, 0.5f),	DirectX::XMFLOAT2(1.f, 1.f),	DirectX::XMFLOAT3(1.f, 0.f, 0.f), },	// 2	10
-		{ DirectX::XMFLOAT3(0.5f,-0.5f,-0.5f),	DirectX::XMFLOAT2(0.f, 1.f),	DirectX::XMFLOAT3(1.f, 0.f, 0.f), },	// 1	11
+		{ Vector3D(0.5f, 0.5f,-0.5f),	Vector2D(0.f, 0.f),	Vector3D(1.f, 0.f, 0.f), },	// 5	8
+		{ Vector3D(0.5f, 0.5f, 0.5f),	Vector2D(1.f, 0.f),	Vector3D(1.f, 0.f, 0.f), },	// 6	9
+		{ Vector3D(0.5f,-0.5f, 0.5f),	Vector2D(1.f, 1.f),	Vector3D(1.f, 0.f, 0.f), },	// 2	10
+		{ Vector3D(0.5f,-0.5f,-0.5f),	Vector2D(0.f, 1.f),	Vector3D(1.f, 0.f, 0.f), },	// 1	11
 
-		{ DirectX::XMFLOAT3(0.5f, 0.5f, 0.5f),	DirectX::XMFLOAT2(0.f, 0.f),	DirectX::XMFLOAT3(0.f, 0.f, 1.f), },	// 6	12
-		{ DirectX::XMFLOAT3(-0.5f, 0.5f, 0.5f),	DirectX::XMFLOAT2(0.f, 1.f),	DirectX::XMFLOAT3(0.f, 0.f, 1.f), },	// 7	13
-		{ DirectX::XMFLOAT3(-0.5f,-0.5f, 0.5f),	DirectX::XMFLOAT2(1.f, 1.f),	DirectX::XMFLOAT3(0.f, 0.f, 1.f), },	// 3	14
-		{ DirectX::XMFLOAT3(0.5f,-0.5f, 0.5f),	DirectX::XMFLOAT2(0.f, 1.f),	DirectX::XMFLOAT3(0.f, 0.f, 1.f), },	// 2	15
+		{ Vector3D(0.5f, 0.5f, 0.5f),	Vector2D(0.f, 0.f),	Vector3D(0.f, 0.f, 1.f), },	// 6	12
+		{ Vector3D(-0.5f, 0.5f, 0.5f),	Vector2D(0.f, 1.f),	Vector3D(0.f, 0.f, 1.f), },	// 7	13
+		{ Vector3D(-0.5f,-0.5f, 0.5f),	Vector2D(1.f, 1.f),	Vector3D(0.f, 0.f, 1.f), },	// 3	14
+		{ Vector3D(0.5f,-0.5f, 0.5f),	Vector2D(0.f, 1.f),	Vector3D(0.f, 0.f, 1.f), },	// 2	15
 		
-		{ DirectX::XMFLOAT3(-0.5f, 0.5f, 0.5f),	DirectX::XMFLOAT2(0.f, 0.f),	DirectX::XMFLOAT3(-1.f, 0.f, 0.f), },	// 7	16
-		{ DirectX::XMFLOAT3(-0.5f, 0.5f,-0.5f),	DirectX::XMFLOAT2(1.f, 0.f),	DirectX::XMFLOAT3(-1.f, 0.f, 0.f), },	// 4	17
-		{ DirectX::XMFLOAT3(-0.5f,-0.5f,-0.5f),	DirectX::XMFLOAT2(1.f, 1.f),	DirectX::XMFLOAT3(-1.f, 0.f, 0.f), },	// 0	18
-		{ DirectX::XMFLOAT3(-0.5f,-0.5f, 0.5f),	DirectX::XMFLOAT2(0.f, 1.f),	DirectX::XMFLOAT3(-1.f, 0.f, 0.f), },	// 3	19
+		{ Vector3D(-0.5f, 0.5f, 0.5f),	Vector2D(0.f, 0.f),	Vector3D(-1.f, 0.f, 0.f), },	// 7	16
+		{ Vector3D(-0.5f, 0.5f,-0.5f),	Vector2D(1.f, 0.f),	Vector3D(-1.f, 0.f, 0.f), },	// 4	17
+		{ Vector3D(-0.5f,-0.5f,-0.5f),	Vector2D(1.f, 1.f),	Vector3D(-1.f, 0.f, 0.f), },	// 0	18
+		{ Vector3D(-0.5f,-0.5f, 0.5f),	Vector2D(0.f, 1.f),	Vector3D(-1.f, 0.f, 0.f), },	// 3	19
 
-		{ DirectX::XMFLOAT3(-0.5f, 0.5f, 0.5f),	DirectX::XMFLOAT2(0.f, 0.f),	DirectX::XMFLOAT3(0.f, 1.f, 0.f), },	// 7	20
-		{ DirectX::XMFLOAT3(0.5f, 0.5f, 0.5f),	DirectX::XMFLOAT2(1.f, 0.f),	DirectX::XMFLOAT3(0.f, 1.f, 0.f), },	// 6	21
-		{ DirectX::XMFLOAT3(0.5f, 0.5f,-0.5f),	DirectX::XMFLOAT2(1.f, 1.f),	DirectX::XMFLOAT3(0.f, 1.f, 0.f), },	// 5	22
-		{ DirectX::XMFLOAT3(-0.5f, 0.5f,-0.5f),	DirectX::XMFLOAT2(0.f, 1.f),	DirectX::XMFLOAT3(0.f, 1.f, 0.f), },	// 4	23
+		{ Vector3D(-0.5f, 0.5f, 0.5f),	Vector2D(0.f, 0.f),	Vector3D(0.f, 1.f, 0.f), },	// 7	20
+		{ Vector3D(0.5f, 0.5f, 0.5f),	Vector2D(1.f, 0.f),	Vector3D(0.f, 1.f, 0.f), },	// 6	21
+		{ Vector3D(0.5f, 0.5f,-0.5f),	Vector2D(1.f, 1.f),	Vector3D(0.f, 1.f, 0.f), },	// 5	22
+		{ Vector3D(-0.5f, 0.5f,-0.5f),	Vector2D(0.f, 1.f),	Vector3D(0.f, 1.f, 0.f), },	// 4	23
 	};
 
 	// 버퍼를 설정하는 구조체
@@ -1071,80 +859,13 @@ HRESULT DXGraphics::CreateCube()
 HRESULT DXGraphics::CreateAxis()
 {
 	HRESULT hr = S_OK;
-	
-	// 꼭짓점을 설명하는 정보
-	Vertex axis[] =
+
+	axis = new Axis(m_pd3dDevice, m_pd3dDeviceContext, m_wireRasterizerState);
+	if (axis == nullptr)
 	{
-		{DirectX::XMFLOAT3(0.f, 0.f, 0.f),	DirectX::XMFLOAT4(Color::Red),},
-		{DirectX::XMFLOAT3(15.f, 0.f, 0.f), DirectX::XMFLOAT4(Color::Red),},
-
-		{DirectX::XMFLOAT3(0.f, 0.f, 0.f),	DirectX::XMFLOAT4(Color::Green),},
-		{DirectX::XMFLOAT3(0.f ,15.f, 0.f), DirectX::XMFLOAT4(Color::Green),},
-
-		{DirectX::XMFLOAT3(0.f, 0.f, 0.f),	DirectX::XMFLOAT4(Color::Blue),},
-		{DirectX::XMFLOAT3(0.f ,0.f, 15.f), DirectX::XMFLOAT4(Color::Blue),},
-	};
-
-	// 버퍼를 설정하는 구조체
-	D3D11_BUFFER_DESC bufferDesc;
-	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	bufferDesc.ByteWidth = sizeof(axis);
-	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bufferDesc.CPUAccessFlags = 0;
-	bufferDesc.MiscFlags = 0;
-	bufferDesc.StructureByteStride = 0;
-
-	// 하위 리소스 설정. 텍스처 같은거 할때나 쓰임
-	D3D11_SUBRESOURCE_DATA InitData;
-	InitData.pSysMem = axis;
-	InitData.SysMemPitch = 0;
-	InitData.SysMemSlicePitch = 0;
-
-	// 위에 설정한 버퍼 설정을 바탕으로 버퍼를 초기화함.
-	hr = m_pd3dDevice->CreateBuffer(
-		&bufferDesc,
-		&InitData,
-		m_axisVertexBuffer.GetAddressOf()
-	);
-
-	if (FAILED(hr))
-	{
-		return hr;
+		return S_FALSE;
 	}
-
-	UINT indices[] = {
-		0, 1,			// x
-
-		2, 3,			// y
-
-		4, 5,			// z
-	};
-
-	axisIndexCount = ARRAYSIZE(indices);
-
-	D3D11_BUFFER_DESC indexBufferDesc;
-	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = sizeof(indices);
-	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	indexBufferDesc.CPUAccessFlags = 0;
-	indexBufferDesc.MiscFlags = 0;
-	indexBufferDesc.StructureByteStride = 0;
-
-	D3D11_SUBRESOURCE_DATA indexInit;
-	indexInit.pSysMem = indices;
-	indexInit.SysMemPitch = 0;
-	indexInit.SysMemSlicePitch = 0;
-
-	hr = m_pd3dDevice->CreateBuffer(
-		&indexBufferDesc,
-		&indexInit,
-		m_axisIndexBuffer.GetAddressOf()
-	);
-
-	if (FAILED(hr))
-	{
-		return hr;
-	}
+	axis->Initialize();
 
 	return hr;
 }
@@ -1152,80 +873,13 @@ HRESULT DXGraphics::CreateAxis()
 HRESULT DXGraphics::CreateGrid()
 {
 	HRESULT hr = S_OK;
-	
-	// 꼭짓점을 설명하는 정보
-	Vertex vertices[100];
-	for (int i = 0; i < 100; i++)
+
+	grid = new Grid(m_pd3dDevice, m_pd3dDeviceContext, m_wireRasterizerState);
+	if (grid == nullptr)
 	{
-		vertices[i].pos = DirectX::XMFLOAT3((float)(i % 10) - 5.0f, 0.0f, (float)(i / 10) - 5.0f);
-		vertices[i].color = DirectX::XMFLOAT4(Color::White);
+		return S_FALSE;
 	}
-
-	// 버퍼를 설정하는 구조체
-	D3D11_BUFFER_DESC bufferDesc;
-	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	bufferDesc.ByteWidth = sizeof(vertices);
-	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bufferDesc.CPUAccessFlags = 0;
-	bufferDesc.MiscFlags = 0;
-	bufferDesc.StructureByteStride = 0;
-
-	// 하위 리소스 설정. 텍스처 같은거 할때나 쓰임
-	D3D11_SUBRESOURCE_DATA InitData;
-	InitData.pSysMem = vertices;
-	InitData.SysMemPitch = 0;
-	InitData.SysMemSlicePitch = 0;
-
-	// 위에 설정한 버퍼 설정을 바탕으로 버퍼를 초기화함.
-	hr = m_pd3dDevice->CreateBuffer(
-		&bufferDesc,
-		&InitData,
-		m_gridVertexBuffer.GetAddressOf()
-	);
-
-	if (FAILED(hr))
-	{
-		return hr;
-	}
-
-	UINT indices[40];
-	for (int i = 0; i < 10; i++)
-	{
-		indices[i * 2] = i;
-		indices[i * 2 + 1] = i + 90;
-	}
-
-	for (int i = 0; i < 10; i++)
-	{
-		indices[20 + (i * 2)] = i * 10;
-		indices[20 + (i * 2) + 1] = i * 10 + 9;
-	}
-
-	gridIndexCount = ARRAYSIZE(indices);
-
-	D3D11_BUFFER_DESC indexBufferDesc;
-	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = sizeof(indices);
-	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	indexBufferDesc.CPUAccessFlags = 0;
-	indexBufferDesc.MiscFlags = 0;
-	indexBufferDesc.StructureByteStride = 0;
-
-	D3D11_SUBRESOURCE_DATA indexInit;
-	indexInit.pSysMem = indices;
-	indexInit.SysMemPitch = 0;
-	indexInit.SysMemSlicePitch = 0;
-
-	hr = m_pd3dDevice->CreateBuffer(
-		&indexBufferDesc,
-		&indexInit,
-		m_gridIndexBuffer.GetAddressOf()
-	);
-
-	if (FAILED(hr))
-	{
-		return hr;
-	}
+	grid->Initialize();
 
 	return hr;
 }
@@ -1254,89 +908,12 @@ void DXGraphics::BeginDraw()
 	);
 
 	Matrix4x4 wvp = camera.GetViewProjMatrix();
-
 	DirectX::XMMATRIX worldViewProj = ConvertToXMMATRIX(wvp);
 
 	/// 쉐이더 코드 자리?? 인듯??	
-	{
-		// 레스터라이즈 스테이트
-		m_pd3dDeviceContext->RSSetState(m_wireRasterizerState.Get());
 
-		m_pd3dDeviceContext->IASetInputLayout(m_axisInputLayout.Get());
-		m_pd3dDeviceContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
-
-		// IA에 버텍스 버퍼 설정
-		UINT stride = sizeof(Vertex);
-		UINT offset = 0;
-		m_pd3dDeviceContext->IASetVertexBuffers(
-			0,
-			1,
-			m_axisVertexBuffer.GetAddressOf(),
-			&stride,
-			&offset
-		);
-
-		// IA에 인덱스 버퍼 설정
-		m_pd3dDeviceContext->IASetIndexBuffer(
-			m_axisIndexBuffer.Get(),
-			DXGI_FORMAT_R32_UINT,					// 32비트 unsigned int 형으로 읽음
-			0
-		);
-
-		// 상수 버퍼 설정
-		m_axisMatrixVariable->SetMatrix(reinterpret_cast<float*>(&worldViewProj));
-
-		// 테크닉
-		D3DX11_TECHNIQUE_DESC techDesc;
-		m_axisTechnique->GetDesc(&techDesc);
-
-		for (UINT p = 0; p < techDesc.Passes; ++p)
-		{
-			m_axisTechnique->GetPassByIndex(p)->Apply(0, m_pd3dDeviceContext.Get());
-
-			m_pd3dDeviceContext->DrawIndexed(axisIndexCount, 0, 0);
-		}
-	}	
-
-	{
-		// 레스터라이즈 스테이트
-		m_pd3dDeviceContext->RSSetState(m_wireRasterizerState.Get());
-
-		m_pd3dDeviceContext->IASetInputLayout(m_gridInputLayout.Get());
-		m_pd3dDeviceContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
-
-		// IA에 버텍스 버퍼 설정
-		UINT stride = sizeof(Vertex);
-		UINT offset = 0;
-		m_pd3dDeviceContext->IASetVertexBuffers(
-			0,
-			1,
-			m_gridVertexBuffer.GetAddressOf(),
-			&stride,
-			&offset
-		);
-
-		// IA에 인덱스 버퍼 설정
-		m_pd3dDeviceContext->IASetIndexBuffer(
-			m_gridIndexBuffer.Get(),
-			DXGI_FORMAT_R32_UINT,					// 32비트 unsigned int 형으로 읽음
-			0
-		);
-
-		// 상수 버퍼 설정
-		m_gridMatrixVariable->SetMatrix(reinterpret_cast<float*>(&worldViewProj));
-
-		// 테크닉
-		D3DX11_TECHNIQUE_DESC techDesc;
-		m_gridTechnique->GetDesc(&techDesc);
-
-		for (UINT p = 0; p < techDesc.Passes; ++p)
-		{
-			m_gridTechnique->GetPassByIndex(p)->Apply(0, m_pd3dDeviceContext.Get());
-
-			m_pd3dDeviceContext->DrawIndexed(gridIndexCount, 0, 0);
-		}
-	}
+	grid->Render();
+	axis->Render();
 
 	{
 		// 레스터라이즈 스테이트
@@ -1346,7 +923,7 @@ void DXGraphics::BeginDraw()
 		m_pd3dDeviceContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		// IA에 버텍스 버퍼 설정
-		UINT stride = sizeof(TextureVertex);
+		UINT stride = sizeof(PTNVertex);
 		UINT offset = 0;
 		m_pd3dDeviceContext->IASetVertexBuffers(
 			0,
@@ -1365,7 +942,7 @@ void DXGraphics::BeginDraw()
 
 		// 상수 버퍼 설정
 		m_cubeMatrixVariable->SetMatrix(reinterpret_cast<float*>(&worldViewProj));
-		float light[4] = { directionalLight.x, directionalLight.y, directionalLight.z, directionalLight.w };
+		float light[3] = { directionalLight.x, directionalLight.y, directionalLight.z };
 		m_directionalLight->SetFloatVector(light);
 		m_cubeShaderResource->SetResource(m_cubeTextureView.Get());
 
@@ -1380,40 +957,6 @@ void DXGraphics::BeginDraw()
 			m_pd3dDeviceContext->DrawIndexed(cubeIndexCount, 0, 0);
 		}
 	}
-
-	/*
-	m_pd3dDeviceContext->VSSetShader(
-		m_vertexShader.Get(), 
-		nullptr, 
-		0
-	);
-
-	m_pd3dDeviceContext->VSSetConstantBuffers(
-		0, 
-		1, 
-		m_constantBuffer.GetAddressOf()
-	);
-
-	m_pd3dDeviceContext->PSSetShader(
-		m_pixelShader.Get(), 
-		nullptr,
-		0
-	);
-
-	m_pd3dDeviceContext->DrawIndexed(
-		count, 
-		0, 
-		0
-	);
-	*/
-	
-	/// 스왑체인1의 프리센트1을 사용하기 위해서는 이것도 필요함.
-	// DXGI_PRESENT_PARAMETERS present;
-	// present.DirtyRectsCount = 0;
-	// present.pDirtyRects = nullptr;
-	// present.pScrollRect = nullptr;
-	// present.pScrollOffset = nullptr;
-	// m_pDXGISwapChain1->Present1(1, 0, &present);
 }
 
 void DXGraphics::EndDraw()

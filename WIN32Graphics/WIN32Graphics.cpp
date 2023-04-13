@@ -27,6 +27,11 @@ void WIN32Graphics::Finalize()
 }
 
 
+HRESULT WIN32Graphics::OnResize()
+{
+	return 0;
+}
+
 void WIN32Graphics::Update()
 {
 

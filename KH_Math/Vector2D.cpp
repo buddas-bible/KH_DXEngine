@@ -12,7 +12,7 @@ Vector2D::Vector2D() noexcept :
 
 }
 
-Vector2D::Vector2D(float _x, float _y) noexcept :
+constexpr Vector2D::Vector2D(float _x, float _y) noexcept :
 	x(_x), y(_y)
 {
 
@@ -38,6 +38,12 @@ Vector2D::Vector2D(const Vector3D& other) noexcept :
 
 Vector2D::Vector2D(const Vector3D&& other) noexcept :
 	x(other.x), y(other.y)
+{
+
+}
+
+Vector2D::Vector2D(_In_reads_(2) const float* pArr) noexcept :
+	x(pArr[0]), y(pArr[1])
 {
 
 }

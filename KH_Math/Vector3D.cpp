@@ -12,7 +12,7 @@ Vector3D::Vector3D() :
 
 }
 
-Vector3D::Vector3D(float _x, float _y, float _z) :
+constexpr Vector3D::Vector3D(float _x, float _y, float _z) noexcept :
 	x(_x), y(_y), z(_z)
 {
 
@@ -50,6 +50,12 @@ Vector3D::Vector3D(const Vector4D& other) :
 
 Vector3D::Vector3D(const Vector4D&& other) noexcept :
 	x(other.x), y(other.y), z(other.z)
+{
+
+}
+
+Vector3D::Vector3D(_In_reads_(3) const float* pArr) noexcept :
+	x(pArr[0]), y(pArr[1]), z(pArr[2])
 {
 
 }

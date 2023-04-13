@@ -15,6 +15,7 @@ private:
 public:
 	HRESULT Initialize(HWND hWnd);
 	void Finalize();
+	HRESULT OnResize();
 	void Render();
 	void Update();
 };

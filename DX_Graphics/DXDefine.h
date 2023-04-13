@@ -40,6 +40,7 @@
 #include "../KH_Math/Vector3D.h"
 #include "../KH_Math/Vector4D.h"
 #include "../KH_Math/Matrix4x4.h"
+#include "Vertex.h"
 
 /// FX를 사용하기 위한 헤더
 #include "../DXTK/Inc/d3dx11effect.h"
@@ -55,6 +56,8 @@
 #pragma comment(lib, "d3dcompiler.lib")
 
 #include "../DXTK/Inc/DDSTextureLoader.h"
+
+#define HR(x) 	if (FAILED(x)) { return hr; }
 
 constexpr float PI = 3.14159265f;
 constexpr int VK_A = 0x41;

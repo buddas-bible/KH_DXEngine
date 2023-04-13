@@ -7,7 +7,7 @@ class Matrix4x4
 {
 public:
 	Matrix4x4();
-	Matrix4x4(
+	constexpr Matrix4x4(
 		float e00, float e01, float e02, float e03,
 		float e10, float e11, float e12, float e13,
 		float e20, float e21, float e22, float e23,
@@ -19,7 +19,7 @@ public:
 
 	float e[4][4];
 
-	static Matrix4x4 IdentityMatrix();
+	static Matrix4x4&& IdentityMatrix();
 
 	static Matrix4x4 TransformMatrix(											// 변환행렬
 		float moveX, float moveY, float moveZ,

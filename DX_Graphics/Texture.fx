@@ -13,7 +13,7 @@ cbuffer cbPerObject
 Texture2D g_Texture;
 SamplerState g_Sampler;
 
-float4 fLight;
+float3 fLight;
 
 struct VertexIn
 {

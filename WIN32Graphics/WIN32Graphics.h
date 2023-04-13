@@ -21,6 +21,7 @@ private:
 public:
 	virtual HRESULT Initialize(HWND hWnd) override;
 	virtual void Finalize() override;
+	virtual HRESULT OnResize() override;
 	virtual void Update() override;
 	virtual void BeginDraw() override;
 	virtual void EndDraw() override;

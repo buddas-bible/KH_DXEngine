@@ -1,5 +1,7 @@
 #pragma once
 
+#include <sal.h>
+
 class Matrix3x3;
 class Matrix4x4;
 class Vector2D;
@@ -9,7 +11,8 @@ class Vector3D
 {
 public:
 	Vector3D();
-	Vector3D(float, float, float);
+	constexpr Vector3D(float, float, float) noexcept;
+	Vector3D(_In_reads_(3) const float* pArr) noexcept;
 	Vector3D(const Vector3D& other);			// 복사 생성자
 	Vector3D(const Vector3D&& other) noexcept;		// 이동 생성자
 	Vector3D(const Vector2D& other);					// 복사 생성자

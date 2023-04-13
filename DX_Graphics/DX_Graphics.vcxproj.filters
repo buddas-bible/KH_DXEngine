@@ -7,14 +7,23 @@
     <Filter Include="Color">
       <UniqueIdentifier>{534da521-284b-4028-aac6-cdd41f9ab46e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Camera">
-      <UniqueIdentifier>{3644887e-4b67-4f20-b601-304c24241ef7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="etc">
       <UniqueIdentifier>{d9397347-f2d7-4ff6-b663-4c68c5ee2976}</UniqueIdentifier>
     </Filter>
     <Filter Include="etc\Struct">
       <UniqueIdentifier>{07f02d51-b009-4ad4-8fb2-e0ecebb422e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object">
+      <UniqueIdentifier>{5efa9b4a-cf89-45cd-a053-7f2669995929}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Camera">
+      <UniqueIdentifier>{3644887e-4b67-4f20-b601-304c24241ef7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Axis">
+      <UniqueIdentifier>{bc2fc9f7-585b-497b-828b-5e8829a8f323}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Grid">
+      <UniqueIdentifier>{43a31292-2e54-40a6-a398-542dacfca471}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -25,15 +34,9 @@
       <Filter>Color</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
-      <Filter>Camera</Filter>
+      <Filter>Object\Camera</Filter>
     </ClInclude>
     <ClInclude Include="DXDefine.h">
-      <Filter>etc</Filter>
-    </ClInclude>
-    <ClInclude Include="TimeManager.h">
-      <Filter>etc</Filter>
-    </ClInclude>
-    <ClInclude Include="InputManager.h">
       <Filter>etc</Filter>
     </ClInclude>
     <ClInclude Include="Struct.h">
@@ -42,22 +45,40 @@
     <ClInclude Include="Vertex.h">
       <Filter>etc\Struct</Filter>
     </ClInclude>
+    <ClInclude Include="Axis.h">
+      <Filter>Object\Axis</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid.h">
+      <Filter>Object\Grid</Filter>
+    </ClInclude>
+    <ClInclude Include="InputManager.h">
+      <Filter>etc</Filter>
+    </ClInclude>
+    <ClInclude Include="TimeManager.h">
+      <Filter>etc</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>Object</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DXGraphics.cpp">
       <Filter>DXGraphics</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
-      <Filter>Camera</Filter>
+      <Filter>Object\Camera</Filter>
     </ClCompile>
-    <ClCompile Include="TimeManager.cpp">
-      <Filter>etc</Filter>
+    <ClCompile Include="Axis.cpp">
+      <Filter>Object\Axis</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid.cpp">
+      <Filter>Object\Grid</Filter>
     </ClCompile>
     <ClCompile Include="InputManager.cpp">
       <Filter>etc</Filter>
     </ClCompile>
-    <ClCompile Include="Vertex.cpp">
-      <Filter>etc\Struct</Filter>
+    <ClCompile Include="TimeManager.cpp">
+      <Filter>etc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -33,6 +33,11 @@ void CoreEngine::Finalize()
 	}
 }
 
+HRESULT CoreEngine::OnResize()
+{
+	return m_pGraphics->OnResize();
+}
+
 void CoreEngine::Render()
 {
 	m_pGraphics->BeginDraw();

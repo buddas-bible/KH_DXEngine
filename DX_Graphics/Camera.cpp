@@ -16,6 +16,15 @@ void Camera::Update()
 	// 월드 up을 look을 외적 = right
 	// look에 right를 외적 = up
 	m_View = UpdateViewMatrix();
+
+	if (isPerspective)
+	{
+		m_Proj = m_persProj;
+	}
+	else
+	{
+		m_Proj = m_orthProj;
+	}
 }
 
 Matrix4x4 Camera::UpdateViewMatrix()
@@ -35,17 +44,17 @@ Matrix4x4 Camera::UpdateViewMatrix()
 	return view;
 }
 
-Matrix4x4 Camera::GetViewMatrix()
+Matrix4x4 Camera::GetViewMatrix() const
 {
 	return m_View;
 }
 
-Matrix4x4 Camera::GetProjMatrix()
+Matrix4x4 Camera::GetProjMatrix() const
 {
 	return m_Proj;
 }
 
-Matrix4x4 Camera::GetViewProjMatrix()
+Matrix4x4 Camera::GetViewProjMatrix() const
 {
 	return m_View * m_Proj;
 }
@@ -111,7 +120,7 @@ void Camera::CameraPerspectiveFovLH(float angleY, float ratio, float near, float
 	m_near = near;
 	m_far = far;
 
-	m_Proj = Matrix4x4
+	m_persProj = Matrix4x4
 	(
 		scaleX, 0.f, 0.f, 0.f,
 		0.f, scaleY, 0.f, 0.f,
@@ -130,8 +139,8 @@ void Camera::XMPerspectiveFovLH(float angleY, float ratio, float near, float far
 /// </summary>
 void Camera::CameraOrthographicLH(float width, float height, float near, float far)
 {
-	float scaleY = 2.f / height;
 	float scaleX = 2.f / width;
+	float scaleY = 2.f / height;
 	float scaleZ = 1.f / (far - near);
 	float translate = -near * scaleZ;
 
@@ -140,12 +149,12 @@ void Camera::CameraOrthographicLH(float width, float height, float near, float f
 	m_near = near;
 	m_far = far;
 
-	m_Proj = Matrix4x4
+	m_orthProj = Matrix4x4
 	(
 		scaleX, 0.f, 0.f, 0.f,
 		0.f, scaleY, 0.f, 0.f,
-		0.f, 0.f, scaleZ, 1.f,
-		0.f, 0.f, translate, 0.f
+		0.f, 0.f, scaleZ, 0.f,
+		0.f, 0.f, translate, 1.f
 	);
 }
 
@@ -205,14 +214,10 @@ void Camera::Yaw(const float& a)
 	m_look = m_look.Normalize() * rotate;
 }
 
-void Camera::SetViewportHW(float height, float width)
-{
-	m_height = height;
-	m_width = width;
-}
-
 void Camera::SetPerspectiveView()
 {
+	isPerspective = true;
+	/*
 	float nearH = 2.f * m_near * tanf(m_angle * 0.5f);		// 니어까지의 거리 * 탄젠트 반시야각 (-1 1로 바꿔주기 위해 2곱함)
 	float nearW = nearH * m_ratio;							// 화면비에 높이를 곱하니까 너비가 나옴
 	float scaleX = 2.f * m_near / nearW;					// 2 * n / w
@@ -229,10 +234,13 @@ void Camera::SetPerspectiveView()
 		0.f, 0.f, scaleZ, 1.f,
 		0.f, 0.f, translate, 0.f
 	);
+	*/
 }
 
 void Camera::SetOrthographicView()
 {
+	isPerspective = false;
+	/*
 	float scaleX = 2.f / m_width;
 	float scaleY = 2.f / m_height;
 	float scaleZ = 1.f / (m_far - m_near);
@@ -245,4 +253,5 @@ void Camera::SetOrthographicView()
 		0.f, 0.f, scaleZ, 0.f,
 		0.f, 0.f, translate, 1.f
 	);
+	*/
 }

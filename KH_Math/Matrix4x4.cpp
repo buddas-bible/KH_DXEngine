@@ -11,7 +11,7 @@ Matrix4x4::Matrix4x4() :
 
 }
 
-Matrix4x4::Matrix4x4(
+constexpr Matrix4x4::Matrix4x4(
 	float e00, float e01, float e02, float e03, 
 	float e10, float e11, float e12, float e13, 
 	float e20, float e21, float e22, float e23, 
@@ -45,17 +45,17 @@ Matrix4x4::Matrix4x4(const Matrix4x4&& mat) noexcept :
 
 }
 
-DirectX::XMMATRIX ConvertToXMMATRIX(const Matrix4x4& matrix)
-{
-	return DirectX::XMLoadFloat4x4((DirectX::XMFLOAT4X4*) matrix.e);
-}
-
 Matrix4x4::~Matrix4x4()
 {
 
 }
 
-Matrix4x4 Matrix4x4::IdentityMatrix()
+DirectX::XMMATRIX ConvertToXMMATRIX(const Matrix4x4& matrix)
+{
+	return DirectX::XMLoadFloat4x4((DirectX::XMFLOAT4X4*) matrix.e);
+}
+ 
+Matrix4x4&& Matrix4x4::IdentityMatrix()
 {
 	return Matrix4x4();
 }

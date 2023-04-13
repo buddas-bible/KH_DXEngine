@@ -5,6 +5,9 @@
 
 #include "TimeManager.h"
 
+class Axis;
+class Grid;
+
 class DXGraphics : public IGraphics
 {
 public:
@@ -35,6 +38,7 @@ private:
 public:
 	virtual HRESULT Initialize(HWND hWnd) override;
 	virtual void Finalize() override;
+	virtual HRESULT OnResize() override;
 	virtual void Update() override;
 	virtual void BeginDraw() override;
 	virtual void EndDraw() override;
@@ -44,14 +48,16 @@ private:
 	HRESULT CreateSwapChain();			// 스왑체인 설정
 	HRESULT CreateRenderTargetView();	// 렌더타겟 설정
 	HRESULT CreateDepthStencilView();	// 뎁스스탠실뷰 설정
+	void SetCamera();
+	
 	HRESULT CreateRasterState();		// 레스터 상태 설정
 
 	HRESULT CreateObject();
 
 	HRESULT CreateInputLayout();
-	// void Test();
 
 	HRESULT CreateCubeShaders();
+	// void Test();
 
 #pragma region 오브젝트
 	/// <summary>
@@ -67,7 +73,6 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer>			m_cubeVertexBuffer;		// 정점 버퍼		(정점들의 버퍼?)
 	Microsoft::WRL::ComPtr<ID3D11Buffer>			m_cubeIndexBuffer;		// 인덱스 버퍼	(정점들의 인덱스?)
-	Microsoft::WRL::ComPtr<ID3D11Buffer>			m_constantBuffer;	// 상수 버퍼		(아마 행렬)
 
 	Microsoft::WRL::ComPtr<ID3D11InputLayout>		m_cubeInputLayout;
 
@@ -86,70 +91,24 @@ private:
 	Microsoft::WRL::ComPtr<ID3DX11EffectVectorVariable> m_directionalLight;
 
 private:
+	Axis* axis;
 	HRESULT CreateAxis();
-	UINT axisIndexCount;					// 축 인덱스 개수
-
-	Microsoft::WRL::ComPtr<ID3D11Buffer>			m_axisVertexBuffer;		// 정점 버퍼		(정점들의 버퍼?)
-	Microsoft::WRL::ComPtr<ID3D11Buffer>			m_axisIndexBuffer;		// 인덱스 버퍼	(정점들의 인덱스?)
-
-	Microsoft::WRL::ComPtr<ID3D11InputLayout>		m_axisInputLayout;
-
-	Microsoft::WRL::ComPtr<ID3DX11Effect>				m_axisEffect;			// 버텍스 셰이더 픽셀 셰이더를 대체할 무언가
-	Microsoft::WRL::ComPtr<ID3DX11EffectTechnique>		m_axisTechnique;		// 테크
-	Microsoft::WRL::ComPtr<ID3DX11EffectMatrixVariable> m_axisMatrixVariable;	// 상수버퍼를 대신할 무언가?
 
 private:
+	Grid* grid;
 	HRESULT CreateGrid();
-	UINT gridIndexCount;					// 그리드 인덱스 개수
-
-	Microsoft::WRL::ComPtr<ID3D11Buffer>			m_gridVertexBuffer;		// 정점 버퍼		(정점들의 버퍼?)
-	Microsoft::WRL::ComPtr<ID3D11Buffer>			m_gridIndexBuffer;		// 인덱스 버퍼	(정점들의 인덱스?)
-
-	Microsoft::WRL::ComPtr<ID3D11InputLayout>		m_gridInputLayout;
-
-	Microsoft::WRL::ComPtr<ID3DX11Effect>				m_gridEffect;			// 버텍스 셰이더 픽셀 셰이더를 대체할 무언가
-	Microsoft::WRL::ComPtr<ID3DX11EffectTechnique>		m_gridTechnique;		// 테크
-	Microsoft::WRL::ComPtr<ID3DX11EffectMatrixVariable> m_gridMatrixVariable;	// 상수버퍼를 대신할 무언가?
-
+	
 #pragma endregion 오브젝트
 
 private:
-	// Microsoft::WRL::ComPtr<ID3D11VertexShader>		m_vertexShader;		// 버텍스 셰이더
-	// Microsoft::WRL::ComPtr<ID3D11PixelShader>		m_pixelShader;		// 픽셀 셰이더
-
-
-private:
-	struct Vertex
-	{
-		DirectX::XMFLOAT3 pos;				// 버텍스 위치 정보
-		DirectX::XMFLOAT4 color;			// 버텍스 컬러 정보
-	};
-
-	struct TextureVertex
-	{
-		DirectX::XMFLOAT3 pos;				// 버텍스 위치 정보
-		DirectX::XMFLOAT2 uv;				// 버텍스 텍스쳐 UV 좌표
-		DirectX::XMFLOAT3 normal;			// 버텍스 노말 정보
-		// DirectX::XMFLOAT4 color;			// 버텍스 컬러 정보
-	};
-
-	struct ConstantBuffer
-	{
-		DirectX::XMMATRIX world;			// 월드 매트릭스
-		DirectX::XMMATRIX view;			// 뷰 매트릭스
-		DirectX::XMMATRIX projection;		// 투영 매트릭스
-	};
-
-	DirectX::XMFLOAT4 m_x;
-	DirectX::XMFLOAT4 m_z;
-	DirectX::XMFLOAT4 m_y;
+	Matrix4x4 m_world;			// 월드 매트릭스
+	Matrix4x4 m_view;			// 뷰 매트릭스
+	Matrix4x4 m_projection;		// 투영 매트릭스
 
 	DirectX::XMFLOAT4 m_pos;
 
 	Camera camera;
-	Vector4D directionalLight = Vector4D{ 1.f, 1.f, 0.f, 1.f }.Normalize();
+	Vector3D directionalLight;
 	Vector3D pointLight;
-
-	ConstantBuffer m_constantBufferData;	// 상수 버퍼 데이터 (월드 뷰 투영 매트릭스 정보)
 };
 

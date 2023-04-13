@@ -12,7 +12,7 @@ Matrix3x3::Matrix3x3() :
 
 }
 
-Matrix3x3::Matrix3x3(
+constexpr Matrix3x3::Matrix3x3(
 	float e00, float e01, float e02,
 	float e10, float e11, float e12,
 	float e20, float e21, float e22) :
