@@ -6,9 +6,9 @@ class Grid : public Object
 {
 public:
 	Grid(
-		const Microsoft::WRL::ComPtr<ID3D11Device>& device,
-		const Microsoft::WRL::ComPtr<ID3D11DeviceContext>& context,
-		const Microsoft::WRL::ComPtr<ID3D11RasterizerState> randerState
+		Microsoft::WRL::ComPtr<ID3D11Device>& device,
+		Microsoft::WRL::ComPtr<ID3D11DeviceContext>& context,
+		Microsoft::WRL::ComPtr<ID3D11RasterizerState>& randerState
 	) : Object(device, context, randerState)
 	{}
 	virtual ~Grid();

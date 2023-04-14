@@ -3,6 +3,7 @@
 #include <fstream>
 #include <vector>
 
+#include "Box.h"
 #include "Axis.h"
 #include "Grid.h"
 
@@ -134,6 +135,7 @@ void DXGraphics::Update()
 	m_projection = camera.GetProjMatrix();
 	grid->Update(m_view, m_projection);
 	axis->Update(m_view, m_projection);
+	box->Update(m_view, m_projection);
 
 	float dt = time.GetfDeltaTime();
 	if (GetAsyncKeyState(VK_Q))
@@ -539,6 +541,8 @@ HRESULT DXGraphics::CreateRasterState()
 		return hr;
 	}
 
+	m_solidRasterizerState.As(&m_currRasterizerState);
+
 	return hr;
 }
 
@@ -581,34 +585,6 @@ HRESULT DXGraphics::CreateInputLayout()
 {
 	HRESULT hr = S_OK;
 
-	D3D11_INPUT_ELEMENT_DESC textureDesc[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,
-		0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,
-		0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,
-		0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-
-	// 인풋 레이아웃 만듬
-	D3DX11_PASS_DESC cubePassDesc;
-	m_cubeTechnique->GetPassByIndex(0)->GetDesc(&cubePassDesc);
-	hr = m_pd3dDevice->CreateInputLayout(
-		textureDesc,
-		ARRAYSIZE(textureDesc),						// 버텍스에 들어간 데이터 갯수
-		cubePassDesc.pIAInputSignature,				// 셰이더 코드 포인터
-		cubePassDesc.IAInputSignatureSize,			// 셰이더 크기
-		m_cubeInputLayout.GetAddressOf()
-	);
-
-	if (FAILED(hr))
-	{
-		return hr;
-	}	
-
 	return hr;
 }
 
@@ -650,58 +626,6 @@ HRESULT DXGraphics::CreateCubeShaders()
 {
 	HRESULT hr = S_OK;
 
-#if _WIN64
-
-#if _DEBUG
-	std::ifstream cfin("../x64/debug/Texture.cso", std::ios::binary);
-#else
-	std::ifstream cfin("../x64/release/Texture.cso", std::ios::binary);		// 이부분 경로 다시 생각해보자...
-#endif
-
-#else
-
-#if _DEBUG
-	std::ifstream cfin("../WIN32/debug/Texture.cso", std::ios::binary);
-#else
-	std::ifstream cfin("../WIN32/release/Texture.cso", std::ios::binary);
-#endif
-
-#endif
-
-	cfin.seekg(0, std::ios_base::end);
-	int size = (int)cfin.tellg();
-	cfin.seekg(0, std::ios_base::beg);
-	std::vector<char> cCompiledShader(size);
-
-	cfin.read(&cCompiledShader[0], size);
-	cfin.close();
-
-	/// 파일로부터 이펙트 정보를 읽어옴
-	// 큐브 이펙트
-	{
-		hr = D3DX11CreateEffectFromMemory(
-			&cCompiledShader[0],
-			size,
-			0,
-			m_pd3dDevice.Get(),
-			m_cubeEffect.GetAddressOf()
-		);
-
-		m_cubeTechnique = m_cubeEffect->GetTechniqueByName("Tech");								// 파일에 Tech 이름의 데이터를 읽어옴
-		m_cubeMatrixVariable = m_cubeEffect->GetVariableByName("worldViewProj")->AsMatrix();	// 파일에 worldViewProj 이름의 데이터를 읽어옴
-		
-		// 이펙트로 셰이더 리소스랑 샘플러가 필요하지 않을까?
-		m_cubeShaderResource = m_cubeEffect->GetVariableByName("g_Texture")->AsShaderResource();	// 
-		m_cubeSampler = m_cubeEffect->GetVariableByName("g_Sampler")->AsSampler();
-
-		m_directionalLight = m_cubeEffect->GetVariableByName("fLight")->AsVector();
-	}
-
-	if (FAILED(hr))
-	{
-		return hr;
-	}
-
 	return hr;
 }
 
@@ -709,149 +633,12 @@ HRESULT DXGraphics::CreateCube()
 {
 	HRESULT hr = S_OK;
 
-	// 꼭짓점을 설명하는 정보
-	PTNVertex cube[] =
+	box = new Box(m_pd3dDevice, m_pd3dDeviceContext, m_currRasterizerState);
+	if (box == nullptr)
 	{
-		// POSITION								UV								NORMAL
-		{ Vector3D(-0.5f,-0.5f,-0.5f),	Vector2D(0.f, 0.f),	Vector3D(0.f, -1.f, 0.f), },	// 0	0
-		{ Vector3D(0.5f,-0.5f,-0.5f),	Vector2D(1.f, 0.f),	Vector3D(0.f, -1.f, 0.f), },	// 1	1
-		{ Vector3D(0.5f,-0.5f, 0.5f),	Vector2D(1.f, 1.f),	Vector3D(0.f, -1.f, 0.f), },	// 2	2
-		{ Vector3D(-0.5f,-0.5f, 0.5f),	Vector2D(0.f, 1.f),	Vector3D(0.f, -1.f, 0.f), },	// 3	3
-		  
-		{ Vector3D(-0.5f, 0.5f,-0.5f),	Vector2D(0.f, 0.f),	Vector3D(0.f, 0.f, -1.f), },	// 4	4
-		{ Vector3D(0.5f, 0.5f,-0.5f),	Vector2D(1.f, 0.f),	Vector3D(0.f, 0.f, -1.f), },	// 5	5
-		{ Vector3D(0.5f,-0.5f,-0.5f),	Vector2D(1.f, 1.f),	Vector3D(0.f, 0.f, -1.f), },	// 1	6
-		{ Vector3D(-0.5f,-0.5f,-0.5f),	Vector2D(0.f, 1.f),	Vector3D(0.f, 0.f, -1.f), },	// 0	7
-
-		{ Vector3D(0.5f, 0.5f,-0.5f),	Vector2D(0.f, 0.f),	Vector3D(1.f, 0.f, 0.f), },	// 5	8
-		{ Vector3D(0.5f, 0.5f, 0.5f),	Vector2D(1.f, 0.f),	Vector3D(1.f, 0.f, 0.f), },	// 6	9
-		{ Vector3D(0.5f,-0.5f, 0.5f),	Vector2D(1.f, 1.f),	Vector3D(1.f, 0.f, 0.f), },	// 2	10
-		{ Vector3D(0.5f,-0.5f,-0.5f),	Vector2D(0.f, 1.f),	Vector3D(1.f, 0.f, 0.f), },	// 1	11
-
-		{ Vector3D(0.5f, 0.5f, 0.5f),	Vector2D(0.f, 0.f),	Vector3D(0.f, 0.f, 1.f), },	// 6	12
-		{ Vector3D(-0.5f, 0.5f, 0.5f),	Vector2D(0.f, 1.f),	Vector3D(0.f, 0.f, 1.f), },	// 7	13
-		{ Vector3D(-0.5f,-0.5f, 0.5f),	Vector2D(1.f, 1.f),	Vector3D(0.f, 0.f, 1.f), },	// 3	14
-		{ Vector3D(0.5f,-0.5f, 0.5f),	Vector2D(0.f, 1.f),	Vector3D(0.f, 0.f, 1.f), },	// 2	15
-		
-		{ Vector3D(-0.5f, 0.5f, 0.5f),	Vector2D(0.f, 0.f),	Vector3D(-1.f, 0.f, 0.f), },	// 7	16
-		{ Vector3D(-0.5f, 0.5f,-0.5f),	Vector2D(1.f, 0.f),	Vector3D(-1.f, 0.f, 0.f), },	// 4	17
-		{ Vector3D(-0.5f,-0.5f,-0.5f),	Vector2D(1.f, 1.f),	Vector3D(-1.f, 0.f, 0.f), },	// 0	18
-		{ Vector3D(-0.5f,-0.5f, 0.5f),	Vector2D(0.f, 1.f),	Vector3D(-1.f, 0.f, 0.f), },	// 3	19
-
-		{ Vector3D(-0.5f, 0.5f, 0.5f),	Vector2D(0.f, 0.f),	Vector3D(0.f, 1.f, 0.f), },	// 7	20
-		{ Vector3D(0.5f, 0.5f, 0.5f),	Vector2D(1.f, 0.f),	Vector3D(0.f, 1.f, 0.f), },	// 6	21
-		{ Vector3D(0.5f, 0.5f,-0.5f),	Vector2D(1.f, 1.f),	Vector3D(0.f, 1.f, 0.f), },	// 5	22
-		{ Vector3D(-0.5f, 0.5f,-0.5f),	Vector2D(0.f, 1.f),	Vector3D(0.f, 1.f, 0.f), },	// 4	23
-	};
-
-	// 버퍼를 설정하는 구조체
-	D3D11_BUFFER_DESC bufferDesc;
-	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	bufferDesc.ByteWidth = sizeof(cube);
-	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bufferDesc.CPUAccessFlags = 0;
-	bufferDesc.MiscFlags = 0;
-	bufferDesc.StructureByteStride = 0;
-
-	// 하위 리소스 설정. 텍스처 같은거 할때나 쓰임
-	D3D11_SUBRESOURCE_DATA InitData;
-	InitData.pSysMem = cube;
-	InitData.SysMemPitch = 0;
-	InitData.SysMemSlicePitch = 0;
-
-	// 위에 설정한 버퍼 설정을 바탕으로 버퍼를 초기화함.
-	hr = m_pd3dDevice->CreateBuffer(
-		&bufferDesc, 
-		&InitData, 
-		m_cubeVertexBuffer.GetAddressOf()
-	);
-
-	if (FAILED(hr))
-	{
-		return hr;
+		return S_FALSE;
 	}
-
-	UINT indices[] =
-	{
-		0, 1, 2,		// 하
-		0, 2, 3,
-
-		4, 5, 6,
-		4, 6, 7,
-
-		8, 9, 10,
-		8, 10, 11,
-
-		12, 13, 14,
-		12, 14, 15,
-
-		16, 17, 18,
-		16, 18, 19,
-
-		20, 21, 22,
-		20, 22, 23,
-	};
-
-	cubeIndexCount = ARRAYSIZE(indices);
-
-	D3D11_BUFFER_DESC indexBufferDesc;
-	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = sizeof(indices);
-	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	indexBufferDesc.CPUAccessFlags = 0;
-	indexBufferDesc.MiscFlags = 0;
-	indexBufferDesc.StructureByteStride = 0;
-
-	D3D11_SUBRESOURCE_DATA indexInit;
-	indexInit.pSysMem = indices;
-	indexInit.SysMemPitch = 0;
-	indexInit.SysMemSlicePitch = 0;
-
-	hr = m_pd3dDevice->CreateBuffer(
-		&indexBufferDesc, 
-		&indexInit, 
-		m_cubeIndexBuffer.GetAddressOf()
-	);
-
-	if (FAILED(hr))
-	{
-		return hr;
-	}
-
-	ComPtr<ID3D11Resource> texture;
-	ComPtr<ID3D11ShaderResourceView> textureView;				// ../ 같은 경로는 다시 생각해보자.. 실행파일 뽑을 때 많이 귀찮아 진다...
-	hr = DirectX::CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"../Texture/WoodCrate01.dds", texture.GetAddressOf(), textureView.GetAddressOf());
-	// hr = DirectX::CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"WoodCrate01.dds", texture.GetAddressOf(), textureView.GetAddressOf());
-	if (FAILED(hr))
-	{
-		return hr;
-	}
-	texture.As(&m_cubeTexture);
-	textureView.As(&m_cubeTextureView);
-
-	D3D11_SAMPLER_DESC samplerDesc;
-	ZeroMemory(&samplerDesc, sizeof(D3D11_SAMPLER_DESC));
-	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.MinLOD = -FLT_MAX;
-	samplerDesc.MaxLOD = FLT_MAX;
-	samplerDesc.MipLODBias = 0.f;
-	samplerDesc.MaxAnisotropy = 1;
-	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	samplerDesc.BorderColor[0] = 1.f;
-	samplerDesc.BorderColor[1] = 1.f;
-	samplerDesc.BorderColor[2] = 1.f;
-	samplerDesc.BorderColor[3] = 1.f;
-
-	ComPtr<ID3D11SamplerState> samplerstate;
-	hr = m_pd3dDevice->CreateSamplerState(&samplerDesc, samplerstate.GetAddressOf());
-	if (FAILED(hr))
-	{
-		return hr;
-	}
-	samplerstate.As(&m_cubeSamplerState);
+	box->Initialize();
 
 	return hr;
 }
@@ -907,56 +694,11 @@ void DXGraphics::BeginDraw()
 		0
 	);
 
-	Matrix4x4 wvp = camera.GetViewProjMatrix();
-	DirectX::XMMATRIX worldViewProj = ConvertToXMMATRIX(wvp);
-
 	/// 쉐이더 코드 자리?? 인듯??	
 
 	grid->Render();
 	axis->Render();
-
-	{
-		// 레스터라이즈 스테이트
-		m_pd3dDeviceContext->RSSetState(m_currRasterizerState.Get());
-
-		m_pd3dDeviceContext->IASetInputLayout(m_cubeInputLayout.Get());
-		m_pd3dDeviceContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-		// IA에 버텍스 버퍼 설정
-		UINT stride = sizeof(PTNVertex);
-		UINT offset = 0;
-		m_pd3dDeviceContext->IASetVertexBuffers(
-			0,
-			1,
-			m_cubeVertexBuffer.GetAddressOf(),
-			&stride,
-			&offset
-		);
-
-		// IA에 인덱스 버퍼 설정
-		m_pd3dDeviceContext->IASetIndexBuffer(
-			m_cubeIndexBuffer.Get(),
-			DXGI_FORMAT_R32_UINT,					// 32비트 unsigned int 형으로 읽음
-			0
-		);
-
-		// 상수 버퍼 설정
-		m_cubeMatrixVariable->SetMatrix(reinterpret_cast<float*>(&worldViewProj));
-		float light[3] = { directionalLight.x, directionalLight.y, directionalLight.z };
-		m_directionalLight->SetFloatVector(light);
-		m_cubeShaderResource->SetResource(m_cubeTextureView.Get());
-
-		// 테크닉
-		D3DX11_TECHNIQUE_DESC techDesc;
-		m_cubeTechnique->GetDesc(&techDesc);
-
-		for (UINT p = 0; p < techDesc.Passes; ++p)
-		{
-			m_cubeTechnique->GetPassByIndex(p)->Apply(0, m_pd3dDeviceContext.Get());
-			
-			m_pd3dDeviceContext->DrawIndexed(cubeIndexCount, 0, 0);
-		}
-	}
+	box->Render();
 }
 
 void DXGraphics::EndDraw()

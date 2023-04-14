@@ -10,16 +10,16 @@ class Vector4D;
 class Vector3D
 {
 public:
-	Vector3D();
+	Vector3D() noexcept;
 	constexpr Vector3D(float, float, float) noexcept;
 	Vector3D(_In_reads_(3) const float* pArr) noexcept;
-	Vector3D(const Vector3D& other);			// 복사 생성자
+	Vector3D(const Vector3D& other) noexcept;			// 복사 생성자
 	Vector3D(const Vector3D&& other) noexcept;		// 이동 생성자
-	Vector3D(const Vector2D& other);					// 복사 생성자
+	Vector3D(const Vector2D& other) noexcept;					// 복사 생성자
 	Vector3D(const Vector2D&& other) noexcept;		// 이동 생성자
-	Vector3D(const Vector4D& other);			// 복사 생성자
+	Vector3D(const Vector4D& other) noexcept;			// 복사 생성자
 	Vector3D(const Vector4D&& other) noexcept;		// 이동 생성자
-	~Vector3D();
+	~Vector3D() noexcept;
 
 public:
 	float x, y, z;
@@ -39,13 +39,13 @@ public:
 	Vector3D Normalize() &&;							// 정규화된 벡터를 반환
 
 public:
-	Vector3D& operator = (const Vector3D&);				// 복사 대입 연산자
+	Vector3D& operator = (const Vector3D&) noexcept;				// 복사 대입 연산자
 	Vector3D& operator = (const Vector3D&&) noexcept;			// 이동 대입 연산자
 	
-	Vector3D& operator = (const Vector2D&);				// 복사 대입 연산자
+	Vector3D& operator = (const Vector2D&) noexcept;				// 복사 대입 연산자
 	Vector3D& operator = (const Vector2D&&) noexcept;				// 복사 대입 연산자
 
-	Vector3D& operator = (const Vector4D&);				// 복사 대입 연산자
+	Vector3D& operator = (const Vector4D&) noexcept;				// 복사 대입 연산자
 	Vector3D& operator = (const Vector4D&&) noexcept;			// 이동 대입 연산자
 
 public:

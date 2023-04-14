@@ -7,9 +7,9 @@ class Object
 {
 public:
 	Object(
-		const Microsoft::WRL::ComPtr<ID3D11Device> device,
-		const Microsoft::WRL::ComPtr<ID3D11DeviceContext> context,
-		const Microsoft::WRL::ComPtr<ID3D11RasterizerState> randerState
+		Microsoft::WRL::ComPtr<ID3D11Device>& device,
+		Microsoft::WRL::ComPtr<ID3D11DeviceContext>& context,
+		Microsoft::WRL::ComPtr<ID3D11RasterizerState>& randerState
 	) : m_device(device), m_context(context), m_randerState(randerState),
 		count(0), m_worldTM(), m_viewTM(), m_projTM(),
 		m_vertexBuffer(), m_indexBuffer(), m_inputLayout(),
@@ -33,9 +33,9 @@ protected:
 	Matrix4x4 m_viewTM;
 	Matrix4x4 m_projTM;
 
-	Microsoft::WRL::ComPtr< ID3D11Device> m_device;
-	Microsoft::WRL::ComPtr< ID3D11DeviceContext> m_context;
-	Microsoft::WRL::ComPtr< ID3D11RasterizerState> m_randerState;
+	Microsoft::WRL::ComPtr< ID3D11Device>& m_device;
+	Microsoft::WRL::ComPtr< ID3D11DeviceContext>& m_context;
+	Microsoft::WRL::ComPtr< ID3D11RasterizerState>& m_randerState;
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_indexBuffer;

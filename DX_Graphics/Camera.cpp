@@ -1,7 +1,7 @@
 #include "Camera.h"
 #include "../KH_Math/Matrix3x3.h"
 
-#include <utility>;
+#include <utility>
 
 
 /// <summary>

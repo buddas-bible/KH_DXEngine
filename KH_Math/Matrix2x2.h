@@ -3,13 +3,13 @@
 class Matrix2x2
 {
 public:
-	Matrix2x2();
+	Matrix2x2() noexcept;
 	Matrix2x2(
 		float e00, float e01,
-		float e10, float e11);
-	Matrix2x2(const Matrix2x2& mat);
+		float e10, float e11) noexcept;
+	Matrix2x2(const Matrix2x2& mat) noexcept;
 	Matrix2x2(const Matrix2x2&& mat) noexcept;
-	~Matrix2x2();
+	~Matrix2x2() noexcept;
 
 	float e[2][2];
 
@@ -21,7 +21,7 @@ public:
 	Matrix2x2 operator * (const Matrix2x2& other) const;
 	Matrix2x2 operator + (const Matrix2x2& other) const;
 	Matrix2x2 operator - (const Matrix2x2& other) const;
-	Matrix2x2& operator = (const Matrix2x2& other);
+	Matrix2x2& operator = (const Matrix2x2& other) noexcept;
 	Matrix2x2& operator = (const Matrix2x2&& other) noexcept;
 };
 

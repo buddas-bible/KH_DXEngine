@@ -25,6 +25,9 @@
     <Filter Include="Object\Grid">
       <UniqueIdentifier>{43a31292-2e54-40a6-a398-542dacfca471}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Object\Box">
+      <UniqueIdentifier>{d8f8ba81-8f49-418b-bee1-c13563ff7d28}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DXGraphics.h">
@@ -60,6 +63,9 @@
     <ClInclude Include="Object.h">
       <Filter>Object</Filter>
     </ClInclude>
+    <ClInclude Include="Box.h">
+      <Filter>Object\Box</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DXGraphics.cpp">
@@ -79,6 +85,9 @@
     </ClCompile>
     <ClCompile Include="TimeManager.cpp">
       <Filter>etc</Filter>
+    </ClCompile>
+    <ClCompile Include="Box.cpp">
+      <Filter>Object\Box</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

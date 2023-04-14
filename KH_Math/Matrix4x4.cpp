@@ -1,7 +1,9 @@
 #include "Matrix4x4.h"
 #include <cmath>
 
-Matrix4x4::Matrix4x4() :
+#include "Vector3D.h"
+
+Matrix4x4::Matrix4x4() noexcept :
 	e{
 	(1), (0), (0), (0),
 	(0), (1), (0), (0),
@@ -15,7 +17,7 @@ constexpr Matrix4x4::Matrix4x4(
 	float e00, float e01, float e02, float e03, 
 	float e10, float e11, float e12, float e13, 
 	float e20, float e21, float e22, float e23, 
-	float e30, float e31, float e32, float e33) :
+	float e30, float e31, float e32, float e33) noexcept :
 	e{
 	(e00), (e01), (e02), (e03),
 	(e10), (e11), (e12), (e13),
@@ -25,7 +27,7 @@ constexpr Matrix4x4::Matrix4x4(
 
 }
 
-Matrix4x4::Matrix4x4(const Matrix4x4& mat) :
+Matrix4x4::Matrix4x4(const Matrix4x4& mat) noexcept :
 	e{
 	(mat.e[0][0]), (mat.e[0][1]), (mat.e[0][2]), (mat.e[0][3]),
 	(mat.e[1][0]), (mat.e[1][1]), (mat.e[1][2]), (mat.e[1][3]),
@@ -45,7 +47,7 @@ Matrix4x4::Matrix4x4(const Matrix4x4&& mat) noexcept :
 
 }
 
-Matrix4x4::~Matrix4x4()
+Matrix4x4::~Matrix4x4() noexcept
 {
 
 }
@@ -55,6 +57,55 @@ DirectX::XMMATRIX ConvertToXMMATRIX(const Matrix4x4& matrix)
 	return DirectX::XMLoadFloat4x4((DirectX::XMFLOAT4X4*) matrix.e);
 }
  
+Matrix4x4 CreateMatrix(const Vector3D& pos, const Vector3D& angle, const Vector3D& scale)
+{
+	float cx = std::cos(angle.x);
+	float sx = std::sin(angle.x);
+	
+	float cy = std::cos(angle.y);
+	float sy = std::sin(angle.y);
+
+	float cz = std::cos(angle.z);
+	float sz = std::sin(angle.z);
+
+	Matrix4x4 trans{
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		pos.x, pos.y, pos.z, 1
+	};
+
+	Matrix4x4 scaling{
+		scale.x, 0, 0, 0,
+		0, scale.y, 0, 0,
+		0, 0, scale.z, 0,
+		0, 0, 0, 1
+	};
+
+	Matrix4x4 rotateX{
+		1, 0, 0, 0,
+		0, cx, -sx, 0,
+		0, sx, cx, 0,
+		0, 0, 0, 1
+	};
+
+	Matrix4x4 rotateY{
+		cy, 0, sy, 0,
+		0, 1, 0, 0,
+		-sy, 0, cy, 0,
+		0, 0, 0, 1
+	};
+
+	Matrix4x4 rotateZ{
+		cz, -sz, 0, 0,
+		sz, cz, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 0, 1
+	};
+
+	return scaling * rotateX * rotateY * rotateZ * trans;
+}
+
 Matrix4x4&& Matrix4x4::IdentityMatrix()
 {
 	return Matrix4x4();
@@ -200,7 +251,7 @@ Matrix4x4 Matrix4x4::operator*(const Matrix4x4& other) const
 	);
 }
 
-Matrix4x4 Matrix4x4::operator=(const Matrix4x4& other)
+Matrix4x4 Matrix4x4::operator=(const Matrix4x4& other) noexcept
 {
 	if (this != &other)
 	{

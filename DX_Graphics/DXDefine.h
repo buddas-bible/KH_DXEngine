@@ -39,6 +39,7 @@
 #include "../KH_Math/Vector2D.h"
 #include "../KH_Math/Vector3D.h"
 #include "../KH_Math/Vector4D.h"
+#include "../KH_Math/Matrix3x3.h"
 #include "../KH_Math/Matrix4x4.h"
 #include "Vertex.h"
 

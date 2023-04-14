@@ -11,23 +11,23 @@ class Vector3D;
 class Vector4D
 {
 public:
-	Vector4D();
-	constexpr Vector4D(float, float, float, float = 0.f);
+	Vector4D() noexcept;
+	constexpr Vector4D(float, float, float, float = 0.f) noexcept;
 	Vector4D(_In_reads_(4) const float* pArr) noexcept;
-	Vector4D(const Vector4D& other);			// 복사 생성자
-	Vector4D(const Vector4D&& other) noexcept;		// 이동 생성자
-	Vector4D(const Vector3D& other, const float _w = 0);			// 복사 생성자
-	Vector4D(const Vector3D&& other, const float _w = 0) noexcept;		// 이동 생성자
-	~Vector4D();
+	Vector4D(const Vector4D& other) noexcept;						// 복사 생성자
+	Vector4D(const Vector4D&& other) noexcept;						// 이동 생성자
+	Vector4D(const Vector3D& other, const float _w = 0) noexcept;	// 복사 생성자
+	Vector4D(const Vector3D&& other, const float _w = 0) noexcept;	// 이동 생성자
+	~Vector4D() noexcept;
 
 public:
 	float x, y, z, w;
 
 public:
-	Vector4D& operator = (const Vector4D&);				// 복사 대입 연산자
+	Vector4D& operator = (const Vector4D&) noexcept;				// 복사 대입 연산자
 	Vector4D& operator = (const Vector4D&&) noexcept;			// 이동 대입 연산자
 
-	Vector4D& operator = (const Vector3D&);				// 복사 대입 연산자
+	Vector4D& operator = (const Vector3D&) noexcept;				// 복사 대입 연산자
 	Vector4D& operator = (const Vector3D&&) noexcept;				// 복사 대입 연산자
 
 public:

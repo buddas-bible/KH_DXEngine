@@ -1,7 +1,7 @@
 #include "Matrix2x2.h"
 #include <cmath>
 
-Matrix2x2::Matrix2x2() : 
+Matrix2x2::Matrix2x2() noexcept :
 	e{
 	(1), (0),
 	(0), (1) }
@@ -11,7 +11,7 @@ Matrix2x2::Matrix2x2() :
 
 Matrix2x2::Matrix2x2(
 	float e00, float e01, 
-	float e10, float e11) :
+	float e10, float e11) noexcept :
 	e{
 	(e00), (e01),
 	(e10), (e11) }
@@ -19,7 +19,7 @@ Matrix2x2::Matrix2x2(
 
 }
 
-Matrix2x2::Matrix2x2(const Matrix2x2& mat) :
+Matrix2x2::Matrix2x2(const Matrix2x2& mat) noexcept :
 	e{
 	(mat.e[0][0]), (mat.e[0][1]),
 	(mat.e[1][0]), (mat.e[1][1]) }
@@ -35,7 +35,7 @@ Matrix2x2::Matrix2x2(const Matrix2x2&& mat) noexcept :
 
 }
 
-Matrix2x2::~Matrix2x2()
+Matrix2x2::~Matrix2x2() noexcept
 {
 
 }
@@ -96,7 +96,7 @@ Matrix2x2 Matrix2x2::operator*(const Matrix2x2& other) const
 	);
 }
 
-Matrix2x2& Matrix2x2::operator=(const Matrix2x2& other)
+Matrix2x2& Matrix2x2::operator=(const Matrix2x2& other) noexcept
 {
 	if (this != &other)
 	{

@@ -2,20 +2,21 @@
 #include <DirectXMath.h>
 
 class Quaternion;
+class Vector3D;
 
 class Matrix4x4
 {
 public:
-	Matrix4x4();
+	Matrix4x4() noexcept;
 	constexpr Matrix4x4(
 		float e00, float e01, float e02, float e03,
 		float e10, float e11, float e12, float e13,
 		float e20, float e21, float e22, float e23,
 		float e30, float e31, float e32, float e33
-	);
-	Matrix4x4(const Matrix4x4& mat);
+	) noexcept;
+	Matrix4x4(const Matrix4x4& mat) noexcept;
 	Matrix4x4(const Matrix4x4&& mat) noexcept;
-	~Matrix4x4();
+	~Matrix4x4() noexcept;
 
 	float e[4][4];
 
@@ -36,8 +37,9 @@ public:
 	Matrix4x4 operator * (const Matrix4x4& other) const;
 	Matrix4x4 operator + (const Matrix4x4& other) const;
 	Matrix4x4 operator - (const Matrix4x4& other) const;
-	Matrix4x4 operator = (const Matrix4x4& other);
+	Matrix4x4 operator = (const Matrix4x4& other) noexcept;
 	Matrix4x4 operator = (const Matrix4x4&& other) noexcept;
 };
 
 DirectX::XMMATRIX ConvertToXMMATRIX(const Matrix4x4& matrix);
+Matrix4x4 CreateMatrix(const Vector3D& pos, const Vector3D& angle, const Vector3D& scale);

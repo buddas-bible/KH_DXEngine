@@ -164,7 +164,7 @@ Vector2D Vector2D::Normalize() const
 	}
 }
 
-Vector2D& Vector2D::operator=(const Vector2D& other)
+Vector2D& Vector2D::operator=(const Vector2D& other) noexcept
 {
 	if (this != &other)
 	{
@@ -186,7 +186,7 @@ Vector2D& Vector2D::operator=(const Vector2D&& other) noexcept
 	return *this;
 }
 
-Vector2D& Vector2D::operator=(const Vector3D& other)
+Vector2D& Vector2D::operator=(const Vector3D& other) noexcept
 {
 	this->x = other.x;
 	this->y = other.y;

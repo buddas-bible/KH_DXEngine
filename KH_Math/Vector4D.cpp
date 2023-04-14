@@ -3,19 +3,19 @@
 #include "Vector3D.h"
 #include "Matrix4x4.h"
 
-Vector4D::Vector4D() : 
+Vector4D::Vector4D() noexcept :
 	x(0), y(0), z(0), w(0)
 {
 
 }
 
-constexpr Vector4D::Vector4D(float _x, float _y, float _z, float _w) :
+constexpr Vector4D::Vector4D(float _x, float _y, float _z, float _w) noexcept :
 	x(_x), y(_y), z(_z), w(_w)
 {
 
 }
 
-Vector4D::Vector4D(const Vector4D& other) :
+Vector4D::Vector4D(const Vector4D& other) noexcept :
 	x(other.x), y(other.y), z(other.z), w(other.w)
 {
 
@@ -27,7 +27,7 @@ Vector4D::Vector4D(const Vector4D&& other) noexcept :
 
 }
 
-Vector4D::Vector4D(const Vector3D& other, const float _w) :
+Vector4D::Vector4D(const Vector3D& other, const float _w) noexcept :
 	x(other.x), y(other.y), z(other.z), w(_w)
 {
 
@@ -45,7 +45,7 @@ Vector4D::Vector4D(_In_reads_(4) const float* pArr) noexcept :
 
 }
 
-Vector4D::~Vector4D()
+Vector4D::~Vector4D() noexcept
 {
 
 }
@@ -143,7 +143,7 @@ Vector4D& Vector4D::operator-=(const Vector4D& other)
 	return *this;
 }
 
-Vector4D& Vector4D::operator=(const Vector4D& other)
+Vector4D& Vector4D::operator=(const Vector4D& other) noexcept
 {
 	if (this != &other)
 	{
@@ -169,7 +169,7 @@ Vector4D& Vector4D::operator=(const Vector4D&& other) noexcept
 	return *this;
 }
 
-Vector4D& Vector4D::operator=(const Vector3D& other)
+Vector4D& Vector4D::operator=(const Vector3D& other) noexcept
 {
 	this->x = other.x;
 	this->y = other.y;

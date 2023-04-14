@@ -6,7 +6,7 @@
 #include "Vector2D.h"
 #include "Vector4D.h"
 
-Vector3D::Vector3D() :
+Vector3D::Vector3D() noexcept :
 	x(0.f), y(0.f), z(0.f)
 {
 
@@ -18,7 +18,7 @@ constexpr Vector3D::Vector3D(float _x, float _y, float _z) noexcept :
 
 }
 
-Vector3D::Vector3D(const Vector3D& other) :
+Vector3D::Vector3D(const Vector3D& other) noexcept :
 	x(other.x), y(other.y), z(other.z)
 {
 
@@ -30,7 +30,7 @@ Vector3D::Vector3D(const Vector3D&& other) noexcept :
 
 }
 
-Vector3D::Vector3D(const Vector2D& other) :
+Vector3D::Vector3D(const Vector2D& other) noexcept :
 	x(other.x), y(other.y), z(0.f)
 {
 
@@ -42,7 +42,7 @@ Vector3D::Vector3D(const Vector2D&& other) noexcept :
 
 }
 
-Vector3D::Vector3D(const Vector4D& other) :
+Vector3D::Vector3D(const Vector4D& other) noexcept :
 	x(other.x), y(other.y), z(other.z)
 {
 
@@ -60,7 +60,7 @@ Vector3D::Vector3D(_In_reads_(3) const float* pArr) noexcept :
 
 }
 
-Vector3D::~Vector3D()
+Vector3D::~Vector3D() noexcept
 {
 
 }
@@ -196,7 +196,7 @@ Vector3D Vector3D::Normalize() &&
 	}
 }
 
-Vector3D& Vector3D::operator=(const Vector3D& other)
+Vector3D& Vector3D::operator=(const Vector3D& other) noexcept
 {
 	if (this != &other)
 	{
@@ -221,7 +221,7 @@ Vector3D& Vector3D::operator=(const Vector3D&& other) noexcept
 }
 
 
-Vector3D& Vector3D::operator=(const Vector2D& other)
+Vector3D& Vector3D::operator=(const Vector2D& other) noexcept
 {
 	this->x = other.x;
 	this->y = other.y;
@@ -239,7 +239,7 @@ Vector3D& Vector3D::operator=(const Vector2D&& other) noexcept
 	return *this;
 }
 
-Vector3D& Vector3D::operator=(const Vector4D& other)
+Vector3D& Vector3D::operator=(const Vector4D& other) noexcept
 {
 	this->x = other.x;
 	this->y = other.y;

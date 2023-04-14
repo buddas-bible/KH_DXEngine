@@ -37,10 +37,10 @@ public:
 	Vector2D Normalize() const;							// 정규화된 벡터를 반환
 
 public:
-	Vector2D& operator = (const Vector2D&);				// 복사 대입 연산자
+	Vector2D& operator = (const Vector2D&) noexcept;				// 복사 대입 연산자
 	Vector2D& operator = (const Vector2D&&) noexcept;			// 이동 대입 연산자
 	
-	Vector2D& operator = (const Vector3D&);				// 복사 대입 연산자
+	Vector2D& operator = (const Vector3D&) noexcept;				// 복사 대입 연산자
 	Vector2D& operator = (const Vector3D&&) noexcept;	// 이동 대입 연산자
 
 public:
