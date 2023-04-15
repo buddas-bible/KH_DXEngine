@@ -267,12 +267,14 @@ HRESULT Box::CreateEffect()
 
 	m_tech = m_effect->GetTechniqueByName("Tech");							// 파일에 Tech 이름의 데이터를 읽어옴
 	m_matrix = m_effect->GetVariableByName("worldViewProj")->AsMatrix();	// 파일에 worldViewProj 이름의 데이터를 읽어옴
+	m_invMatrix = m_effect->GetVariableByName("invTworldViewProj")->AsMatrix();	// 파일에 worldViewProj 이름의 데이터를 읽어옴
 
 	// 이펙트로 셰이더 리소스랑 샘플러가 필요하지 않을까?
 	m_shaderResource = m_effect->GetVariableByName("g_Texture")->AsShaderResource();	// 
 	m_sampler = m_effect->GetVariableByName("g_Sampler")->AsSampler();
 
 	m_directionalLight = m_effect->GetVariableByName("fLight")->AsVector();
+	m_Light = m_effect->GetVariableByName("pLight")->AsVector();
 
 	return hr;
 }
@@ -304,6 +306,7 @@ void Box::Update(const Matrix4x4& view, const Matrix4x4& proj)
 	}
 
 	m_worldTM = CreateMatrix(m_pos, m_angle, m_scale);
+	invT = TransposeMatrix(CreateInvMatrix(m_pos, m_angle, m_scale));
 
 	m_viewTM = view;
 	m_projTM = proj;
@@ -337,11 +340,16 @@ void Box::Render()
 
 	Matrix4x4 wvp = m_worldTM * m_viewTM * m_projTM;
 	DirectX::XMMATRIX worldViewProj = ConvertToXMMATRIX(wvp);
+	Matrix4x4 invMatrix = CreateInvMatrix(m_pos, m_angle, m_scale);
+	DirectX::XMMATRIX inv = ConvertToXMMATRIX(invT);
 
 	// 상수 버퍼 설정
 	m_matrix->SetMatrix(reinterpret_cast<float*>(&worldViewProj));
-	float light[3] = { 1.f, 0.f, 0.f };
+	m_invMatrix->SetMatrix(reinterpret_cast<float*>(&inv));
+	const float light[3] = { 1.f, 0.f, 0.f };
 	m_directionalLight->SetFloatVector(light);
+	// const float pLight[4] = { 4.f, 4.f, 4.f, 1.f };
+	// m_Light->SetFloatVector(pLight);
 	m_shaderResource->SetResource(m_textureView.Get());
 
 	// 테크닉

@@ -8,12 +8,14 @@
 cbuffer cbPerObject
 {
     float4x4 worldViewProj;
+    float4x4 invTworldViewProj;
 };
 
 Texture2D g_Texture;
 SamplerState g_Sampler;
 
-float3 fLight;
+float3 dLight;
+float4 pLight;
 
 struct VertexIn
 {
@@ -26,19 +28,26 @@ struct VertexOut
 {
     float4 PosH     : SV_POSITION;
     float2 uv       : TEXCOORD;
-    float4 Diffuse  : COLOR;
+    float4 Diffuse  : COLOR0;
+    // float4 Diffuse2  : COLOR1;
 };
 
 VertexOut VS(VertexIn vin)
 {
     VertexOut vout;
-    float3 N = vin.Normal;
-    float3 L = fLight;
+    float3 N = mul(float4(vin.Normal, 0.f), invTworldViewProj);
+    N = normalize(N);
+    // float3 N = vin.Normal;
+    float3 L = dLight;
+    float4 L2 = pLight;
 
     // Transform to homogeneous clip space.
     vout.PosH = mul(float4(vin.PosL, 1.0f), worldViewProj);
+    float4 D = float4(vin.PosL, 1.0f) - L2;
+    D = normalize(D);
     vout.uv = vin.uv;
     vout.Diffuse = dot(N, L) * 0.5f + 0.5f;         // Half Lambert
+    // vout.Diffuse2 = dot(N, D);
     // vout.Diffuse = dot(N, L);
     // Just pass vertex color into the pixel shader.
 

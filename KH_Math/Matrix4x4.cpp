@@ -106,6 +106,65 @@ Matrix4x4 CreateMatrix(const Vector3D& pos, const Vector3D& angle, const Vector3
 	return scaling * rotateX * rotateY * rotateZ * trans;
 }
 
+Matrix4x4 CreateInvMatrix(const Vector3D& pos, const Vector3D& angle, const Vector3D& scale)
+{
+	float cx = std::cos(angle.x);
+	float sx = std::sin(angle.x);
+
+	float cy = std::cos(angle.y);
+	float sy = std::sin(angle.y);
+
+	float cz = std::cos(angle.z);
+	float sz = std::sin(angle.z);
+
+	Matrix4x4 trans{
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		-pos.x, -pos.y, -pos.z, 1
+	};
+
+	Matrix4x4 scaling{
+		1 / scale.x, 0, 0, 0,
+		0, 1 / scale.y, 0, 0,
+		0, 0, 1 / scale.z, 0,
+		0, 0, 0, 1
+	};
+
+	Matrix4x4 rotateX{
+		1, 0, 0, 0,
+		0, cx, sx, 0,
+		0, -sx, cx, 0,
+		0, 0, 0, 1
+	};
+
+	Matrix4x4 rotateY{
+		cy, 0, -sy, 0,
+		0, 1, 0, 0,
+		sy, 0, cy, 0,
+		0, 0, 0, 1
+	};
+
+	Matrix4x4 rotateZ{
+		cz, sz, 0, 0,
+		-sz, cz, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 0, 1
+	};
+
+	return trans * rotateZ * rotateY * rotateX * scaling;
+}
+
+Matrix4x4 TransposeMatrix(const Matrix4x4& m)
+{
+	return Matrix4x4(
+		m.e[0][0], m.e[1][0], m.e[2][0], m.e[3][0],
+		m.e[0][1], m.e[1][1], m.e[2][1], m.e[3][1],
+		m.e[0][2], m.e[1][2], m.e[2][2], m.e[3][2],
+		m.e[0][3], m.e[1][3], m.e[2][3], m.e[3][3]
+	);
+}
+
 Matrix4x4&& Matrix4x4::IdentityMatrix()
 {
 	return Matrix4x4();

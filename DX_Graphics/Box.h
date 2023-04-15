@@ -29,6 +29,7 @@ private:
 	Vector3D m_scale{1.f, 1.f, 1.f};
 
 private:
+	Matrix4x4 invT;
 	// UINT count;
 	// Matrix4x4 worldTM;
 	// 
@@ -44,6 +45,7 @@ private:
 	// Microsoft::WRL::ComPtr<ID3DX11Effect> m_effect;
 	// Microsoft::WRL::ComPtr<ID3DX11EffectTechnique> m_tech;
 	// Microsoft::WRL::ComPtr<ID3DX11EffectMatrixVariable> m_matrix;
+	Microsoft::WRL::ComPtr<ID3DX11EffectMatrixVariable> m_invMatrix;
 
 	Microsoft::WRL::ComPtr<ID3DX11EffectShaderResourceVariable> m_shaderResource;	// 
 	Microsoft::WRL::ComPtr<ID3DX11EffectSamplerVariable> m_sampler;		// 어떻게 샘플링 할지. 기본값이 이미 들어있어서 설정을 따로 안해줘도 텍스쳐는 찍힘
@@ -54,5 +56,5 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>	m_textureView;	// 텍스쳐 들고 있을 친구
 
 	Microsoft::WRL::ComPtr<ID3DX11EffectVectorVariable> m_directionalLight;
-
+	Microsoft::WRL::ComPtr<ID3DX11EffectVectorVariable> m_Light;
 };
