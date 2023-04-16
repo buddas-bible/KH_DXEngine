@@ -30,13 +30,13 @@ Vector3D::Vector3D(const Vector3D&& other) noexcept :
 
 }
 
-Vector3D::Vector3D(const Vector2D& other) noexcept :
+Vector3D::Vector3D(const Vector2D& other, const float _z) noexcept :
 	x(other.x), y(other.y), z(0.f)
 {
 
 }
 
-Vector3D::Vector3D(const Vector2D&& other) noexcept :
+Vector3D::Vector3D(const Vector2D&& other, const float _z) noexcept :
 	x(other.x), y(other.y), z(0)
 {
 

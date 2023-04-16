@@ -15,8 +15,8 @@ public:
 	Vector3D(_In_reads_(3) const float* pArr) noexcept;
 	Vector3D(const Vector3D& other) noexcept;			// 복사 생성자
 	Vector3D(const Vector3D&& other) noexcept;		// 이동 생성자
-	Vector3D(const Vector2D& other) noexcept;					// 복사 생성자
-	Vector3D(const Vector2D&& other) noexcept;		// 이동 생성자
+	Vector3D(const Vector2D& other, const float _z = 0) noexcept;					// 복사 생성자
+	Vector3D(const Vector2D&& other, const float _z = 0) noexcept;		// 이동 생성자
 	Vector3D(const Vector4D& other) noexcept;			// 복사 생성자
 	Vector3D(const Vector4D&& other) noexcept;		// 이동 생성자
 	~Vector3D() noexcept;

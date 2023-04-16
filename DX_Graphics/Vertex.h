@@ -10,6 +10,12 @@ struct PCVertex
 	Vector4D color;
 };
 
+struct PNVertex
+{
+	Vector3D pos;				// 버텍스 위치 정보
+	Vector3D normal;
+};
+
 struct PTNVertex
 {
 	Vector3D pos;				// 버텍스 위치 정보

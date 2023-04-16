@@ -28,6 +28,9 @@
     <Filter Include="Object\Box">
       <UniqueIdentifier>{d8f8ba81-8f49-418b-bee1-c13563ff7d28}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Object\Skull">
+      <UniqueIdentifier>{0f27749c-d3aa-49d2-a3a3-1406f354eed0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DXGraphics.h">
@@ -66,6 +69,9 @@
     <ClInclude Include="Box.h">
       <Filter>Object\Box</Filter>
     </ClInclude>
+    <ClInclude Include="Skull.h">
+      <Filter>Object\Skull</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DXGraphics.cpp">
@@ -89,9 +95,13 @@
     <ClCompile Include="Box.cpp">
       <Filter>Object\Box</Filter>
     </ClCompile>
+    <ClCompile Include="Skull.cpp">
+      <Filter>Object\Skull</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Texture.fx" />
     <FxCompile Include="Color.fx" />
+    <FxCompile Include="WhireWire.fx" />
   </ItemGroup>
 </Project>

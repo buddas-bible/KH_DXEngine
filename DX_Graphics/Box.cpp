@@ -151,7 +151,7 @@ HRESULT Box::CreateBuffer()
 
 	ComPtr<ID3D11Resource> texture;
 	ComPtr<ID3D11ShaderResourceView> textureView;				// ../ 같은 경로는 다시 생각해보자.. 실행파일 뽑을 때 많이 귀찮아 진다...
-	hr = DirectX::CreateDDSTextureFromFile(m_device.Get(), L"../Texture/WoodCrate01.dds", texture.GetAddressOf(), textureView.GetAddressOf());
+	hr = DirectX::CreateDDSTextureFromFile(m_device.Get(), L"../Textures/WoodCrate01.dds", texture.GetAddressOf(), textureView.GetAddressOf());
 	// hr = DirectX::CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"WoodCrate01.dds", texture.GetAddressOf(), textureView.GetAddressOf());
 	if (FAILED(hr))
 	{
@@ -273,8 +273,8 @@ HRESULT Box::CreateEffect()
 	m_shaderResource = m_effect->GetVariableByName("g_Texture")->AsShaderResource();	// 
 	m_sampler = m_effect->GetVariableByName("g_Sampler")->AsSampler();
 
-	m_directionalLight = m_effect->GetVariableByName("fLight")->AsVector();
-	m_Light = m_effect->GetVariableByName("pLight")->AsVector();
+	m_directionalLight = m_effect->GetVariableByName("lightDirection")->AsVector();
+	// m_Light = m_effect->GetVariableByName("pLight")->AsVector();
 
 	return hr;
 }
@@ -346,8 +346,8 @@ void Box::Render()
 	// 상수 버퍼 설정
 	m_matrix->SetMatrix(reinterpret_cast<float*>(&worldViewProj));
 	m_invMatrix->SetMatrix(reinterpret_cast<float*>(&inv));
-	const float light[3] = { 1.f, 0.f, 0.f };
-	m_directionalLight->SetFloatVector(light);
+	const float light[3] = { 0.5f, 0.5f, 0.f };
+	m_directionalLight->SetRawValue(light, 0, sizeof(light));
 	// const float pLight[4] = { 4.f, 4.f, 4.f, 1.f };
 	// m_Light->SetFloatVector(pLight);
 	m_shaderResource->SetResource(m_textureView.Get());

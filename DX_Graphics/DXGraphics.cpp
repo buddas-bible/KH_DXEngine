@@ -6,6 +6,7 @@
 #include "Box.h"
 #include "Axis.h"
 #include "Grid.h"
+#include "Skull.h"
 
 using namespace Microsoft::WRL;
 
@@ -136,6 +137,7 @@ void DXGraphics::Update()
 	grid->Update(m_view, m_projection);
 	axis->Update(m_view, m_projection);
 	box->Update(m_view, m_projection);
+	skull->Update(m_view, m_projection);
 
 	float dt = time.GetfDeltaTime();
 	if (GetAsyncKeyState(VK_Q))
@@ -571,6 +573,14 @@ HRESULT DXGraphics::CreateObject()
 		return hr;
 	}
 
+	hr = CreateSkull();
+	if (FAILED(hr))
+	{
+		MessageBox(m_hWnd, L"스컬 오브젝트 초기화 실패", L"오브젝트 설정 오류", MB_OK | MB_ICONWARNING);
+		return hr;
+	}
+
+
 	hr = CreateCubeShaders();
 	if (FAILED(hr))
 	{
@@ -671,6 +681,20 @@ HRESULT DXGraphics::CreateGrid()
 	return hr;
 }
 
+HRESULT DXGraphics::CreateSkull()
+{
+	HRESULT hr = S_OK;
+
+	skull = new Skull(m_pd3dDevice, m_pd3dDeviceContext, m_currRasterizerState);
+	if (skull == nullptr)
+	{
+		return S_FALSE;
+	}
+	skull->Initialize();
+
+	return hr;
+}
+
 void DXGraphics::BeginDraw()
 {
 	// 랜더 타켓 설정.
@@ -699,6 +723,7 @@ void DXGraphics::BeginDraw()
 	grid->Render();
 	axis->Render();
 	box->Render();
+	skull->Render();
 }
 
 void DXGraphics::EndDraw()

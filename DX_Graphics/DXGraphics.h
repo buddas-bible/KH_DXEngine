@@ -8,6 +8,7 @@
 class Box;
 class Axis;
 class Grid;
+class Skull;
 
 class DXGraphics : public IGraphics
 {
@@ -66,9 +67,6 @@ private:
 	/// </summary>
 	/// <returns></returns>
 private:
-	/// <summary>
-	/// 큐브 관련 무언가
-	/// </summary>
 	Box* box;
 	HRESULT CreateCube();
 
@@ -79,6 +77,10 @@ private:
 private:
 	Grid* grid;
 	HRESULT CreateGrid();
+
+private:
+	Skull* skull;
+	HRESULT CreateSkull();
 	
 #pragma endregion 오브젝트
 
