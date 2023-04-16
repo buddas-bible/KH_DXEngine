@@ -552,6 +552,8 @@ HRESULT DXGraphics::CreateObject()
 		return hr;
 	}
 
+	m_teapot->LoadGeomerty();
+
 	return hr;
 }
 
