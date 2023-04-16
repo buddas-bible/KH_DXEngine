@@ -1,8 +1,8 @@
 #include "CoreEngine.h"
 
 #include "IGraphics.h"
-#include "../DX_Graphics/DXGraphics.h"
-#include "../WIN32Graphics/WIN32Graphics.h"
+#include "DXGraphics.h"
+#include "WIN32Graphics.h"
 
 CoreEngine::CoreEngine() : m_pGraphics()
 {

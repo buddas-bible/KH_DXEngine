@@ -86,7 +86,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Win32/Debug;$(SolutionDir)DXTK/lnc;%(AdditionalLibraryDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Win32/Debug;$(SolutionDir)DXTK/lnc/;%(AdditionalLibraryDirectories);%(AdditionalIncludeDirectories);$(SolutionDir)ASEParser/;$(SolutionDir)KH_Math/;$(SolutionDir)Texture/;$(SolutionDir)ASEParser/;$(SolutionDir)CoreEngine/;$(SolutionDir)KH_Math/;$(SolutionDir)Texture/;$(SolutionDir)DXTK/Inc/</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -107,7 +107,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)Win32/Release;$(SolutionDir)DXTK/lnc/;%(AdditionalLibraryDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Win32/Release;$(SolutionDir)DXTK/lnc/;%(AdditionalLibraryDirectories);%(AdditionalIncludeDirectories);$(SolutionDir)ASEParser/;$(SolutionDir)KH_Math;$(SolutionDir)ASEParser/;$(SolutionDir)ASEParser/;$(SolutionDir)CoreEngine/;$(SolutionDir)KH_Math/;$(SolutionDir)Texture/;$(SolutionDir)DXTK/Inc/</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -128,7 +128,7 @@
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)x64/Debug/;$(SolutionDir)DXTK/lnc/;$(SolutionDir)Texture/;%(AdditionalLibraryDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)x64/Debug/;$(SolutionDir)DXTK/Inc/;$(SolutionDir)Texture/;$(SolutionDir)"KH_Math"/;$(SolutionDir)CoreEngine/;$(SolutionDir)ASEParser/;%(AdditionalIncludeDirectories);%(AdditionalLibraryDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -149,7 +149,7 @@
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)x64/Release;$(SolutionDir)DXTK/lnc/;%(AdditionalLibraryDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)x64/Release;$(SolutionDir)DXTK/lnc/;%(AdditionalLibraryDirectories);$(SolutionDir)ASEParser/;%(AdditionalIncludeDirectories);$(SolutionDir)ASEParser/;$(SolutionDir)KH_Math;$(SolutionDir)ASEParser/;$(SolutionDir)ASEParser/;$(SolutionDir)CoreEngine/;$(SolutionDir)KH_Math/;$(SolutionDir)Texture/;$(SolutionDir)DXTK/Inc/</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -167,7 +167,7 @@
     <ClInclude Include="Axis.h" />
     <ClInclude Include="Box.h" />
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="Color.h" />
+    <ClInclude Include="KHColor.h" />
     <ClInclude Include="DXDefine.h" />
     <ClInclude Include="DXGraphics.h" />
     <ClInclude Include="Grid.h" />
@@ -175,6 +175,7 @@
     <ClInclude Include="Object.h" />
     <ClInclude Include="Skull.h" />
     <ClInclude Include="Struct.h" />
+    <ClInclude Include="Teapot.h" />
     <ClInclude Include="TimeManager.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
@@ -186,6 +187,7 @@
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Skull.cpp" />
+    <ClCompile Include="Teapot.cpp" />
     <ClCompile Include="TimeManager.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -24,7 +24,8 @@
 #include <vector>
 #include <string>
 //#include <DirectXMath.h>
-#include <SimpleMath.h>
+#include <../DXTK//Inc/SimpleMath.h>
+
 
 using namespace std;
 using namespace DirectX;

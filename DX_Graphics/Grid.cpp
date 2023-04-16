@@ -42,7 +42,7 @@ HRESULT Grid::CreateBuffer()
 	for (int i = 0; i < 100; i++)
 	{
 		vertices[i].pos = Vector3D((i % 10) - 5.0f, 0.0f, (float)(i / 10) - 5.0f);
-		vertices[i].color = Vector4D(Color::White);
+		vertices[i].color = Vector4D(KHColor::White);
 	}
 
 	// 버퍼를 설정하는 구조체

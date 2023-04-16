@@ -25,9 +25,6 @@
     <Filter Include="Matrix\Matrix4x4">
       <UniqueIdentifier>{0a2ea50c-e310-4fd8-9f7f-da5845133c8e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Quaternion">
-      <UniqueIdentifier>{b6a9900b-5c7e-484b-8812-b5dbae624095}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Vector2D.cpp">
@@ -48,9 +45,6 @@
     <ClCompile Include="Matrix4x4.cpp">
       <Filter>Matrix\Matrix4x4</Filter>
     </ClCompile>
-    <ClCompile Include="Quaternion.cpp">
-      <Filter>Quaternion</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Vector2D.h">
@@ -70,9 +64,6 @@
     </ClInclude>
     <ClInclude Include="Matrix4x4.h">
       <Filter>Matrix\Matrix4x4</Filter>
-    </ClInclude>
-    <ClInclude Include="Quaternion.h">
-      <Filter>Quaternion</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

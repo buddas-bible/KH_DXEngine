@@ -1,7 +1,6 @@
 #pragma once
 #include <DirectXMath.h>
 
-class Quaternion;
 class Vector3D;
 
 class Matrix4x4
@@ -28,7 +27,7 @@ public:
 		float scaleX, float scaleY, float scaleZ);
 	static Matrix4x4 TranslateMatrix(float moveX, float moveY, float moveZ);	// 이동 변환 행렬
 	static Matrix4x4 RotateMatrix(float thetaX, float thetaY, float thetaZ);	// 회전 변환 행렬
-	static Matrix4x4 RotateMatrix(const Quaternion& q);	// 회전 변환 행렬
+	// static Matrix4x4 RotateMatrix(const Quaternion& q);	// 회전 변환 행렬
 	static Matrix4x4 ScaleMatrix(float scaleX, float scaleY, float scaleZ);		// 축척 변환 행렬
 	static Matrix4x4 ScaleRotate(
 		float scaleX, float scaleY, float scaleZ,

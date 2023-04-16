@@ -91,7 +91,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(solutiondir)DX_Graphics;$(solutiondir)KH_Math;$(solutiondir)WIN32Graphics;$(solutiondir)CoreEngine</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(solutiondir)KH_Math;$(solutiondir)CoreEngine</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -109,7 +109,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(solutiondir)DX_Graphics;$(solutiondir)KH_Math;$(solutiondir)WIN32Graphics;$(solutiondir)CoreEngine</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(solutiondir)KH_Math;$(solutiondir)CoreEngine</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -127,7 +127,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(solutiondir)DX_Graphics;$(solutiondir)KH_Math;$(solutiondir)WIN32Graphics;$(solutiondir)CoreEngine</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(solutiondir)KH_Math;$(solutiondir)CoreEngine</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -145,7 +145,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(solutiondir)DX_Graphics;$(solutiondir)KH_Math;$(solutiondir)WIN32Graphics;$(solutiondir)CoreEngine</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(solutiondir)KH_Math;$(solutiondir)CoreEngine</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>

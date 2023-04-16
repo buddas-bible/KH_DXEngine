@@ -31,12 +31,15 @@
     <Filter Include="Object\Skull">
       <UniqueIdentifier>{0f27749c-d3aa-49d2-a3a3-1406f354eed0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Object\Teapot">
+      <UniqueIdentifier>{d23ea741-e29f-4f78-ae4a-8a3af4cb997a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DXGraphics.h">
       <Filter>DXGraphics</Filter>
     </ClInclude>
-    <ClInclude Include="Color.h">
+    <ClInclude Include="KHColor.h">
       <Filter>Color</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
@@ -72,6 +75,9 @@
     <ClInclude Include="Skull.h">
       <Filter>Object\Skull</Filter>
     </ClInclude>
+    <ClInclude Include="Teapot.h">
+      <Filter>Object\Teapot</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DXGraphics.cpp">
@@ -97,6 +103,9 @@
     </ClCompile>
     <ClCompile Include="Skull.cpp">
       <Filter>Object\Skull</Filter>
+    </ClCompile>
+    <ClCompile Include="Teapot.cpp">
+      <Filter>Object\Teapot</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -8,11 +8,13 @@
 #include "Grid.h"
 #include "Skull.h"
 
+#include "CASEParser.h"
+
 using namespace Microsoft::WRL;
 
 DXGraphics::~DXGraphics()
 {
-	
+
 }
 
 HRESULT DXGraphics::Initialize(HWND hwnd)
@@ -56,6 +58,10 @@ HRESULT DXGraphics::Initialize(HWND hwnd)
 		return hr;
 	}
 
+	m_parser = new CASEParser();
+	m_parser->Init();
+	m_parser->Load((LPSTR)"../ASEFile/teapot.ASE");
+
 	/// 이부분 부터는 그냥 바뀔수가 있음
 	hr = CreateObject();
 	if (FAILED(hr))
@@ -63,22 +69,27 @@ HRESULT DXGraphics::Initialize(HWND hwnd)
 		return hr;
 	}
 
-	hr = CreateInputLayout();
-	if (FAILED(hr))
-	{
-		MessageBox(m_hWnd, L"인풋레이아웃 생성 실패", L"초기화 오류", MB_OK | MB_ICONWARNING);
-		return hr;
-	}
-
-	directionalLight = Vector3D(1.f, 1.f, 0.f).Normalize();
-	pointLight; // 이건 월드에서의 위치를 가지고 있어야함.
-
 	return hr;
 }
 
 void DXGraphics::Finalize()
 {
-
+	if (axis != nullptr)
+	{
+		delete axis;
+	}
+	if (grid != nullptr)
+	{
+		delete grid;
+	}
+	if (box != nullptr)
+	{
+		delete box;
+	}
+	if (skull != nullptr)
+	{
+		delete skull;
+	}
 }
 
 HRESULT DXGraphics::OnResize()
@@ -214,45 +225,6 @@ void DXGraphics::Update()
 	if (GetAsyncKeyState(VK_F6))
 	{
 		camera.SetOrthographicView();
-	}
-
-	if (GetAsyncKeyState(0x31) && !GetAsyncKeyState(VK_SHIFT))
-	{
-		directionalLight = Vector4D{ 1.f, 1.f, 0.f, 1.f }.Normalize();
-	}
-	if (GetAsyncKeyState(0x32) && !GetAsyncKeyState(VK_SHIFT))
-	{
-		directionalLight = Vector4D{ 0.f, 1.f, 1.f, 1.f }.Normalize();
-	}
-	if (GetAsyncKeyState(0x33) && !GetAsyncKeyState(VK_SHIFT))
-	{
-		directionalLight = Vector4D{ 1.f, 0.f, 1.f, 1.f }.Normalize();
-	}
-
-	if (GetAsyncKeyState(0x34) && !GetAsyncKeyState(VK_SHIFT))
-	{
-		directionalLight = Vector4D{ -1.f, 1.f, 1.f, 1.f }.Normalize();
-	}
-	if (GetAsyncKeyState(0x35) && !GetAsyncKeyState(VK_SHIFT))
-	{
-		directionalLight = Vector4D{ 1.f, -1.f, 1.f, 1.f }.Normalize();
-	}
-	if (GetAsyncKeyState(0x36) && !GetAsyncKeyState(VK_SHIFT))
-	{
-		directionalLight = Vector4D{ 1.f, 1.f, -1.f, 1.f }.Normalize();
-	}
-
-	if (GetAsyncKeyState(0x37) && !GetAsyncKeyState(VK_SHIFT))
-	{
-		directionalLight = Vector4D{ -1.f, -1.f, 1.f, 0.f }.Normalize();
-	}
-	if (GetAsyncKeyState(0x38) && !GetAsyncKeyState(VK_SHIFT))
-	{
-		directionalLight = Vector4D{ 1.f, -1.f, -1.f, 0.f }.Normalize();
-	}
-	if (GetAsyncKeyState(0x39) && !GetAsyncKeyState(VK_SHIFT))
-	{
-		directionalLight = Vector4D{ -1.f, 1.f, -1.f, 0.f }.Normalize();
 	}
 }
 
@@ -580,21 +552,6 @@ HRESULT DXGraphics::CreateObject()
 		return hr;
 	}
 
-
-	hr = CreateCubeShaders();
-	if (FAILED(hr))
-	{
-		MessageBox(m_hWnd, L"셰이더 초기화 실패", L"오브젝트 설정 오류", MB_OK | MB_ICONWARNING);
-		return hr;
-	}
-
-	return hr;
-}
-
-HRESULT DXGraphics::CreateInputLayout()
-{
-	HRESULT hr = S_OK;
-
 	return hr;
 }
 
@@ -632,13 +589,6 @@ void DXGraphics::Test()
 }
 */ 
 
-HRESULT DXGraphics::CreateCubeShaders()
-{
-	HRESULT hr = S_OK;
-
-	return hr;
-}
-
 HRESULT DXGraphics::CreateCube()
 {
 	HRESULT hr = S_OK;
@@ -648,7 +598,7 @@ HRESULT DXGraphics::CreateCube()
 	{
 		return S_FALSE;
 	}
-	box->Initialize();
+	hr = box->Initialize();
 
 	return hr;
 }
@@ -662,7 +612,7 @@ HRESULT DXGraphics::CreateAxis()
 	{
 		return S_FALSE;
 	}
-	axis->Initialize();
+	hr = axis->Initialize();
 
 	return hr;
 }
@@ -676,7 +626,7 @@ HRESULT DXGraphics::CreateGrid()
 	{
 		return S_FALSE;
 	}
-	grid->Initialize();
+	hr = grid->Initialize();
 
 	return hr;
 }
@@ -690,7 +640,7 @@ HRESULT DXGraphics::CreateSkull()
 	{
 		return S_FALSE;
 	}
-	skull->Initialize();
+	hr = skull->Initialize();
 
 	return hr;
 }
@@ -707,7 +657,7 @@ void DXGraphics::BeginDraw()
 	// 랜더 타겟 뷰 클리어
 	m_pd3dDeviceContext->ClearRenderTargetView(
 		m_pd3dRenderTargetView.Get(), 
-		Color::Black
+		KHColor::Black
 	);
 
 	// 뎁스 스텐실 뷰 클리어

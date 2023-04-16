@@ -22,6 +22,9 @@
 
 #endif
 
+
+#pragma comment(lib, "ASEParser.lib")
+
 #include <d3d11.h>
 #include <d3d11_1.h>
 #include <d3d11_2.h>
@@ -35,7 +38,7 @@
 /// Comptr을 사용하기 위한 헤더
 #include <wrl.h>
 
-#include "../CoreEngine/IGraphics.h"
+#include "IGraphics.h"
 #include "../KH_Math/Vector2D.h"
 #include "../KH_Math/Vector3D.h"
 #include "../KH_Math/Vector4D.h"
@@ -44,19 +47,19 @@
 #include "Vertex.h"
 
 /// FX를 사용하기 위한 헤더
-#include "../DXTK/Inc/d3dx11effect.h"
+#include "../DXTK//Inc/d3dx11effect.h"
 
 /// 수학 헤더
 #include <DirectXMath.h>
 
 /// 색깔
-#include "Color.h"
+#include "KHColor.h"
 
 /// 쉐이더 파일을 직접 컴파일 하기 위한 헤더
 #include <d3dcompiler.h>
 #pragma comment(lib, "d3dcompiler.lib")
 
-#include "../DXTK/Inc/DDSTextureLoader.h"
+#include "../DXTK//Inc/DDSTextureLoader.h"
 
 #define HR(x) 	if (FAILED(x)) { return hr; }
 

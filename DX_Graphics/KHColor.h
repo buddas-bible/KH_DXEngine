@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Color
+namespace KHColor
 {
 	constexpr float AliceBlue			[4] = { 0.941176534f, 0.972549081f, 1.000000000f, 1.000000000f };
 	constexpr float AntiqueWhite		[4] = { 0.980392218f, 0.921568692f, 0.843137324f, 1.000000000f };

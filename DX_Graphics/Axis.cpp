@@ -40,14 +40,14 @@ HRESULT Axis::CreateBuffer()
 	// 꼭짓점을 설명하는 정보
 	PCVertex axis[] =
 	{
-		{Vector3D(0.f, 0.01f, 0.f),	Vector4D(Color::Red),},
-		{Vector3D(15.f, 0.01f, 0.f), Vector4D(Color::Red),},
+		{Vector3D(0.f, 0.01f, 0.f),	Vector4D(KHColor::Red),},
+		{Vector3D(15.f, 0.01f, 0.f), Vector4D(KHColor::Red),},
 
-		{Vector3D(0.f, 0.f, 0.f),	Vector4D(Color::Green),},
-		{Vector3D(0.f ,15.f, 0.f), Vector4D(Color::Green),},
+		{Vector3D(0.f, 0.f, 0.f),	Vector4D(KHColor::Green),},
+		{Vector3D(0.f ,15.f, 0.f), Vector4D(KHColor::Green),},
 
-		{Vector3D(0.f, 0.01f, 0.f),	Vector4D(Color::Blue),},
-		{Vector3D(0.f ,0.01f, 15.f), Vector4D(Color::Blue),},
+		{Vector3D(0.f, 0.01f, 0.f),	Vector4D(KHColor::Blue),},
+		{Vector3D(0.f ,0.01f, 15.f), Vector4D(KHColor::Blue),},
 	};
 
 	// 버퍼를 설정하는 구조체

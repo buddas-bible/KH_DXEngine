@@ -1,6 +1,6 @@
 #include "GameLoop.h"
 
-#include "../CoreEngine/CoreEngine.h"
+#include "CoreEngine.h"
 #pragma comment(lib, "KH_Math.lib")
 #include <cmath>
 

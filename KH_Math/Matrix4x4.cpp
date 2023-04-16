@@ -213,10 +213,12 @@ Matrix4x4 Matrix4x4::RotateMatrix(float thetaX, float thetaY, float thetaZ)
 	);
 }
 
+/*
 Matrix4x4 Matrix4x4::RotateMatrix(const Quaternion& q)
 {
 	return Matrix4x4();
 }
+*/
 
 Matrix4x4 Matrix4x4::ScaleMatrix(float scaleX, float scaleY, float scaleZ)
 {

@@ -1,6 +1,6 @@
 #pragma once
 #include "DXDefine.h"
-#include "Color.h"
+#include "KHColor.h"
 #include "Camera.h"
 
 #include "TimeManager.h"
@@ -9,6 +9,9 @@ class Box;
 class Axis;
 class Grid;
 class Skull;
+
+class CASEParser;
+class MeshObject;
 
 class DXGraphics : public IGraphics
 {
@@ -56,9 +59,6 @@ private:
 
 	HRESULT CreateObject();
 
-	HRESULT CreateInputLayout();
-
-	HRESULT CreateCubeShaders();
 	// void Test();
 
 #pragma region 오브젝트
@@ -82,6 +82,11 @@ private:
 	Skull* skull;
 	HRESULT CreateSkull();
 	
+
+	CASEParser* m_parser;
+	// Mash* m_genji;
+	MeshObject* m_teapot;
+
 #pragma endregion 오브젝트
 
 private:
@@ -92,7 +97,5 @@ private:
 	DirectX::XMFLOAT4 m_pos;
 
 	Camera camera;
-	Vector3D directionalLight;
-	Vector3D pointLight;
 };
 
