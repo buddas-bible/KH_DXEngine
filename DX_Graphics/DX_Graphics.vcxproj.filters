@@ -1,64 +1,67 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="DXGraphics">
-      <UniqueIdentifier>{d540b081-ab0c-42f6-8cfe-7aee02b77b41}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Color">
-      <UniqueIdentifier>{534da521-284b-4028-aac6-cdd41f9ab46e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="etc">
       <UniqueIdentifier>{d9397347-f2d7-4ff6-b663-4c68c5ee2976}</UniqueIdentifier>
     </Filter>
-    <Filter Include="etc\Struct">
-      <UniqueIdentifier>{07f02d51-b009-4ad4-8fb2-e0ecebb422e1}</UniqueIdentifier>
+    <Filter Include="1. DXGraphics">
+      <UniqueIdentifier>{d540b081-ab0c-42f6-8cfe-7aee02b77b41}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Object">
+    <Filter Include="2. Object">
       <UniqueIdentifier>{5efa9b4a-cf89-45cd-a053-7f2669995929}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Object\Camera">
+    <Filter Include="2. Object\Camera">
       <UniqueIdentifier>{3644887e-4b67-4f20-b601-304c24241ef7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Object\Axis">
+    <Filter Include="2. Object\Axis">
       <UniqueIdentifier>{bc2fc9f7-585b-497b-828b-5e8829a8f323}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Object\Grid">
+    <Filter Include="2. Object\Grid">
       <UniqueIdentifier>{43a31292-2e54-40a6-a398-542dacfca471}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Object\Box">
+    <Filter Include="2. Object\Box">
       <UniqueIdentifier>{d8f8ba81-8f49-418b-bee1-c13563ff7d28}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Object\Skull">
+    <Filter Include="2. Object\Skull">
       <UniqueIdentifier>{0f27749c-d3aa-49d2-a3a3-1406f354eed0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Object\Teapot">
+    <Filter Include="2. Object\Teapot">
       <UniqueIdentifier>{d23ea741-e29f-4f78-ae4a-8a3af4cb997a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3. Struct">
+      <UniqueIdentifier>{07f02d51-b009-4ad4-8fb2-e0ecebb422e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="4. Color">
+      <UniqueIdentifier>{534da521-284b-4028-aac6-cdd41f9ab46e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="5. FX">
+      <UniqueIdentifier>{582acb35-8893-4522-9366-78afb8039ecb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DXGraphics.h">
-      <Filter>DXGraphics</Filter>
+      <Filter>1. DXGraphics</Filter>
     </ClInclude>
     <ClInclude Include="KHColor.h">
-      <Filter>Color</Filter>
+      <Filter>4. Color</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
-      <Filter>Object\Camera</Filter>
+      <Filter>2. Object\Camera</Filter>
     </ClInclude>
     <ClInclude Include="DXDefine.h">
       <Filter>etc</Filter>
     </ClInclude>
     <ClInclude Include="Struct.h">
-      <Filter>etc\Struct</Filter>
+      <Filter>3. Struct</Filter>
     </ClInclude>
     <ClInclude Include="Vertex.h">
-      <Filter>etc\Struct</Filter>
+      <Filter>3. Struct</Filter>
     </ClInclude>
     <ClInclude Include="Axis.h">
-      <Filter>Object\Axis</Filter>
+      <Filter>2. Object\Axis</Filter>
     </ClInclude>
     <ClInclude Include="Grid.h">
-      <Filter>Object\Grid</Filter>
+      <Filter>2. Object\Grid</Filter>
     </ClInclude>
     <ClInclude Include="InputManager.h">
       <Filter>etc</Filter>
@@ -67,30 +70,30 @@
       <Filter>etc</Filter>
     </ClInclude>
     <ClInclude Include="Object.h">
-      <Filter>Object</Filter>
+      <Filter>2. Object</Filter>
     </ClInclude>
     <ClInclude Include="Box.h">
-      <Filter>Object\Box</Filter>
+      <Filter>2. Object\Box</Filter>
     </ClInclude>
     <ClInclude Include="Skull.h">
-      <Filter>Object\Skull</Filter>
+      <Filter>2. Object\Skull</Filter>
     </ClInclude>
     <ClInclude Include="Teapot.h">
-      <Filter>Object\Teapot</Filter>
+      <Filter>2. Object\Teapot</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DXGraphics.cpp">
-      <Filter>DXGraphics</Filter>
+      <Filter>1. DXGraphics</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
-      <Filter>Object\Camera</Filter>
+      <Filter>2. Object\Camera</Filter>
     </ClCompile>
     <ClCompile Include="Axis.cpp">
-      <Filter>Object\Axis</Filter>
+      <Filter>2. Object\Axis</Filter>
     </ClCompile>
     <ClCompile Include="Grid.cpp">
-      <Filter>Object\Grid</Filter>
+      <Filter>2. Object\Grid</Filter>
     </ClCompile>
     <ClCompile Include="InputManager.cpp">
       <Filter>etc</Filter>
@@ -99,18 +102,24 @@
       <Filter>etc</Filter>
     </ClCompile>
     <ClCompile Include="Box.cpp">
-      <Filter>Object\Box</Filter>
+      <Filter>2. Object\Box</Filter>
     </ClCompile>
     <ClCompile Include="Skull.cpp">
-      <Filter>Object\Skull</Filter>
+      <Filter>2. Object\Skull</Filter>
     </ClCompile>
     <ClCompile Include="Teapot.cpp">
-      <Filter>Object\Teapot</Filter>
+      <Filter>2. Object\Teapot</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Texture.fx" />
-    <FxCompile Include="Color.fx" />
-    <FxCompile Include="WhireWire.fx" />
+    <FxCompile Include="Color.fx">
+      <Filter>5. FX</Filter>
+    </FxCompile>
+    <FxCompile Include="Texture.fx">
+      <Filter>5. FX</Filter>
+    </FxCompile>
+    <FxCompile Include="WhireWire.fx">
+      <Filter>5. FX</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

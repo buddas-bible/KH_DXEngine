@@ -246,17 +246,25 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 			break;
 
 		case TOKENR_GEOMOBJECT:
+		{
 			/// 이 토큰을 만났다는건 새로운 메시가 생겼다는 것이다. 지역 변수로 mesh를 하나 선언, 그 포인터를 리스트에 넣고, m_onemesh에 그 포인터를 복사, 그대로 쓰면 될까?
-			break;
+			Mesh* m = new Mesh;
+			m_MeshList.push_back(m);
+			m_OneMesh = m;
+		}
+		break;
 
 		case TOKENR_NODE_NAME:
 			// 어쩄든 지금은 오브젝트들을 구별 할 수 있는 유일한 값이다.
 			// 모드에 따라 넣어야 할 곳이 다르다.
+			m_OneMesh->m_nodename = Parsing_String();
 			break;
 
 		case TOKENR_NODE_PARENT:
 			// 현 노드의 부모 노드의 정보.
 			// 일단 입력을 하고, 나중에 정리하자.
+			m_OneMesh->m_nodeparent = Parsing_String();
+			m_OneMesh->m_isparentexist = true;
 			break;
 
 			/// NODE_TM
@@ -277,31 +285,44 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 
 		case TOKENR_INHERIT_POS:
 			// 카메라는 NodeTM이 두번 나온다. 두번째라면 넣지 않는다.
+			m_OneMesh->m_inherit_pos = Parsing_NumberVector3();
 			break;
 		case TOKENR_INHERIT_ROT:
+			m_OneMesh->m_inherit_rot = Parsing_NumberVector3();
 			break;
 		case TOKENR_INHERIT_SCL:
+			m_OneMesh->m_inherit_scl = Parsing_NumberVector3();
 			break;
 		case TOKENR_TM_ROW0:
+			m_OneMesh->m_tm_row0 = Parsing_NumberVector3();
 			break;
 		case TOKENR_TM_ROW1:
+			m_OneMesh->m_tm_row1 = Parsing_NumberVector3();
 			break;
 		case TOKENR_TM_ROW2:
+			m_OneMesh->m_tm_row2 = Parsing_NumberVector3();
 			break;
 		case TOKENR_TM_ROW3:
+			m_OneMesh->m_tm_row3 = Parsing_NumberVector3();
 			break;
 		case TOKENR_TM_POS:
+			m_OneMesh->m_tm_pos = Parsing_NumberVector3();
 			break;
 		case TOKENR_TM_ROTAXIS:
+			m_OneMesh->m_tm_rotaxis = Parsing_NumberVector3();
 			break;
 		case TOKENR_TM_ROTANGLE:
+			m_OneMesh->m_tm_rotangle = Parsing_NumberFloat();
 			break;
 		case TOKENR_TM_SCALE:
+			m_OneMesh->m_tm_scale = Parsing_NumberVector3();
 			break;
 		case TOKENR_TM_SCALEAXIS:
+			m_OneMesh->m_tm_scaleaxis = Parsing_NumberVector3();
 			break;
 		case TOKENR_TM_SCALEAXISANG:
 			// 현재 카메라 상태였다면 이미 노드를 읽은 것으로 표시해준다.
+			m_OneMesh->m_tm_scaleaxisang = Parsing_NumberFloat();
 			break;
 
 
@@ -311,16 +332,20 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 			//
 			break;
 		case TOKENR_TIMEVALUE:
+			m_OneMesh->m_timevalue = Parsing_NumberInt();
 			break;
 		case TOKENR_MESH_NUMBONE:
 			// 이게 있다면 이것은 Skinned Mesh라고 단정을 짓는다.
 			// 내용 입력
+			m_OneMesh->m_numbone = Parsing_NumberInt();
 			break;
 		case TOKENR_MESH_NUMSKINWEIGHT:
 			break;
 		case TOKENR_MESH_NUMVERTEX:
+			m_OneMesh->m_mesh_numvertex = Parsing_NumberInt();
 			break;
 		case TOKENR_MESH_NUMFACES:
+			m_OneMesh->m_mesh_numfaces = Parsing_NumberInt();
 			break;
 
 			/// MESH_VERTEX_LIST
@@ -331,8 +356,14 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 			// 이미 벡터로 선언이 돼 있으므로 그냥 넣으면 된다.
 			break;
 		case TOKENR_MESH_VERTEX:
+		{
+			ASEParser::Vertex* v = new ASEParser::Vertex;
+			m_OneMesh->m_meshvertex.push_back(v);
+			int index = Parsing_NumberInt();
+			m_OneMesh->m_meshvertex[index]->m_pos = Parsing_NumberVector3();
+		}
 			// 데이터 입력
-			break;
+		break;
 
 			/// Bone
 
@@ -345,10 +376,17 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 			/// 모드 체인지 해 주고, Bone을 소유하고 있다는 것은 이것은 스키닝 오브젝트라는 것이다.
 			// 본 하나를 만들어서 임시 포인터 보관, 벡터에 넣고
 			// Bone의 넘버를 읽어 주자
+			ASEParser::Bone* b = new ASEParser::Bone;
+			m_OneMesh->m_vector_bone_list.push_back(b);
+			m_OneMesh->m_is_skinningobject = true;
 		}
 		break;
 		//이 다음에 본의 이름을 넣어야 한다. 하지만 {를 한 개 더 열었으므로 임시 포인터 변수로서 보관해야겠지.
 		case TOKENR_BONE_NAME:
+		{
+
+		}
+		break;
 		case TOKENR_BONE_PROPERTY:
 			// 이 다음 ABSOLUTE가 나오기는 하는데, 쓸 일이 없다.
 			break;
@@ -378,18 +416,42 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 		case TOKENR_MESH_FACE:
 		{
 			// Face의 번호인데...
-
+			ASEParser::Face* f = new ASEParser::Face;
+			int index = Parsing_NumberInt();
 			// A:를 읽고
+			Parsing_String();
+			f->m_vertexindex[0] = Parsing_NumberInt();
 			// B:
+			Parsing_String();
+			f->m_vertexindex[1] = Parsing_NumberInt();
 			// C:
+			Parsing_String();
+			f->m_vertexindex[2] = Parsing_NumberInt();
 
 			/// (뒤에 정보가 더 있지만 default에 의해 스킵될 것이다.)
 			/// ......
 
 			// 벡터에 넣어준다.
+			m_OneMesh->m_meshface.push_back(f);
 		}
 		break;
 
+		case TOKENR_MESH_NORMALS:
+			break;
+
+		case TOKENR_MESH_FACENORMAL:
+		{
+			int index = Parsing_NumberInt();
+			m_OneMesh->m_meshface[index]->m_normal = Parsing_NumberVector3();
+		}
+		break;
+
+		case TOKENR_MESH_VERTEXNORMAL:
+		{
+			int index = Parsing_NumberInt();
+			m_OneMesh->m_meshvertex[index]->m_normal = Parsing_NumberVector3();
+		}
+		break;
 
 		case TOKENR_MESH_NUMTVERTEX:
 			break;
@@ -420,6 +482,9 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 
 			/// 위의 아무것도 해당하지 않을때
 		default:
+		{
+
+		}
 			// 아무것도 하지 않는다.
 			break;
 
@@ -550,20 +615,3 @@ void CASEParser::Create_onevertex_to_list()
 	Vertex* temp = new Vertex;
 	m_OneMesh->m_meshvertex.push_back(temp);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

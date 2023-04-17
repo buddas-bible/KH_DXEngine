@@ -44,10 +44,11 @@
 #include "../KH_Math/Vector4D.h"
 #include "../KH_Math/Matrix3x3.h"
 #include "../KH_Math/Matrix4x4.h"
+// #pragma comment(lib, "KH_Math.lib")
 #include "Vertex.h"
 
 /// FX를 사용하기 위한 헤더
-#include "../DXTK//Inc/d3dx11effect.h"
+#include "../DXTK/Inc/d3dx11effect.h"
 
 /// 수학 헤더
 #include <DirectXMath.h>
@@ -59,7 +60,7 @@
 #include <d3dcompiler.h>
 #pragma comment(lib, "d3dcompiler.lib")
 
-#include "../DXTK//Inc/DDSTextureLoader.h"
+#include "../DXTK/Inc/DDSTextureLoader.h"
 
 #define HR(x) 	if (FAILED(x)) { return hr; }
 

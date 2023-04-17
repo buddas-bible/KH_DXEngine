@@ -7,6 +7,7 @@
 #include "Axis.h"
 #include "Grid.h"
 #include "Skull.h"
+#include "Teapot.h"
 
 #include "CASEParser.h"
 
@@ -89,6 +90,10 @@ void DXGraphics::Finalize()
 	if (skull != nullptr)
 	{
 		delete skull;
+	}
+	if (m_parser != nullptr)
+	{
+		delete m_parser;
 	}
 }
 
@@ -552,7 +557,7 @@ HRESULT DXGraphics::CreateObject()
 		return hr;
 	}
 
-	// m_teapot->LoadGeomerty();
+	m_teapot->LoadGeometry(m_parser->GetMesh(0));
 
 	return hr;
 }

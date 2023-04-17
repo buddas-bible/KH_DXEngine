@@ -128,7 +128,8 @@
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)x64/Debug/;$(SolutionDir)DXTK/Inc/;$(SolutionDir)Texture/;$(SolutionDir)"KH_Math"/;$(SolutionDir)CoreEngine/;$(SolutionDir)ASEParser/;%(AdditionalIncludeDirectories);%(AdditionalLibraryDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)x64\Debug;$(SolutionDir)DXTK\Inc;$(SolutionDir)Texture;$(SolutionDir)KH_Math;$(SolutionDir)CoreEngine;$(SolutionDir)ASEParser;%(AdditionalIncludeDirectories);%(AdditionalLibraryDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>

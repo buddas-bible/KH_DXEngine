@@ -2,6 +2,11 @@
 
 #include "Object.h"
 
+namespace ASEParser
+{
+	class Mesh;
+}
+
 class Teapot : public Object
 {
 public:
@@ -9,14 +14,18 @@ public:
 		Microsoft::WRL::ComPtr<ID3D11Device>& device,
 		Microsoft::WRL::ComPtr<ID3D11DeviceContext>& context,
 		Microsoft::WRL::ComPtr<ID3D11RasterizerState>& randerState
-	) : Object(device, context, randerState);
+	) : Object(device, context, randerState) {}
 	virtual ~Teapot();
 
 	virtual HRESULT Initialize() override;
+	virtual HRESULT CreateBuffer() override;
+	virtual HRESULT CreateLayout() override;
+	virtual HRESULT CreateEffect() override;
+	virtual HRESULT Finalize() override;
 	virtual void Update(const Matrix4x4& view, const Matrix4x4& proj) override;
 	virtual void Render() override;
 
-	void LoadGeometry(ASEParser::Mesh* meshData);
+	HRESULT LoadGeometry(ASEParser::Mesh* meshData);
 
 
 private:

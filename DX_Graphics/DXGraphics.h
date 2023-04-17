@@ -9,6 +9,7 @@ class Box;
 class Axis;
 class Grid;
 class Skull;
+class Teapot;
 
 class CASEParser;
 class MeshObject;
@@ -85,7 +86,7 @@ private:
 
 	CASEParser* m_parser;
 	// Mash* m_genji;
-	MeshObject* m_teapot;
+	Teapot* m_teapot;
 
 #pragma endregion 오브젝트
 
