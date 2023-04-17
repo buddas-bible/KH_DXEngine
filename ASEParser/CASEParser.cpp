@@ -1,4 +1,4 @@
-#include "CASEParser.h"
+ #include "CASEParser.h"
 
 
 CASEParser::CASEParser()
@@ -231,6 +231,26 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 		// MATERIAL_LIST
 		//--------------------
 
+		case TOKENR_MATERIAL_LIST:
+			break;
+
+		case TOKENR_MATERIAL_COUNT:
+		{
+			m_materialcount = Parsing_NumberInt();
+			if (m_materialcount != 0)
+			{
+				ASEMaterial* material = new ASEMaterial;
+				m_list_materialdata.push_back(material);
+				m_materialdata = material;
+			}
+		}
+		break;
+
+		case TOKENR_MATERIAL:
+		{
+			m_materialdata->m_materialnumber = Parsing_NumberInt();
+		}
+		break;
 
 		//--------------------
 		// GEOMOBJECT
