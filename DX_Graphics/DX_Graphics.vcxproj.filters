@@ -78,7 +78,7 @@
     <ClInclude Include="Skull.h">
       <Filter>2. Object\Skull</Filter>
     </ClInclude>
-    <ClInclude Include="Teapot.h">
+    <ClInclude Include="MeshObject.h">
       <Filter>2. Object\Teapot</Filter>
     </ClInclude>
   </ItemGroup>
@@ -107,7 +107,7 @@
     <ClCompile Include="Skull.cpp">
       <Filter>2. Object\Skull</Filter>
     </ClCompile>
-    <ClCompile Include="Teapot.cpp">
+    <ClCompile Include="MeshObject.cpp">
       <Filter>2. Object\Teapot</Filter>
     </ClCompile>
   </ItemGroup>
@@ -121,5 +121,6 @@
     <FxCompile Include="WhireWire.fx">
       <Filter>5. FX</Filter>
     </FxCompile>
+    <FxCompile Include="NonTextureBasic.fx" />
   </ItemGroup>
 </Project>

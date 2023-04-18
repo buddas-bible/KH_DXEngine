@@ -183,7 +183,7 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 			//--------------------
 			// SCENE
 			//--------------------
-
+#pragma region SCENE
 		case TOKENR_SCENE:
 			//
 			break;
@@ -226,36 +226,88 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 			}
 		}
 		break;
+#pragma endregion
 
 		//--------------------
 		// MATERIAL_LIST
 		//--------------------
 
+#pragma region Material
 		case TOKENR_MATERIAL_LIST:
+			Create_materialdata_to_list();
 			break;
 
 		case TOKENR_MATERIAL_COUNT:
-		{
 			m_materialcount = Parsing_NumberInt();
-			if (m_materialcount != 0)
-			{
-				ASEMaterial* material = new ASEMaterial;
-				m_list_materialdata.push_back(material);
-				m_materialdata = material;
-			}
-		}
-		break;
+			break;
 
 		case TOKENR_MATERIAL:
-		{
 			m_materialdata->m_materialnumber = Parsing_NumberInt();
-		}
-		break;
+			break;
+		case TOKENR_MATERIAL_NAME:
+			m_materialdata->m_material_name = Parsing_String();
+			break;
+		case TOKENR_MATERIAL_CLASS:
+			m_materialdata->m_material_class = Parsing_String();
+			break;
+		case TOKENR_MATERIAL_AMBIENT:
+			m_materialdata->m_material_ambient = Parsing_NumberVector3();
+			break;
+		case TOKENR_MATERIAL_DIFFUSE:
+			m_materialdata->m_material_diffuse = Parsing_NumberVector3();
+			break;
+		case TOKENR_MATERIAL_SPECULAR:
+			m_materialdata->m_material_specular = Parsing_NumberVector3();
+			break;
+		case TOKENR_MATERIAL_SHINE:
+			m_materialdata->m_material_shine = Parsing_NumberFloat();
+			break;
+		case TOKENR_MATERIAL_SHINESTRENGTH:
+			m_materialdata->m_material_shinestrength = Parsing_NumberFloat();
+			break;
+		case TOKENR_MATERIAL_WIRESIZE:
+			m_materialdata->m_material_wiresize = Parsing_NumberFloat();
+			break;
+		case TOKENR_MATERIAL_SHADING:
+			// m_materialdata->m_material_shading = Parsing_NumberFloat();
+			break;
+		case TOKENR_MATERIAL_XP_FALLOFF:
+			m_materialdata->m_material_xp_falloff = Parsing_NumberFloat();
+			break;
+		case TOKENR_MATERIAL_SELFILLUM:
+			m_materialdata->m_material_selfillum = Parsing_NumberFloat();
+			break;
+		case TOKENR_MATERIAL_FALLOFF:
+			// m_materialdata->m_material_falloff = Parsing_NumberFloat();
+			break;
+		case TOKENR_MATERIAL_XP_TYPE:
+			// m_materialdata->m_material_xp_type = Parsing_NumberFloat();
+			break;
+#pragma endregion
+
+#pragma region MapDiffuse
+			///
+		case TOKENR_MAP_DIFFUSE:
+			break;
+
+		case TOKENR_MAP_NAME:
+			break;
+		case TOKENR_MAP_CLASS:
+			break;
+		case TOKENR_MAP_SUBNO:
+			break;
+		case TOKENR_MAP_AMOUNT:
+			break;
+#pragma endregion
+
+#pragma region MapBump
+#pragma endregion
 
 		//--------------------
 		// GEOMOBJECT
 		//--------------------
 
+#pragma region GeomObject
 		case TOKENR_GROUP:
 			//	한 개의 그룹 시작. 이 다음에 이름이 스트링으로 나오기는 하는데.
 			break;
@@ -268,9 +320,7 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 		case TOKENR_GEOMOBJECT:
 		{
 			/// 이 토큰을 만났다는건 새로운 메시가 생겼다는 것이다. 지역 변수로 mesh를 하나 선언, 그 포인터를 리스트에 넣고, m_onemesh에 그 포인터를 복사, 그대로 쓰면 될까?
-			Mesh* m = new Mesh;
-			m_MeshList.push_back(m);
-			m_OneMesh = m;
+			Create_onemesh_to_list();
 		}
 		break;
 
@@ -344,10 +394,11 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 			// 현재 카메라 상태였다면 이미 노드를 읽은 것으로 표시해준다.
 			m_OneMesh->m_tm_scaleaxisang = Parsing_NumberFloat();
 			break;
+#pragma endregion
 
 
 			/// MESH
-
+#pragma region Mesh
 		case TOKENR_MESH:
 			//
 			break;
@@ -367,9 +418,11 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 		case TOKENR_MESH_NUMFACES:
 			m_OneMesh->m_mesh_numfaces = Parsing_NumberInt();
 			break;
+#pragma endregion
 
 			/// MESH_VERTEX_LIST
 
+#pragma region VertexList
 		case TOKENR_MESH_VERTEX_LIST:
 			//
 			// 버텍스의 값들을 집어넣어야 하는데
@@ -377,13 +430,13 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 			break;
 		case TOKENR_MESH_VERTEX:
 		{
-			ASEParser::Vertex* v = new ASEParser::Vertex;
-			m_OneMesh->m_meshvertex.push_back(v);
+			Create_onevertex_to_list();
 			int index = Parsing_NumberInt();
 			m_OneMesh->m_meshvertex[index]->m_pos = Parsing_NumberVector3();
 		}
 			// 데이터 입력
 		break;
+#pragma endregion
 
 			/// Bone
 
@@ -430,6 +483,7 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 
 
 		/// MESH_FACE_LIST
+#pragma region FaceList
 		case TOKENR_MESH_FACE_LIST:
 			//
 			break;
@@ -455,7 +509,9 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 			m_OneMesh->m_meshface.push_back(f);
 		}
 		break;
+#pragma endregion
 
+#pragma region MeshNormal
 		case TOKENR_MESH_NORMALS:
 			break;
 
@@ -472,8 +528,12 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 			m_OneMesh->m_meshvertex[index]->m_normal = Parsing_NumberVector3();
 		}
 		break;
+#pragma endregion
 
+
+#pragma region TextureVertexList
 		case TOKENR_MESH_NUMTVERTEX:
+			m_OneMesh->m_mesh_numtvertex = Parsing_NumberInt();
 			break;
 
 			/// MESH_TVERTLIST
@@ -485,11 +545,30 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 		{
 			// 버텍스의 인덱스가 나오는데 어차피 순서와 같으므로 버린다.
 			// 새로운 TVertex를 만들어서 벡터에 넣는다
+			int index = Parsing_NumberInt();
+			COneTVertex* t = new COneTVertex;
+			m_OneMesh->m_mesh_tvertex.push_back(t);
+			m_OneMesh->m_mesh_tvertex[index]->m_u = Parsing_NumberFloat();
+			m_OneMesh->m_mesh_tvertex[index]->m_v = Parsing_NumberFloat();
+			m_OneMesh->m_mesh_tvertex[index]->m_w = Parsing_NumberFloat();
 		}
 		break;
 		case TOKENR_MESH_NUMTVFACES:
+			m_OneMesh->m_mesh_numtvertex = Parsing_NumberInt();
 			break;
 
+		case TOKENR_MESH_TFACELIST:
+			break;
+
+		case TOKENR_MESH_TFACE:
+		{
+			int index = Parsing_NumberInt();
+			m_OneMesh->m_meshface[index]->m_TFace[0] = Parsing_NumberInt();
+			m_OneMesh->m_meshface[index]->m_TFace[1] = Parsing_NumberInt();
+			m_OneMesh->m_meshface[index]->m_TFace[2] = Parsing_NumberInt();
+		}
+		break;
+#pragma endregion
 
 		case TOKEND_END:
 			// 아마도 이건 파일의 끝이 나타났을때인것 같은데. while을 탈출해야 하는데?

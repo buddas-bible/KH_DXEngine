@@ -348,8 +348,7 @@ void Box::Render()
 	m_invMatrix->SetMatrix(reinterpret_cast<float*>(&inv));
 	const float light[3] = { 0.5f, 0.5f, 0.f };
 	m_directionalLight->SetRawValue(light, 0, sizeof(light));
-	// const float pLight[4] = { 4.f, 4.f, 4.f, 1.f };
-	// m_Light->SetFloatVector(pLight);
+
 	m_shaderResource->SetResource(m_textureView.Get());
 
 	// Å×Å©´Ð

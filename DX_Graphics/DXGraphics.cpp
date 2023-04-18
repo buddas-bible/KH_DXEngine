@@ -7,7 +7,7 @@
 #include "Axis.h"
 #include "Grid.h"
 #include "Skull.h"
-#include "Teapot.h"
+#include "MeshObject.h"
 
 #include "CASEParser.h"
 
@@ -58,10 +58,6 @@ HRESULT DXGraphics::Initialize(HWND hwnd)
 		MessageBox(m_hWnd, L"레스터스테이트 생성 실패", L"초기화 오류", MB_OK | MB_ICONWARNING);
 		return hr;
 	}
-
-	m_parser = new CASEParser();
-	m_parser->Init();
-	m_parser->Load((LPSTR)"../ASEFile/teapot.ASE");
 
 	/// 이부분 부터는 그냥 바뀔수가 있음
 	hr = CreateObject();
@@ -154,6 +150,10 @@ void DXGraphics::Update()
 	axis->Update(m_view, m_projection);
 	box->Update(m_view, m_projection);
 	skull->Update(m_view, m_projection);
+	for (auto& e : m_objectList)
+	{
+		e->Update(m_view, m_projection);
+	}
 
 	float dt = time.GetfDeltaTime();
 	if (GetAsyncKeyState(VK_Q))
@@ -557,7 +557,12 @@ HRESULT DXGraphics::CreateObject()
 		return hr;
 	}
 
-	m_teapot->LoadGeometry(m_parser->GetMesh(0));
+	hr = CreateMeshObject();
+	if (FAILED(hr))
+	{
+		MessageBox(m_hWnd, L"메쉬 오브젝트 초기화 실패", L"오브젝트 설정 오류", MB_OK | MB_ICONWARNING);
+		return hr;
+	}
 
 	return hr;
 }
@@ -652,6 +657,76 @@ HRESULT DXGraphics::CreateSkull()
 	return hr;
 }
 
+HRESULT DXGraphics::CreateMeshObject()
+{
+	HRESULT hr = S_OK;
+
+	m_parser = new CASEParser();
+	m_parser->Init();
+
+	MeshObject* teapot = new MeshObject(m_pd3dDevice, m_pd3dDeviceContext, m_currRasterizerState);
+	if (teapot == nullptr)
+	{
+		return S_FALSE;
+	}
+	m_objectList.push_back(teapot);
+	hr = teapot->Initialize();
+	m_parser->Load((LPSTR)"../ASEFile/teapot.ASE");
+	teapot->LoadGeometry(m_parser->GetMesh(0));
+
+
+	MeshObject* genji = new MeshObject(m_pd3dDevice, m_pd3dDeviceContext, m_currRasterizerState);
+	if (genji == nullptr)
+	{
+		return S_FALSE;
+	}
+	m_objectList.push_back(genji);
+	m_parser->Load((LPSTR)"../ASEFile/genji_max.ASE");
+	hr = genji->SetTexture(L"../Textures/000000002405.dds");
+	hr = genji->Initialize();
+	genji->LoadGeometry(m_parser->GetMesh(1));
+	genji->SetScalse({2.f, 2.f, 2.f});
+	genji->SetPosition({ 0.f, 2.f, 0.f });
+
+	MeshObject* genji2 = new MeshObject(m_pd3dDevice, m_pd3dDeviceContext, m_currRasterizerState);
+	if (genji2 == nullptr)
+	{
+		return S_FALSE;
+	}
+	m_objectList.push_back(genji2);
+	hr = genji2->SetTexture(L"../Textures/000000002405.dds");
+	hr = genji2->Initialize();
+	genji2->LoadGeometry(m_parser->GetMesh(2));
+	genji2->SetScalse({ 2.f, 2.f, 2.f });
+	genji2->SetPosition({ 0.f, 2.f, 0.f });
+
+	MeshObject* genji3 = new MeshObject(m_pd3dDevice, m_pd3dDeviceContext, m_currRasterizerState);
+	if (genji3 == nullptr)
+	{
+		return S_FALSE;
+	}
+	m_objectList.push_back(genji3);
+	hr = genji3->SetTexture(L"../Textures/000000002405.dds");
+	hr = genji3->Initialize();
+	genji3->LoadGeometry(m_parser->GetMesh(3));
+	genji3->SetScalse({ 2.f, 2.f, 2.f });
+	genji3->SetPosition({ 0.f, 2.f, 0.f });
+
+	MeshObject* genji4 = new MeshObject(m_pd3dDevice, m_pd3dDeviceContext, m_currRasterizerState);
+	if (genji4 == nullptr)
+	{
+		return S_FALSE;
+	}
+	m_objectList.push_back(genji4);
+	hr = genji4->SetTexture(L"../Textures/000000002405.dds");
+	hr = genji4->Initialize();
+	genji4->LoadGeometry(m_parser->GetMesh(4));
+	genji4->SetScalse({ 2.f, 2.f, 2.f });
+	genji4->SetPosition({ 0.f, 2.f, 0.f });
+
+	return hr;
+}
+
 void DXGraphics::BeginDraw()
 {
 	// 랜더 타켓 설정.
@@ -681,6 +756,10 @@ void DXGraphics::BeginDraw()
 	axis->Render();
 	box->Render();
 	skull->Render();
+	for (auto& e : m_objectList)
+	{
+		e->Render();
+	}
 }
 
 void DXGraphics::EndDraw()

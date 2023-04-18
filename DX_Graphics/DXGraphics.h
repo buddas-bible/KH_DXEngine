@@ -5,11 +5,13 @@
 
 #include "TimeManager.h"
 
+#include <vector>
+
 class Box;
 class Axis;
 class Grid;
 class Skull;
-class Teapot;
+class MeshObject;
 
 class CASEParser;
 class MeshObject;
@@ -86,7 +88,9 @@ private:
 
 	CASEParser* m_parser;
 	// Mash* m_genji;
-	Teapot* m_teapot;
+
+	std::vector<MeshObject*> m_objectList;
+	HRESULT CreateMeshObject();
 
 #pragma endregion 오브젝트
 
