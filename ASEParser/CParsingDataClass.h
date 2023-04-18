@@ -71,6 +71,28 @@ namespace ASEParser
 		int m_indices;
 
 		int* m_indicesPointer;
+
+		bool operator== (const Vertex& rhs) const noexcept {
+			if (this->m_pos == rhs.m_pos &&
+				this->m_normal == rhs.m_normal &&
+				this->u == rhs.u &&
+				this->v == rhs.v)
+			{
+				return true;
+			}
+			return false;
+		}
+
+		bool operator!= (const Vertex& rhs) const noexcept {
+			if (this->m_pos != rhs.m_pos &&
+				this->m_normal != rhs.m_normal &&
+				this->u != rhs.u &&
+				this->v != rhs.v)
+			{
+				return true;
+			}
+			return false;
+		}
 	};
 
 

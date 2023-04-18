@@ -156,63 +156,46 @@ void DXGraphics::Update()
 	}
 
 	float dt = time.GetfDeltaTime();
-	if (GetAsyncKeyState(VK_Q))
+	if (GetAsyncKeyState(VK_LEFT))
 	{
 		camera.Yaw(4 * dt);
 	}
-	if (GetAsyncKeyState(VK_E))
+	if (GetAsyncKeyState(VK_RIGHT))
 	{
 		camera.Yaw(-4 * dt);
 	}
-	if (GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_W))
+	if (GetAsyncKeyState(VK_UP))
 	{
 		camera.Pitch(4 * dt);
 	}
-	if (GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_S))
+	if (GetAsyncKeyState(VK_DOWN))
 	{
 		camera.Pitch(-4 * dt);
 	}
 
-	if (!GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_A))
+	if (GetAsyncKeyState(VK_A))
 	{
 		camera.moveR(-4 * dt);
 	}
-	if (!GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_D))
+	if (GetAsyncKeyState(VK_D))
 	{
 		camera.moveR(4 * dt);
 	}
-	if (!GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_W))
+	if (GetAsyncKeyState(VK_W))
 	{
 		camera.moveL(4 * dt);
 	}
-	if (!GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_S))
+	if (GetAsyncKeyState(VK_S))
 	{
 		camera.moveL(-4 * dt);
 	}
-
-	if (GetAsyncKeyState(VK_LEFT))
-	{
-		camera.moveX(-3.f * dt);
-	}
-	if (GetAsyncKeyState(VK_RIGHT))
-	{
-		camera.moveX(3.f * dt);
-	}
-	if (GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_UP))
+	if (GetAsyncKeyState(VK_E))
 	{
 		camera.moveY(3.f * dt);
 	}
-	if (GetAsyncKeyState(VK_SHIFT) && GetAsyncKeyState(VK_DOWN))
+	if (GetAsyncKeyState(VK_Q))
 	{
 		camera.moveY(-3.f * dt);
-	}
-	if (GetAsyncKeyState(VK_UP) && !GetAsyncKeyState(VK_SHIFT))
-	{
-		camera.moveZ(3.f * dt);
-	}
-	if (GetAsyncKeyState(VK_DOWN) && !GetAsyncKeyState(VK_SHIFT))
-	{
-		camera.moveZ(-3.f * dt);
 	}
 
 	if (GetAsyncKeyState(VK_F1))
@@ -672,6 +655,7 @@ HRESULT DXGraphics::CreateMeshObject()
 	m_objectList.push_back(teapot);
 	hr = teapot->Initialize();
 	m_parser->Load((LPSTR)"../ASEFile/teapot.ASE");
+	// m_parser->ConvertAll(m_parser->GetMesh(0));
 	teapot->LoadGeometry(m_parser->GetMesh(0));
 
 
@@ -684,6 +668,7 @@ HRESULT DXGraphics::CreateMeshObject()
 	m_parser->Load((LPSTR)"../ASEFile/genji_max.ASE");
 	hr = genji->SetTexture(L"../Textures/000000002405.dds");
 	hr = genji->Initialize();
+	// m_parser->ConvertAll(m_parser->GetMesh(1));
 	genji->LoadGeometry(m_parser->GetMesh(1));
 	genji->SetScalse({2.f, 2.f, 2.f});
 	genji->SetPosition({ 0.f, 2.f, 0.f });
@@ -696,6 +681,7 @@ HRESULT DXGraphics::CreateMeshObject()
 	m_objectList.push_back(genji2);
 	hr = genji2->SetTexture(L"../Textures/000000002405.dds");
 	hr = genji2->Initialize();
+	// m_parser->ConvertAll(m_parser->GetMesh(2));
 	genji2->LoadGeometry(m_parser->GetMesh(2));
 	genji2->SetScalse({ 2.f, 2.f, 2.f });
 	genji2->SetPosition({ 0.f, 2.f, 0.f });
@@ -708,6 +694,7 @@ HRESULT DXGraphics::CreateMeshObject()
 	m_objectList.push_back(genji3);
 	hr = genji3->SetTexture(L"../Textures/000000002405.dds");
 	hr = genji3->Initialize();
+	// m_parser->ConvertAll(m_parser->GetMesh(3));
 	genji3->LoadGeometry(m_parser->GetMesh(3));
 	genji3->SetScalse({ 2.f, 2.f, 2.f });
 	genji3->SetPosition({ 0.f, 2.f, 0.f });
@@ -720,6 +707,7 @@ HRESULT DXGraphics::CreateMeshObject()
 	m_objectList.push_back(genji4);
 	hr = genji4->SetTexture(L"../Textures/000000002405.dds");
 	hr = genji4->Initialize();
+	// m_parser->ConvertAll(m_parser->GetMesh(4));
 	genji4->LoadGeometry(m_parser->GetMesh(4));
 	genji4->SetScalse({ 2.f, 2.f, 2.f });
 	genji4->SetPosition({ 0.f, 2.f, 0.f });
