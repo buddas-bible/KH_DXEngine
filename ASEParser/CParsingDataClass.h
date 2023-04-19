@@ -73,25 +73,110 @@ namespace ASEParser
 		int* m_indicesPointer;
 
 		bool operator== (const Vertex& rhs) const noexcept {
-			if (this->m_pos == rhs.m_pos &&
-				this->m_normal == rhs.m_normal &&
-				this->u == rhs.u &&
-				this->v == rhs.v)
+			if (m_pos.x == rhs.m_pos.x &&
+				m_pos.y == rhs.m_pos.y &&
+				m_pos.z == rhs.m_pos.z)
 			{
-				return true;
+				if (m_normal.x == rhs.m_normal.x &&
+					m_normal.y == rhs.m_normal.y &&
+					m_normal.z == rhs.m_normal.z)
+				{
+					if (u == rhs.u &&
+						v == rhs.v)
+					{
+						return true;
+					}
+				}
 			}
 			return false;
 		}
 
 		bool operator!= (const Vertex& rhs) const noexcept {
-			if (this->m_pos != rhs.m_pos &&
-				this->m_normal != rhs.m_normal &&
-				this->u != rhs.u &&
-				this->v != rhs.v)
+			if (m_pos.x != rhs.m_pos.x &&
+				m_pos.y != rhs.m_pos.y &&
+				m_pos.z != rhs.m_pos.z)
 			{
-				return true;
+				if (m_normal.x != rhs.m_normal.x &&
+					m_normal.y != rhs.m_normal.y &&
+					m_normal.z != rhs.m_normal.z)
+				{
+					if (u != rhs.u &&
+						v != rhs.v)
+					{
+						return true;
+					}
+				}
 			}
 			return false;
+		}
+
+		bool operator<(const Vertex& rhs) const noexcept
+		{
+			if (this->m_pos.x != rhs.m_pos.x)
+			{
+				return this->m_pos.x < rhs.m_pos.x;
+			}
+			if (this->m_pos.y != rhs.m_pos.y)
+			{
+				return this->m_pos.y < rhs.m_pos.y;
+			}
+			if (this->m_pos.z != rhs.m_pos.z)
+			{
+				return this->m_pos.z < rhs.m_pos.z;
+			}
+			if (this->m_normal.x != rhs.m_normal.x)
+			{
+				return this->m_normal.x < rhs.m_normal.x;
+			}
+			if (this->m_normal.y != rhs.m_normal.y)
+			{
+				return this->m_normal.y < rhs.m_normal.y;
+			}
+			if (this->m_normal.z != rhs.m_normal.z)
+			{
+				return this->m_normal.z < rhs.m_normal.z;
+			}
+			if (this->u != rhs.u)
+			{
+				return this->u < rhs.u;
+			}
+			return this->v < rhs.v;
+
+			/// 맵을 사용하려니까 < 가 오버로딩 되어있지 않다고 그래서
+			/// 원래는 아래의 함수를 사용했었는데
+			/// 계속 오류가 생겨서 왜 그런가 찾아보니
+			/// 
+			/// Strict Weak Ordering 이란 것 때문이란다
+			/// 
+			/// 비교 함수를 어설프게 작성하고 돌리면 런타임 에러가 뜬다는데
+			/// 비교 함수의 필요 조건이라는 것 같다.
+			/// 1. 비반사성
+			///		모든 x에 대해 x < x는 거짓
+			/// 2. 비대칭성
+			///		모든 x, y에 대해 x < y 면 y < x는 거짓
+			/// 3. 추이성
+			///		모든 x, y, z에 대해 x < y이고 y < z이면 x < z
+			/// 4. 비비교성의 추이성
+			///		모든 x, y, z에 대해 x == y이고 y == z이면 x == z
+			/// 
+			///	맵은 < 연산자로 내부적으로 정렬을 하는데 
+			/// 위 조건이 모호해서 문제가 생겼던 것으로 보인다.
+// 			if (this->m_pos.x < rhs.m_pos.x && 
+// 				this->m_pos.y < rhs.m_pos.y &&
+// 				this->m_pos.z < rhs.m_pos.z)
+// 			{
+// 				if (this->m_normal.x < rhs.m_normal.x &&
+// 					this->m_normal.y < rhs.m_normal.y &&
+// 					this->m_normal.z < rhs.m_normal.z)
+// 				{
+// 					if (this->u < rhs.u &&
+// 						this->v < rhs.v)
+// 					{
+// 						return true;
+// 					}
+// 				}
+// 			}
+// 			return false;
 		}
 	};
 

@@ -26,7 +26,7 @@ enum eObjectType
 // 파서 내부에서 쓰는 데이터형
 #include "CParsingDataClass.h"
 #include "Animation.h"
-
+#include <unordered_map>
 #include <map>
 #include <list>
 

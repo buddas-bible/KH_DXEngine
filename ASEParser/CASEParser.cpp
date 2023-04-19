@@ -160,6 +160,21 @@ Mesh*& CASEParser::CreateVertexList(Mesh*& mesh)
 			mesh->m_rawIndex.push_back(index);
 		}
 	}
+	
+	for (auto& e : face)
+	{
+		delete e;
+	}
+	for (auto& e : vertex)
+	{
+		delete e;
+	}
+	for (auto& e : tvertex)
+	{
+		delete e;
+	}
+	vertexMap.clear();
+
 	return mesh;
 }
 
@@ -167,18 +182,20 @@ Mesh*& CASEParser::CreateVertexList(Mesh*& mesh)
 int CASEParser::GetVertexIndex(Mesh*& mesh, Vertex*& v)
 {
 	int size = mesh->m_rawVertex.size();
-	for (int i = 0; i < size; i++)
+	Vertex temp = *v;
+
+	auto itr = vertexMap.find(temp);			// 맵에서 버텍스를 찾음
+	if (itr != vertexMap.end())					// 버텍스를 찾게 된다면
 	{
-		if (*(mesh->m_rawVertex[i]) == *v)
-		{
-			delete v;
-			return i;
-		}
+		delete v;
+		return vertexMap[temp];					// 해당 인덱스 반환
 	}
-
-	mesh->m_rawVertex.push_back(v);
-
-	return size;
+	else										// 버텍스를 찾지 못한다면
+	{
+		vertexMap[*v] = size;					// 해당 버텍스를 맵에 넣고
+		mesh->m_rawVertex.push_back(v);			// 버텍스 배열에 포인터 넣음.
+		return size;							// 인덱스 반환
+	}
 }
 
 
