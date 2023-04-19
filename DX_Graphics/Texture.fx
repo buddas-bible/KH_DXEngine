@@ -40,17 +40,11 @@ VertexOut VS(VertexIn vin)
     VertexOut vout; 
     float3 N = mul(float4(vin.Normal, 0.f), invTworldViewProj);
     N = normalize(N);
-    // float3 N = vin.Normal;
     float3 L = lightDirection;
-    // float4 L2 = pLight;
 
     vout.PosH = mul(float4(vin.PosL, 1.0f), worldViewProj);
-    // float4 D = float4(vin.PosL, 1.0f) - L2;
-    // D = normalize(D);
     vout.uv = vin.uv;
     vout.Diffuse = dot(N, L) * 0.5f + 0.5f;         // Half Lambert
-    // vout.Diffuse2 = dot(N, D);
-    // vout.Diffuse = dot(N, L);
 
     return vout;
 }

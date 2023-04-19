@@ -16,14 +16,17 @@ namespace ASEParser
 		m_vertexindex[1] = 0;
 		m_vertexindex[2] = 0;
 
-		m_normal = Vector3(0, 0, 0);
+		m_normal = Vector3(0.f, 0.f, 0.f);
 	}
 
 	COneTVertex::COneTVertex()
 	{
-		m_u = 0;
-		m_v = 0;
-		m_w = 0;
+		this->m_u = 0.f;
+		this->m_v = 0.f;
+		this->m_w = 0.f;
+		// uvw.x = 0;
+		// uvw.y = 0;
+		// uvw.z = 0;
 	}
 
 	ShapeLine::ShapeLine()

@@ -11,6 +11,13 @@ namespace ASEParser
 class MeshObject : public Object
 {
 public:
+	enum class eParsingMode
+	{
+		ASE,
+		BLENDER,
+
+	};
+
 	MeshObject(
 		Microsoft::WRL::ComPtr<ID3D11Device>& device,
 		Microsoft::WRL::ComPtr<ID3D11DeviceContext>& context,
@@ -27,10 +34,13 @@ public:
 	virtual void Render() override;
 
 	HRESULT LoadGeometry(ASEParser::Mesh* meshData);
+	HRESULT LoadASE(ASEParser::Mesh*& meshData);
+	HRESULT LoadBLENDER(ASEParser::Mesh*& meshData);
 
 	void SetScalse(Vector3D scale);
 	void SetPosition(Vector3D position);
 
+	void SetMode(eParsingMode _mode);
 	HRESULT SetTexture(const std::wstring& path);
 
 private:
@@ -38,6 +48,7 @@ private:
 	Vector3D m_angle{ 0.f, 0.f, 0.f };
 	Vector3D m_scale{ 0.5f, 0.5f, 0.5f };
 	bool isTexture{false};
+	eParsingMode mode = eParsingMode::ASE;
 
 private:
 	// UINT count;

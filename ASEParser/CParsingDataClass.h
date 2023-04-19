@@ -105,7 +105,7 @@ namespace ASEParser
 	struct COneTVertex
 	{
 		COneTVertex();
-
+		// Vector3 uvw;
 		float m_u, m_v, m_w;
 	};
 
@@ -376,18 +376,15 @@ namespace ASEParser
 
 		// 텍스쳐용 데이터들
 		/// *MESH_NUMTVERTEX
+		bool istexture;
 		int	m_mesh_numtvertex;		// 텍스쳐용 버텍스 갯수
 		vector<COneTVertex*> m_mesh_tvertex;		// 텍스쳐용 버텍스
 		/// *MESH_RVERTLIST
 		int	m_mesh_tvfaces;			// 텍스쳐용 페이스 갯수 - (갯수는 위의 Face와 같고 이미 위에서 만들었으므로 내용만 넣어주면 된다)
 		int	m_mesh_numcvertex;		// ※ 이건 어디에 쓰는것?
 
-		// 노말 정보들
-		Vector3* m_mesh_facenormal;			// 각 페이스 노말에
-		Vector3* m_mesh_vertexnormal;		// 버텍스 노말이 3개씩
-
-		vector<Vertex*> m_opt_vertex;	/// 최적화 후의 버텍스들
-		IndexList* m_opt_index;			/// 최적화 후의 인덱스들
+		vector<Vertex*>	m_rawVertex;	// 최적화 이전
+		vector<int>	m_rawIndex;			// 최적화 이전
 
 		///----------------------------------
 		/// Shape Object
@@ -462,6 +459,3 @@ namespace ASEParser
 
 	};
 }
-
-
-

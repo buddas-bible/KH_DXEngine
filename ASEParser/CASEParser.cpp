@@ -68,6 +68,7 @@ bool CASEParser::Convert_Optimize(Mesh* pMesh)
 
 bool CASEParser::ConvertAll(Mesh* pMesh)
 {
+/*
 	// 버텍스들은 일단 모두 복사
 	for (unsigned int i = 0; i < pMesh->m_meshvertex.size(); i++)
 	{
@@ -108,12 +109,87 @@ bool CASEParser::ConvertAll(Mesh* pMesh)
 		}
 	}
 
+*/
 	return FALSE;
+}
+
+/// <summary>
+/// 버텍스와 텍스쳐 버텍스를 합쳐주는 곳.
+/// 
+/// face의 인덱스를 참고하면서 해당하는 버텍스에 텍스쳐 좌표를 추가해줌.
+/// </summary>
+Mesh*& CASEParser::CreateVertexList(Mesh*& mesh)
+{
+	const auto& face = mesh->m_meshface;			// 메쉬의 face
+	const auto& vertex = mesh->m_meshvertex;
+	const auto& tvertex = mesh->m_mesh_tvertex;		// 메쉬의 t
+	mesh->istexture = tvertex.empty();
+
+	// 텍스쳐 좌표가 없는 메쉬면 넘어감
+	for (size_t i = 0; i < face.size(); i++)
+	{
+		for (int j = 0; j < 3; j++)
+		{
+			int v1 = face[i]->m_vertexindex[j];			// face에서 버텍스의 인덱스를 가져옴
+
+			Vertex* v = new Vertex;
+			const Vertex& vt = *vertex[v1];
+			v->m_pos = vt.m_pos;				// 버텍스 배열 해당 인덱스에 있는 pos를 가져옴
+			v->m_normal = vt.m_normal;			// 버텍스 배열 해당 인덱스에 있는 normal을 가져옴
+			if (mesh->istexture)				// texture 없을수도 있지?
+			{
+				v->u = 0.f;
+				v->v = 0.f;
+			}
+			else
+			{
+				int t1 = face[i]->m_TFace[j];				// face에서 텍스쳐 좌표를 가져옴
+				v->u = tvertex[t1]->m_u;
+				v->v = tvertex[t1]->m_v;
+			}
+
+			/// 해당 버텍스가 버퍼 안에 있는지 확인
+			/// 없으면 버퍼에 버텍스를 넣고 인덱스 버퍼에 인덱스를 넣고
+			/// 인덱스를 증가시킴.
+			/// 
+			/// 해당 버텍스가 버퍼 안에 있으면
+			/// 해당 인덱스를 가져와서 인덱스 버퍼에 인덱스를 넣음. 
+
+			int index = GetVertexIndex(mesh, v);
+
+			mesh->m_rawIndex.push_back(index);
+		}
+	}
+	return mesh;
+}
+
+
+int CASEParser::GetVertexIndex(Mesh*& mesh, Vertex*& v)
+{
+	int size = mesh->m_rawVertex.size();
+	for (int i = 0; i < size; i++)
+	{
+		if (*(mesh->m_rawVertex[i]) == *v)
+		{
+			delete v;
+			return i;
+		}
+	}
+
+	mesh->m_rawVertex.push_back(v);
+
+	return size;
+}
+
+
+int CASEParser::GetFVertexIndex()
+{
+	return 0;
 }
 
 ASEParser::Mesh* CASEParser::GetMesh(int index)
 {
-	return m_MeshList[index];
+	return CreateVertexList(m_MeshList[index]);
 }
 
 //----------------------------------------------------------------
@@ -439,7 +515,7 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 #pragma endregion
 
 			/// Bone
-
+#pragma region Bone
 		case TOKENR_SKIN_INITTM:
 			break;
 		case TOKENR_BONE_LIST:
@@ -480,6 +556,7 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 			/// 헥 헥....
 		}
 		break;
+#pragma endregion
 
 
 		/// MESH_FACE_LIST
@@ -546,11 +623,11 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 			// 버텍스의 인덱스가 나오는데 어차피 순서와 같으므로 버린다.
 			// 새로운 TVertex를 만들어서 벡터에 넣는다
 			int index = Parsing_NumberInt();
-			COneTVertex* t = new COneTVertex;
-			m_OneMesh->m_mesh_tvertex.push_back(t);
-			m_OneMesh->m_mesh_tvertex[index]->m_u = Parsing_NumberFloat();
-			m_OneMesh->m_mesh_tvertex[index]->m_v = Parsing_NumberFloat();
-			m_OneMesh->m_mesh_tvertex[index]->m_w = Parsing_NumberFloat();
+			COneTVertex* t = new COneTVertex;				// 새로운 텍스쳐 버텍스 생성
+			t->m_u = Parsing_NumberFloat();					// 좌표를 읽어옴
+			t->m_v = Parsing_NumberFloat();
+			t->m_w = Parsing_NumberFloat();
+			m_OneMesh->m_mesh_tvertex.push_back(t);			// 벡터에 저장함
 		}
 		break;
 		case TOKENR_MESH_NUMTVFACES:
@@ -560,8 +637,11 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 		case TOKENR_MESH_TFACELIST:
 			break;
 
+
 		case TOKENR_MESH_TFACE:
 		{
+			// face개수, tface개수 normalface 개수가 같은걸 보니 서로 대응되는 관계라고 유추할 수 있음
+			// 각 face가 가지고 있는 vertex 인덱스를 확인해서 새로운 버택스를 만들어서 벡터에 저장함.
 			int index = Parsing_NumberInt();
 			m_OneMesh->m_meshface[index]->m_TFace[0] = Parsing_NumberInt();
 			m_OneMesh->m_meshface[index]->m_TFace[1] = Parsing_NumberInt();

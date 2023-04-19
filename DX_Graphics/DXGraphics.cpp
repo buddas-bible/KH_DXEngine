@@ -647,6 +647,7 @@ HRESULT DXGraphics::CreateMeshObject()
 	m_parser = new CASEParser();
 	m_parser->Init();
 
+	/*
 	MeshObject* teapot = new MeshObject(m_pd3dDevice, m_pd3dDeviceContext, m_currRasterizerState);
 	if (teapot == nullptr)
 	{
@@ -655,8 +656,8 @@ HRESULT DXGraphics::CreateMeshObject()
 	m_objectList.push_back(teapot);
 	hr = teapot->Initialize();
 	m_parser->Load((LPSTR)"../ASEFile/teapot.ASE");
-	// m_parser->ConvertAll(m_parser->GetMesh(0));
 	teapot->LoadGeometry(m_parser->GetMesh(0));
+	*/
 
 
 	MeshObject* genji = new MeshObject(m_pd3dDevice, m_pd3dDeviceContext, m_currRasterizerState);
@@ -666,10 +667,9 @@ HRESULT DXGraphics::CreateMeshObject()
 	}
 	m_objectList.push_back(genji);
 	m_parser->Load((LPSTR)"../ASEFile/genji_max.ASE");
-	hr = genji->SetTexture(L"../Textures/000000002405.dds");
+	hr = genji->SetTexture(L"../Textures/000000002405_reverse.dds");
 	hr = genji->Initialize();
-	// m_parser->ConvertAll(m_parser->GetMesh(1));
-	genji->LoadGeometry(m_parser->GetMesh(1));
+	genji->LoadGeometry(m_parser->GetMesh(0));
 	genji->SetScalse({2.f, 2.f, 2.f});
 	genji->SetPosition({ 0.f, 2.f, 0.f });
 
@@ -679,10 +679,9 @@ HRESULT DXGraphics::CreateMeshObject()
 		return S_FALSE;
 	}
 	m_objectList.push_back(genji2);
-	hr = genji2->SetTexture(L"../Textures/000000002405.dds");
+	hr = genji2->SetTexture(L"../Textures/000000002405_reverse.dds");
 	hr = genji2->Initialize();
-	// m_parser->ConvertAll(m_parser->GetMesh(2));
-	genji2->LoadGeometry(m_parser->GetMesh(2));
+	genji2->LoadGeometry(m_parser->GetMesh(1));
 	genji2->SetScalse({ 2.f, 2.f, 2.f });
 	genji2->SetPosition({ 0.f, 2.f, 0.f });
 
@@ -692,10 +691,9 @@ HRESULT DXGraphics::CreateMeshObject()
 		return S_FALSE;
 	}
 	m_objectList.push_back(genji3);
-	hr = genji3->SetTexture(L"../Textures/000000002405.dds");
+	hr = genji3->SetTexture(L"../Textures/000000002405_reverse.dds");
 	hr = genji3->Initialize();
-	// m_parser->ConvertAll(m_parser->GetMesh(3));
-	genji3->LoadGeometry(m_parser->GetMesh(3));
+	genji3->LoadGeometry(m_parser->GetMesh(2));
 	genji3->SetScalse({ 2.f, 2.f, 2.f });
 	genji3->SetPosition({ 0.f, 2.f, 0.f });
 
@@ -705,12 +703,25 @@ HRESULT DXGraphics::CreateMeshObject()
 		return S_FALSE;
 	}
 	m_objectList.push_back(genji4);
-	hr = genji4->SetTexture(L"../Textures/000000002405.dds");
+	hr = genji4->SetTexture(L"../Textures/000000002405_reverse.dds");
 	hr = genji4->Initialize();
-	// m_parser->ConvertAll(m_parser->GetMesh(4));
-	genji4->LoadGeometry(m_parser->GetMesh(4));
+	genji4->LoadGeometry(m_parser->GetMesh(3));
 	genji4->SetScalse({ 2.f, 2.f, 2.f });
 	genji4->SetPosition({ 0.f, 2.f, 0.f });
+
+	MeshObject* genjia = new MeshObject(m_pd3dDevice, m_pd3dDeviceContext, m_currRasterizerState);
+	if (genjia == nullptr)
+	{
+		return S_FALSE;
+	}
+	m_objectList.push_back(genjia);
+	m_parser->Load((LPSTR)"../ASEFile/genji_blender.ASE");
+	hr = genjia->SetTexture(L"../Textures/000000002405.dds");
+	hr = genjia->Initialize();
+	genjia->LoadGeometry(m_parser->GetMesh(4));
+	genjia->SetScalse({ 0.2f, 0.2f, 0.2f });
+	genjia->SetPosition({ -1.f, 0.f, 0.f });
+
 
 	return hr;
 }

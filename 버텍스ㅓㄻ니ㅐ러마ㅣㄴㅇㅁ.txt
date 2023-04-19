@@ -1,0 +1,16 @@
+vertex, nvertex, fvertex를 다 모아둠.
+
+face를 참조해서
+vertex를 만듬
+ex ) 
+face[0] = 0, 2, 3
+nface[0] = 0, 2, 3
+fface[0] =10, 11, 13
+
+새로운 버텍스는 
+newVertex(vertex[0], nvertex[0], fvertex[10])
+newVertex(vertex[2], nvertex[2], fvertex[11])
+newVertex(vertex[3], nvertex[3], fvertex[13])
+같은 느낌으로 서로 대응되는 관계인거 같다.
+
+그리고 인덱스는 face가 가지고 있는 index를 따라가면 될듯함.

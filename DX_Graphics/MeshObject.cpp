@@ -81,7 +81,6 @@ HRESULT MeshObject::CreateLayout()
 HRESULT MeshObject::CreateEffect()
 {
 	HRESULT hr = S_OK;
-
 #if _WIN64
 
 #if _DEBUG
@@ -125,10 +124,15 @@ HRESULT MeshObject::CreateEffect()
 	m_matrix = m_effect->GetVariableByName("worldViewProj")->AsMatrix();	// 파일에 worldViewProj 이름의 데이터를 읽어옴
 	m_light = m_effect->GetVariableByName("lightDirection");
 
-	if (isTexture)
+	m_shaderResource = m_effect->GetVariableByName("g_Texture")->AsShaderResource();	// 
+	if (!m_shaderResource)
 	{
-		m_shaderResource = m_effect->GetVariableByName("g_Texture")->AsShaderResource();	// 
-		m_sampler = m_effect->GetVariableByName("g_Sampler")->AsSampler();
+		return S_FALSE;
+	}
+	m_sampler = m_effect->GetVariableByName("g_Sampler")->AsSampler();
+	if (!m_sampler)
+	{
+		return S_FALSE;
 	}
 
 	return hr;
@@ -182,7 +186,7 @@ void MeshObject::Render()
 	const float light[3] = { 0.5f, 0.5f, 0.f };
 	m_light->SetRawValue(light, 0, sizeof(light));
 
-	if (isTexture)
+	if (m_shaderResource)
 	{
 		m_shaderResource->SetResource(m_textureView.Get());
 	}
@@ -203,41 +207,58 @@ HRESULT MeshObject::LoadGeometry(ASEParser::Mesh* meshData)
 {
 	HRESULT hr = S_OK;
 
+	switch (mode)
+	{
+		case MeshObject::eParsingMode::ASE:
+			hr = LoadASE(meshData);
+			break;
+		case MeshObject::eParsingMode::BLENDER:
+			hr = LoadBLENDER(meshData);
+			break;
+		default:
+			break;
+	}
+
+	return hr;
+}
+
+
+HRESULT MeshObject::LoadASE(ASEParser::Mesh*& meshData)
+{
+	HRESULT hr = S_OK;
+
 	UINT vcount = 0;
 	UINT tcount = 0;
 
-	vcount = meshData->m_meshvertex.size();
+	vcount = meshData->m_rawVertex.size();
 	std::vector<PTNVertex> vertices(vcount);
 
-	//for (ASEParser::Vertex* vertex : meshData->m_meshvertex)
+	isTexture = meshData->istexture;
+
 	for (int i = 0; i < vcount; i++)
 	{
-		vertices[i].pos.x = meshData->m_meshvertex[i]->m_pos.x;
-		vertices[i].pos.y = meshData->m_meshvertex[i]->m_pos.y;
-		vertices[i].pos.z = meshData->m_meshvertex[i]->m_pos.z;
+		vertices[i].pos.x = meshData->m_rawVertex[i]->m_pos.x;
+		vertices[i].pos.y = meshData->m_rawVertex[i]->m_pos.y;
+		vertices[i].pos.z = meshData->m_rawVertex[i]->m_pos.z;
 
-		// vertices[i].uv.x = meshData->m_meshvertex[i]->u;
-		// vertices[i].uv.y = meshData->m_meshvertex[i]->v;
-		if (meshData->m_mesh_tvertex.size() != 0)
-		{
-			vertices[i].uv.x = meshData->m_mesh_tvertex[i]->m_u;
-			vertices[i].uv.y = meshData->m_mesh_tvertex[i]->m_v;
-		}
+		vertices[i].uv.x = meshData->m_rawVertex[i]->u;
+		vertices[i].uv.y = meshData->m_rawVertex[i]->v;
 
-		vertices[i].normal.x = meshData->m_meshvertex[i]->m_normal.x;
-		vertices[i].normal.y = meshData->m_meshvertex[i]->m_normal.y;
-		vertices[i].normal.z = meshData->m_meshvertex[i]->m_normal.z;
+		vertices[i].normal.x = meshData->m_rawVertex[i]->m_normal.x;
+		vertices[i].normal.y = meshData->m_rawVertex[i]->m_normal.y;
+		vertices[i].normal.z = meshData->m_rawVertex[i]->m_normal.z;
 	}
 
-	tcount = meshData->m_mesh_numfaces;
+	tcount = meshData->m_rawIndex.size();
 
-	count = 3 * tcount;
+	count = tcount;
+	int inv = tcount / 3;
 	std::vector<UINT> indices(count);
-	for (UINT i = 0; i < tcount; ++i)
+	for (UINT i = 0; i < inv; ++i)
 	{
-		indices[i * 3 + 0] = meshData->m_meshface[i]->m_vertexindex[0];
-		indices[i * 3 + 1] = meshData->m_meshface[i]->m_vertexindex[2];
-		indices[i * 3 + 2] = meshData->m_meshface[i]->m_vertexindex[1];
+		indices[i * 3 + 0] = meshData->m_rawIndex[i * 3 + 0];
+		indices[i * 3 + 1] = meshData->m_rawIndex[i * 3 + 2];
+		indices[i * 3 + 2] = meshData->m_rawIndex[i * 3 + 1];
 	}
 
 	D3D11_BUFFER_DESC vbd;
@@ -255,9 +276,77 @@ HRESULT MeshObject::LoadGeometry(ASEParser::Mesh* meshData)
 		return hr;
 	}
 
-	//
-	// Pack the indices of all the meshes into one index buffer.
-	//
+	D3D11_BUFFER_DESC ibd;
+	ibd.Usage = D3D11_USAGE_DEFAULT;
+	ibd.ByteWidth = sizeof(UINT) * count;
+	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	ibd.CPUAccessFlags = 0;
+	ibd.MiscFlags = 0;
+	D3D11_SUBRESOURCE_DATA iinitData;
+	iinitData.pSysMem = &indices[0];
+	hr = m_device->CreateBuffer(&ibd, &iinitData, &m_indexBuffer);
+
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+
+	return hr;
+}
+
+
+HRESULT MeshObject::LoadBLENDER(ASEParser::Mesh*& meshData)
+{
+	HRESULT hr = S_OK;
+
+	UINT vcount = 0;
+	UINT tcount = 0;
+
+	vcount = meshData->m_rawVertex.size();
+	std::vector<PTNVertex> vertices(vcount);
+
+	isTexture = meshData->istexture;
+
+	for (int i = 0; i < vcount; i++)
+	{
+		vertices[i].pos.x = meshData->m_rawVertex[i]->m_pos.x;
+		vertices[i].pos.y = meshData->m_rawVertex[i]->m_pos.y;
+		vertices[i].pos.z = meshData->m_rawVertex[i]->m_pos.z;
+
+		vertices[i].uv.x = -1.f * meshData->m_rawVertex[i]->u;
+		vertices[i].uv.y = meshData->m_rawVertex[i]->v;
+
+		vertices[i].normal.x = meshData->m_rawVertex[i]->m_normal.x;
+		vertices[i].normal.y = meshData->m_rawVertex[i]->m_normal.y;
+		vertices[i].normal.z = meshData->m_rawVertex[i]->m_normal.z;
+	}
+
+	tcount = meshData->m_rawIndex.size();
+
+	count = tcount;
+	int inv = tcount / 3;
+	std::vector<UINT> indices(count);
+	for (UINT i = 0; i < inv; ++i)
+	{
+		indices[i * 3 + 0] = meshData->m_rawIndex[i * 3 + 0];
+		indices[i * 3 + 1] = meshData->m_rawIndex[i * 3 + 2];
+		indices[i * 3 + 2] = meshData->m_rawIndex[i * 3 + 1];
+	}
+
+	D3D11_BUFFER_DESC vbd;
+	vbd.Usage = D3D11_USAGE_DEFAULT;
+	vbd.ByteWidth = sizeof(PTNVertex) * vcount;
+	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vbd.CPUAccessFlags = 0;
+	vbd.MiscFlags = 0;
+	D3D11_SUBRESOURCE_DATA vinitData;
+	vinitData.pSysMem = &vertices[0];
+	hr = m_device->CreateBuffer(&vbd, &vinitData, &m_vertexBuffer);
+
+	if (FAILED(hr))
+	{
+		return hr;
+	}
 
 	D3D11_BUFFER_DESC ibd;
 	ibd.Usage = D3D11_USAGE_DEFAULT;
@@ -285,6 +374,12 @@ void MeshObject::SetScalse(Vector3D scale)
 void MeshObject::SetPosition(Vector3D position)
 {
 	m_pos = position;
+}
+
+
+void MeshObject::SetMode(eParsingMode _mode)
+{
+	this->mode = _mode;
 }
 
 HRESULT MeshObject::SetTexture(const wstring& path)

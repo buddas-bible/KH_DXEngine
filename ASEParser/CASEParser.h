@@ -27,6 +27,7 @@ enum eObjectType
 #include "CParsingDataClass.h"
 #include "Animation.h"
 
+#include <map>
 #include <list>
 
 using namespace std;
@@ -66,6 +67,10 @@ public:
 	bool Convert_Optimize(Mesh* pMesh);		// 버텍스(노말), 텍스쳐 값으로 최적화를 해 준다.
 	bool ConvertAll(Mesh* pMesh);			// 모두 그냥 변환 (예시용)
 
+	Mesh*& CreateVertexList(Mesh*& mesh);
+	int GetVertexIndex(Mesh*& mesh, Vertex*& v);
+	int GetFVertexIndex();
+
 
 private:
 	// 토큰을 구별해내기 위한 스트링
@@ -103,6 +108,7 @@ public:
 	// Export
 	//--------------------------------------------------
 	Mesh* GetMesh(int index);
+	std::map<ASEParser::Vertex, int> vertexMap;
 
 
 public:

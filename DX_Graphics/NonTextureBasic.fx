@@ -11,6 +11,9 @@ cbuffer cbPerObject
     float4x4 invTworldViewProj;
 };
 
+Texture2D g_Texture;
+SamplerState g_Sampler;
+
 cbuffer cbPerFrame
 {
     float3 lightDirection;
@@ -49,7 +52,7 @@ VertexOut VS(VertexIn vin)
 float4 PS(VertexOut pin) : SV_Target
 {
     // ºû°ú ÇÈ¼¿ ³ë¸»ÀÌ¶û ³»ÀûÇÔ.
-    float4 c = float4(1.f, 1.f, 1.f, 1.f);
+    float4 c = g_Texture.Sample(g_Sampler, pin.uv);
     return c * pin.Diffuse;
 }
 
