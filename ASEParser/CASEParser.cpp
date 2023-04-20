@@ -31,6 +31,8 @@ bool CASEParser::Init()
 //---------------------------------------------------------------------------------------------------
 bool CASEParser::Load(LPSTR p_File)
 {
+	meshCount = 0;
+
 	/// 0) 파일을 로드한다.
 	if (!m_lexer->Open(p_File))
 	{
@@ -118,7 +120,7 @@ bool CASEParser::ConvertAll(Mesh* pMesh)
 /// 
 /// face의 인덱스를 참고하면서 해당하는 버텍스에 텍스쳐 좌표를 추가해줌.
 /// </summary>
-Mesh*& CASEParser::CreateVertexList(Mesh*& mesh)
+Mesh*& CASEParser::CreateVertexList(Mesh*& mesh, int index)
 {
 	const auto& face = mesh->m_meshface;			// 메쉬의 face
 	const auto& vertex = mesh->m_meshvertex;
@@ -206,8 +208,21 @@ int CASEParser::GetFVertexIndex()
 
 ASEParser::Mesh* CASEParser::GetMesh(int index)
 {
-	return CreateVertexList(m_MeshList[index]);
+	return CreateVertexList(m_MeshList[index], index);
 }
+
+
+int CASEParser::GetMeshCount()
+{
+	return meshCount;
+}
+
+/*
+ASEParser::Mesh* CASEParser::GetMesh()
+{
+	return CreateVertexList(m_MeshList[meshCount]);
+}
+*/
 
 //----------------------------------------------------------------
 // 재귀 호출됨을 전제로 하는 분기 함수이다.
@@ -253,9 +268,6 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 			Parsing_DivergeRecursiveALL(depth++);
 			break;
 
-		case TOKENR_HELPER_CLASS:
-			break;
-
 			//--------------------
 			// 3DSMAX_ASCIIEXPORT
 			//--------------------
@@ -270,7 +282,6 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 
 		case TOKENR_COMMENT:
 			Parsing_String();	// 그냥 m_TokenString에 읽어버리는 역할 뿐.
-			//AfxMessageBox( m_TokenString, NULL, NULL);		/// 임시로 코멘트를 출력해본다
 			break;
 
 			//--------------------
@@ -326,14 +337,13 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 		//--------------------
 
 #pragma region Material
+		/*
 		case TOKENR_MATERIAL_LIST:
 			Create_materialdata_to_list();
 			break;
-
 		case TOKENR_MATERIAL_COUNT:
 			m_materialcount = Parsing_NumberInt();
 			break;
-
 		case TOKENR_MATERIAL:
 			m_materialdata->m_materialnumber = Parsing_NumberInt();
 			break;
@@ -376,13 +386,12 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 		case TOKENR_MATERIAL_XP_TYPE:
 			// m_materialdata->m_material_xp_type = Parsing_NumberFloat();
 			break;
+		*/
 #pragma endregion
 
 #pragma region MapDiffuse
-			///
 		case TOKENR_MAP_DIFFUSE:
 			break;
-
 		case TOKENR_MAP_NAME:
 			break;
 		case TOKENR_MAP_CLASS:
@@ -402,21 +411,30 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 
 #pragma region GeomObject
 		case TOKENR_GROUP:
-			//	한 개의 그룹 시작. 이 다음에 이름이 스트링으로 나오기는 하는데.
 			break;
 
+			/*
 		case TOKENR_HELPEROBJECT:
-			// 일단 생성하고
-			// 오브젝트의 타입 정해줌. 이것에 따라 서로 다른 파싱 모드 발동.
+			Create_onemesh_to_list();
+			m_OneMesh->m_type = eHelperObject;
 			break;
+			*/
+
+		case TOKENR_HELPER_CLASS:
+		{
+		}
+		break;
+			
 
 		case TOKENR_GEOMOBJECT:
 		{
 			/// 이 토큰을 만났다는건 새로운 메시가 생겼다는 것이다. 지역 변수로 mesh를 하나 선언, 그 포인터를 리스트에 넣고, m_onemesh에 그 포인터를 복사, 그대로 쓰면 될까?
+			meshCount++;
 			Create_onemesh_to_list();
+			m_OneMesh->m_type = eGeomobject;
 		}
 		break;
-
+		/*
 		case TOKENR_NODE_NAME:
 			// 어쩄든 지금은 오브젝트들을 구별 할 수 있는 유일한 값이다.
 			// 모드에 따라 넣어야 할 곳이 다르다.
@@ -424,11 +442,10 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 			break;
 
 		case TOKENR_NODE_PARENT:
-			// 현 노드의 부모 노드의 정보.
-			// 일단 입력을 하고, 나중에 정리하자.
 			m_OneMesh->m_nodeparent = Parsing_String();
 			m_OneMesh->m_isparentexist = true;
 			break;
+		*/
 
 			/// NODE_TM
 
@@ -446,6 +463,7 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 
 			break;
 
+			/*
 		case TOKENR_INHERIT_POS:
 			// 카메라는 NodeTM이 두번 나온다. 두번째라면 넣지 않는다.
 			m_OneMesh->m_inherit_pos = Parsing_NumberVector3();
@@ -487,10 +505,20 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 			// 현재 카메라 상태였다면 이미 노드를 읽은 것으로 표시해준다.
 			m_OneMesh->m_tm_scaleaxisang = Parsing_NumberFloat();
 			break;
+			*/
+			
 #pragma endregion
 
+#pragma region Animation
+			/*
+		case TOKENR_TM_ANIMATION:
+			break;
 
-			/// MESH
+		case TOKENR_CONTROL_POS_TRACK:
+			break;
+			*/
+#pragma endregion
+
 #pragma region Mesh
 		case TOKENR_MESH:
 			//
@@ -513,25 +541,19 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 			break;
 #pragma endregion
 
-			/// MESH_VERTEX_LIST
-
 #pragma region VertexList
 		case TOKENR_MESH_VERTEX_LIST:
-			//
-			// 버텍스의 값들을 집어넣어야 하는데
-			// 이미 벡터로 선언이 돼 있으므로 그냥 넣으면 된다.
 			break;
+
 		case TOKENR_MESH_VERTEX:
 		{
 			Create_onevertex_to_list();
 			int index = Parsing_NumberInt();
 			m_OneMesh->m_meshvertex[index]->m_pos = Parsing_NumberVector3();
 		}
-			// 데이터 입력
 		break;
 #pragma endregion
 
-			/// Bone
 #pragma region Bone
 		case TOKENR_SKIN_INITTM:
 			break;
@@ -583,9 +605,9 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 			break;
 		case TOKENR_MESH_FACE:
 		{
-			// Face의 번호인데...
 			ASEParser::Face* f = new ASEParser::Face;
-			int index = Parsing_NumberInt();
+			// Face의 번호인데...
+			Parsing_String();
 			// A:를 읽고
 			Parsing_String();
 			f->m_vertexindex[0] = Parsing_NumberInt();

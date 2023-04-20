@@ -154,6 +154,8 @@
     <ClCompile Include="Lexer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\ASEFile\03IK-Joe.ASE" />
+    <None Include="..\ASEFile\03IK-Joe_onlymesh.ASE" />
     <None Include="..\ASEFile\box.ASE" />
     <None Include="..\ASEFile\box_material.ASE" />
     <None Include="..\ASEFile\genji_blender.ase" />

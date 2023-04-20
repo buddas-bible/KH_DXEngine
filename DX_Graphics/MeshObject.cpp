@@ -1,7 +1,6 @@
 #include "MeshObject.h"
 
 #include <fstream>
-#include <vector>
 #include "CParsingDataClass.h"
 
 using namespace Microsoft;
@@ -81,20 +80,21 @@ HRESULT MeshObject::CreateLayout()
 HRESULT MeshObject::CreateEffect()
 {
 	HRESULT hr = S_OK;
+	std::ifstream fin;
 #if _WIN64
 
 #if _DEBUG
-	std::ifstream fin("../x64/debug/NonTextureBasic.cso", std::ios::binary);
+	fin.open("../x64/debug/NonTextureBasic.cso", std::ios::binary);
 #else
-	std::ifstream fin("../x64/release/NonTextureBasic.cso", std::ios::binary);		// 이부분 경로 다시 생각해보자...
+	fin.open("../x64/release/NonTextureBasic.cso", std::ios::binary);		// 이부분 경로 다시 생각해보자...
 #endif
 
 #else
 
 #if _DEBUG
-	std::ifstream fin("../WIN32/debug/NonTextureBasic.cso", std::ios::binary);
+	fin.open("../WIN32/debug/NonTextureBasic.cso", std::ios::binary);
 #else
-	std::ifstream fin("../WIN32/release/NonTextureBasic.cso", std::ios::binary);
+	fin.open("../WIN32/release/NonTextureBasic.cso", std::ios::binary);
 #endif
 
 #endif
@@ -125,15 +125,8 @@ HRESULT MeshObject::CreateEffect()
 	m_light = m_effect->GetVariableByName("lightDirection");
 
 	m_shaderResource = m_effect->GetVariableByName("g_Texture")->AsShaderResource();	// 
-	if (!m_shaderResource)
-	{
-		return S_FALSE;
-	}
 	m_sampler = m_effect->GetVariableByName("g_Sampler")->AsSampler();
-	if (!m_sampler)
-	{
-		return S_FALSE;
-	}
+	istexture = m_effect->GetVariableByName("istexture");
 
 	return hr;
 }
@@ -185,11 +178,9 @@ void MeshObject::Render()
 
 	const float light[3] = { 0.5f, 0.5f, 0.f };
 	m_light->SetRawValue(light, 0, sizeof(light));
+	istexture->SetRawValue(&isTexture, 0, sizeof(isTexture));
 
-	if (m_shaderResource)
-	{
-		m_shaderResource->SetResource(m_textureView.Get());
-	}
+	m_shaderResource->SetResource(m_textureView.Get());
 
 	// 테크닉
 	D3DX11_TECHNIQUE_DESC techDesc;
@@ -203,27 +194,33 @@ void MeshObject::Render()
 	}
 }
 
-HRESULT MeshObject::LoadGeometry(ASEParser::Mesh* meshData)
+
+HRESULT MeshObject::LoadNodeData(ASEParser::Mesh* meshData)
 {
 	HRESULT hr = S_OK;
 
-	switch (mode)
+	if (!meshData->m_isparentexist)
 	{
-		case MeshObject::eParsingMode::ASE:
-			hr = LoadASE(meshData);
-			break;
-		case MeshObject::eParsingMode::BLENDER:
-			hr = LoadBLENDER(meshData);
-			break;
-		default:
-			break;
+		return S_FALSE;
 	}
+
+	meshData->m_nodename;
+	std::wstring parent;
+	parent.assign(meshData->m_nodeparent.begin(), meshData->m_nodeparent.end());
+
 
 	return hr;
 }
 
 
-HRESULT MeshObject::LoadASE(ASEParser::Mesh*& meshData)
+HRESULT MeshObject::LoadAnimation(ASEParser::Mesh* meshData)
+{
+	HRESULT hr = S_OK;
+
+	return hr;
+}
+
+HRESULT MeshObject::LoadGeometry(ASEParser::Mesh* meshData)
 {
 	HRESULT hr = S_OK;
 
@@ -233,7 +230,7 @@ HRESULT MeshObject::LoadASE(ASEParser::Mesh*& meshData)
 	vcount = meshData->m_rawVertex.size();
 	std::vector<PTNVertex> vertices(vcount);
 
-	isTexture = meshData->istexture;
+	// isTexture = meshData->istexture;
 
 	for (int i = 0; i < vcount; i++)
 	{
@@ -242,78 +239,6 @@ HRESULT MeshObject::LoadASE(ASEParser::Mesh*& meshData)
 		vertices[i].pos.z = meshData->m_rawVertex[i]->m_pos.z;
 
 		vertices[i].uv.x = meshData->m_rawVertex[i]->u;
-		vertices[i].uv.y = meshData->m_rawVertex[i]->v;
-
-		vertices[i].normal.x = meshData->m_rawVertex[i]->m_normal.x;
-		vertices[i].normal.y = meshData->m_rawVertex[i]->m_normal.y;
-		vertices[i].normal.z = meshData->m_rawVertex[i]->m_normal.z;
-	}
-
-	tcount = meshData->m_rawIndex.size();
-
-	count = tcount;
-	int inv = tcount / 3;
-	std::vector<UINT> indices(count);
-	for (UINT i = 0; i < inv; ++i)
-	{
-		indices[i * 3 + 0] = meshData->m_rawIndex[i * 3 + 0];
-		indices[i * 3 + 1] = meshData->m_rawIndex[i * 3 + 2];
-		indices[i * 3 + 2] = meshData->m_rawIndex[i * 3 + 1];
-	}
-
-	D3D11_BUFFER_DESC vbd;
-	vbd.Usage = D3D11_USAGE_DEFAULT;
-	vbd.ByteWidth = sizeof(PTNVertex) * vcount;
-	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vbd.CPUAccessFlags = 0;
-	vbd.MiscFlags = 0;
-	D3D11_SUBRESOURCE_DATA vinitData;
-	vinitData.pSysMem = &vertices[0];
-	hr = m_device->CreateBuffer(&vbd, &vinitData, &m_vertexBuffer);
-
-	if (FAILED(hr))
-	{
-		return hr;
-	}
-
-	D3D11_BUFFER_DESC ibd;
-	ibd.Usage = D3D11_USAGE_DEFAULT;
-	ibd.ByteWidth = sizeof(UINT) * count;
-	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	ibd.CPUAccessFlags = 0;
-	ibd.MiscFlags = 0;
-	D3D11_SUBRESOURCE_DATA iinitData;
-	iinitData.pSysMem = &indices[0];
-	hr = m_device->CreateBuffer(&ibd, &iinitData, &m_indexBuffer);
-
-	if (FAILED(hr))
-	{
-		return hr;
-	}
-
-	return hr;
-}
-
-
-HRESULT MeshObject::LoadBLENDER(ASEParser::Mesh*& meshData)
-{
-	HRESULT hr = S_OK;
-
-	UINT vcount = 0;
-	UINT tcount = 0;
-
-	vcount = meshData->m_rawVertex.size();
-	std::vector<PTNVertex> vertices(vcount);
-
-	isTexture = meshData->istexture;
-
-	for (int i = 0; i < vcount; i++)
-	{
-		vertices[i].pos.x = meshData->m_rawVertex[i]->m_pos.x;
-		vertices[i].pos.y = meshData->m_rawVertex[i]->m_pos.y;
-		vertices[i].pos.z = meshData->m_rawVertex[i]->m_pos.z;
-
-		vertices[i].uv.x = -1.f * meshData->m_rawVertex[i]->u;
 		vertices[i].uv.y = meshData->m_rawVertex[i]->v;
 
 		vertices[i].normal.x = meshData->m_rawVertex[i]->m_normal.x;
@@ -377,21 +302,22 @@ void MeshObject::SetPosition(Vector3D position)
 }
 
 
-void MeshObject::SetMode(eParsingMode _mode)
-{
-	this->mode = _mode;
-}
-
-HRESULT MeshObject::SetTexture(const wstring& path)
+HRESULT MeshObject::LoadTexture(const wstring& path)
 {
 	HRESULT hr = S_OK;
 
-	isTexture = true;
+	if (path == L"no")
+	{
+		isTexture = false;
+		return hr;
+	}
+
 	ComPtr<ID3D11Resource> texture;
 	ComPtr<ID3D11ShaderResourceView> textureView;				// ../ 같은 경로는 다시 생각해보자.. 실행파일 뽑을 때 많이 귀찮아 진다...
 	hr = DirectX::CreateDDSTextureFromFile(m_device.Get(), path.c_str(), texture.GetAddressOf(), textureView.GetAddressOf());
 	if (FAILED(hr))
 	{
+		isTexture = false;
 		return hr;
 	}
 	texture.As(&m_texture);
@@ -417,6 +343,7 @@ HRESULT MeshObject::SetTexture(const wstring& path)
 	hr = m_device->CreateSamplerState(&samplerDesc, samplerstate.GetAddressOf());
 	if (FAILED(hr))
 	{
+		isTexture = false;
 		return hr;
 	}
 	samplerstate.As(&m_samplerState);

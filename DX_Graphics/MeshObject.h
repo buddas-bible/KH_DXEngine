@@ -2,6 +2,7 @@
 
 #include "Object.h"
 #include <string>
+#include <vector>
 
 namespace ASEParser
 {
@@ -11,13 +12,6 @@ namespace ASEParser
 class MeshObject : public Object
 {
 public:
-	enum class eParsingMode
-	{
-		ASE,
-		BLENDER,
-
-	};
-
 	MeshObject(
 		Microsoft::WRL::ComPtr<ID3D11Device>& device,
 		Microsoft::WRL::ComPtr<ID3D11DeviceContext>& context,
@@ -33,22 +27,21 @@ public:
 	virtual void Update(const Matrix4x4& view, const Matrix4x4& proj) override;
 	virtual void Render() override;
 
+	HRESULT LoadNodeData(ASEParser::Mesh* meshData);
+	HRESULT LoadAnimation(ASEParser::Mesh* meshData);
 	HRESULT LoadGeometry(ASEParser::Mesh* meshData);
-	HRESULT LoadASE(ASEParser::Mesh*& meshData);
-	HRESULT LoadBLENDER(ASEParser::Mesh*& meshData);
+	HRESULT LoadTexture(const std::wstring& path);
 
 	void SetScalse(Vector3D scale);
 	void SetPosition(Vector3D position);
 
-	void SetMode(eParsingMode _mode);
-	HRESULT SetTexture(const std::wstring& path);
-
 private:
-	Vector3D m_pos{ -3.f, 0.f, 3.f };
+	std::wstring nodeName;
+
+	Vector3D m_pos{};
 	Vector3D m_angle{ 0.f, 0.f, 0.f };
-	Vector3D m_scale{ 0.5f, 0.5f, 0.5f };
-	bool isTexture{false};
-	eParsingMode mode = eParsingMode::ASE;
+	Vector3D m_scale{ 0.01f, 0.01f, 0.01f };
+	bool isTexture{true};
 
 private:
 	// UINT count;
@@ -79,5 +72,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>	m_textureView;	// 텍스쳐 들고 있을 친구
 
 	Microsoft::WRL::ComPtr<ID3DX11EffectVariable> m_light;
+
+	Microsoft::WRL::ComPtr<ID3DX11EffectVariable> istexture;
 };
 

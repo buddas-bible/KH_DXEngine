@@ -67,7 +67,7 @@ public:
 	bool Convert_Optimize(Mesh* pMesh);		// 버텍스(노말), 텍스쳐 값으로 최적화를 해 준다.
 	bool ConvertAll(Mesh* pMesh);			// 모두 그냥 변환 (예시용)
 
-	Mesh*& CreateVertexList(Mesh*& mesh);
+	Mesh*& CreateVertexList(Mesh*& mesh, int index);
 	int GetVertexIndex(Mesh*& mesh, Vertex*& v);
 	int GetFVertexIndex();
 
@@ -93,6 +93,7 @@ public:
 	Mesh* m_OneMesh;						// 메시 하나의 데이터가 들어갈 구조체
 	vector<Mesh*> m_MeshList;				// 메시들
 
+
 	/// 쉐이프 오브젝트를 파싱할 때 필요한 중간 변수
 	//( 파서 내부에서 쉐이프 오브젝트는 GeomObject와 동일하게 취급된다)
 	ShapeLine* m_nowshapeline;				// 현재 읽고 있는 Line
@@ -109,6 +110,8 @@ public:
 	//--------------------------------------------------
 	Mesh* GetMesh(int index);
 	std::map<ASEParser::Vertex, int> vertexMap;
+	int meshCount;
+	int GetMeshCount();
 
 
 public:

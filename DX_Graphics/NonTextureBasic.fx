@@ -13,6 +13,7 @@ cbuffer cbPerObject
 
 Texture2D g_Texture;
 SamplerState g_Sampler;
+bool istexture;
 
 cbuffer cbPerFrame
 {
@@ -51,9 +52,18 @@ VertexOut VS(VertexIn vin)
 
 float4 PS(VertexOut pin) : SV_Target
 {
+    float4 c;
+    if(istexture)
+    {
+        c = g_Texture.Sample(g_Sampler, pin.uv);
+        return c * pin.Diffuse;
+    }
+    else
+    {
+        c = float4(1.f, 1.f, 1.f, 1.f);
+        return c * pin.Diffuse;
+    }
     // ºû°ú ÇÈ¼¿ ³ë¸»ÀÌ¶û ³»ÀûÇÔ.
-    float4 c = g_Texture.Sample(g_Sampler, pin.uv);
-    return c * pin.Diffuse;
 }
 
 technique11 Tech

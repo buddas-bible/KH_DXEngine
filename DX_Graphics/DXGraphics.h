@@ -5,6 +5,8 @@
 
 #include "TimeManager.h"
 
+#include <map>
+#include <string>
 #include <vector>
 
 class Box;
@@ -61,6 +63,8 @@ private:
 	HRESULT CreateRasterState();		// 레스터 상태 설정
 
 	HRESULT CreateObject();
+	HRESULT LoadObject(const std::wstring&, int index = 0);
+	std::map<std::wstring, std::pair<LPSTR, std::wstring>> object;
 
 	// void Test();
 

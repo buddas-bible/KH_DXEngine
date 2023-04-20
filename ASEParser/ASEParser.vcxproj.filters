@@ -67,5 +67,11 @@
     <None Include="..\ASEFile\box_material.ASE">
       <Filter>ASEParser\ASE</Filter>
     </None>
+    <None Include="..\ASEFile\03IK-Joe.ASE">
+      <Filter>ASEParser\ASE</Filter>
+    </None>
+    <None Include="..\ASEFile\03IK-Joe_onlymesh.ASE">
+      <Filter>ASEParser\ASE</Filter>
+    </None>
   </ItemGroup>
 </Project>

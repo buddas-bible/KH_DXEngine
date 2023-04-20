@@ -550,6 +550,32 @@ HRESULT DXGraphics::CreateObject()
 	return hr;
 }
 
+HRESULT DXGraphics::LoadObject(const std::wstring& name, int index)
+{
+	HRESULT hr = S_OK;
+
+	/*
+	MeshObject* newMesh = new MeshObject(m_pd3dDevice, m_pd3dDeviceContext, m_currRasterizerState);
+	m_objectList.push_back(newMesh);
+	if (index == 0)
+	{
+		m_parser->Load(object[name].first);
+	}
+	int count = m_parser->GetMeshCount();
+	hr = newMesh->LoadTexture(object[name].second);
+	hr = newMesh->Initialize();
+	newMesh->LoadGeometry(m_parser->GetMesh(index));
+	*/
+	/*
+	if (count > 1 && index < count - 1)
+	{
+		LoadObject(name, ++index);
+	}
+	*/
+
+	return hr;
+}
+
 /// <summary>
 /// 초기화 할 때 쓰던 함수
 /// </summary>
@@ -647,81 +673,20 @@ HRESULT DXGraphics::CreateMeshObject()
 	m_parser = new CASEParser();
 	m_parser->Init();
 
-	/*
-	MeshObject* teapot = new MeshObject(m_pd3dDevice, m_pd3dDeviceContext, m_currRasterizerState);
-	if (teapot == nullptr)
+	// object[L"Genji_texture1"] = std::make_pair((LPSTR)"../ASEFile/genji_max.ASE", L"../Textures/000000002405_reverse.dds");
+	object[L"03IK-Joe"] = std::make_pair((LPSTR)"../ASEFile/03IK-Joe.ASE", L"no");
+	
+	m_parser->Load(object[L"03IK-Joe"].first);
+	int index = m_parser->m_MeshList.size();
+	for (auto i = 0; i < index; i++)
 	{
-		return S_FALSE;
+		MeshObject* newMesh = new MeshObject(m_pd3dDevice, m_pd3dDeviceContext, m_currRasterizerState);
+		m_objectList.push_back(newMesh);
+
+		hr = newMesh->LoadTexture(object[L"03IK-Joe"].second);
+		hr = newMesh->Initialize();
+		newMesh->LoadGeometry(m_parser->GetMesh(i));
 	}
-	m_objectList.push_back(teapot);
-	hr = teapot->Initialize();
-	m_parser->Load((LPSTR)"../ASEFile/teapot.ASE");
-	teapot->LoadGeometry(m_parser->GetMesh(0));
-	*/
-
-
-	MeshObject* genji = new MeshObject(m_pd3dDevice, m_pd3dDeviceContext, m_currRasterizerState);
-	if (genji == nullptr)
-	{
-		return S_FALSE;
-	}
-	m_objectList.push_back(genji);
-	m_parser->Load((LPSTR)"../ASEFile/genji_max.ASE");
-	hr = genji->SetTexture(L"../Textures/000000002405_reverse.dds");
-	hr = genji->Initialize();
-	genji->LoadGeometry(m_parser->GetMesh(0));
-	genji->SetScalse({2.f, 2.f, 2.f});
-	genji->SetPosition({ 0.f, 2.f, 0.f });
-
-	MeshObject* genji2 = new MeshObject(m_pd3dDevice, m_pd3dDeviceContext, m_currRasterizerState);
-	if (genji2 == nullptr)
-	{
-		return S_FALSE;
-	}
-	m_objectList.push_back(genji2);
-	hr = genji2->SetTexture(L"../Textures/000000002405_reverse.dds");
-	hr = genji2->Initialize();
-	genji2->LoadGeometry(m_parser->GetMesh(1));
-	genji2->SetScalse({ 2.f, 2.f, 2.f });
-	genji2->SetPosition({ 0.f, 2.f, 0.f });
-
-	MeshObject* genji3 = new MeshObject(m_pd3dDevice, m_pd3dDeviceContext, m_currRasterizerState);
-	if (genji3 == nullptr)
-	{
-		return S_FALSE;
-	}
-	m_objectList.push_back(genji3);
-	hr = genji3->SetTexture(L"../Textures/000000002405_reverse.dds");
-	hr = genji3->Initialize();
-	genji3->LoadGeometry(m_parser->GetMesh(2));
-	genji3->SetScalse({ 2.f, 2.f, 2.f });
-	genji3->SetPosition({ 0.f, 2.f, 0.f });
-
-	MeshObject* genji4 = new MeshObject(m_pd3dDevice, m_pd3dDeviceContext, m_currRasterizerState);
-	if (genji4 == nullptr)
-	{
-		return S_FALSE;
-	}
-	m_objectList.push_back(genji4);
-	hr = genji4->SetTexture(L"../Textures/000000002405_reverse.dds");
-	hr = genji4->Initialize();
-	genji4->LoadGeometry(m_parser->GetMesh(3));
-	genji4->SetScalse({ 2.f, 2.f, 2.f });
-	genji4->SetPosition({ 0.f, 2.f, 0.f });
-
-	MeshObject* genjia = new MeshObject(m_pd3dDevice, m_pd3dDeviceContext, m_currRasterizerState);
-	if (genjia == nullptr)
-	{
-		return S_FALSE;
-	}
-	m_objectList.push_back(genjia);
-	m_parser->Load((LPSTR)"../ASEFile/genji_blender.ASE");
-	hr = genjia->SetTexture(L"../Textures/000000002405.dds");
-	hr = genjia->Initialize();
-	genjia->LoadGeometry(m_parser->GetMesh(4));
-	genjia->SetScalse({ 0.2f, 0.2f, 0.2f });
-	genjia->SetPosition({ -1.f, 0.f, 0.f });
-
 
 	return hr;
 }
@@ -738,7 +703,7 @@ void DXGraphics::BeginDraw()
 	// 랜더 타겟 뷰 클리어
 	m_pd3dDeviceContext->ClearRenderTargetView(
 		m_pd3dRenderTargetView.Get(), 
-		KHColor::Black
+		KHColor::DimGray
 	);
 
 	// 뎁스 스텐실 뷰 클리어
@@ -753,8 +718,8 @@ void DXGraphics::BeginDraw()
 
 	grid->Render();
 	axis->Render();
-	box->Render();
-	skull->Render();
+	// box->Render();
+	// skull->Render();
 	for (auto& e : m_objectList)
 	{
 		e->Render();
