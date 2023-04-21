@@ -12,7 +12,14 @@ cbuffer cbPerObject
 };
 
 Texture2D g_Texture;
-SamplerState g_Sampler;
+SamplerState g_Sampler
+{
+    Filter = ANISOTROPIC;
+    AddressU = WRAP;
+    AddressV = WRAP;
+    AddressW = WRAP;
+    MaxAnisotropy = 1;
+};
 
 cbuffer cbPerFrame
 {

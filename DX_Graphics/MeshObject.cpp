@@ -125,7 +125,6 @@ HRESULT MeshObject::CreateEffect()
 	m_light = m_effect->GetVariableByName("lightDirection");
 
 	m_shaderResource = m_effect->GetVariableByName("g_Texture")->AsShaderResource();	// 
-	m_sampler = m_effect->GetVariableByName("g_Sampler")->AsSampler();
 	istexture = m_effect->GetVariableByName("istexture");
 
 	return hr;
@@ -207,7 +206,7 @@ HRESULT MeshObject::LoadNodeData(ASEParser::Mesh* meshData)
 	meshData->m_nodename;
 	std::wstring parent;
 	parent.assign(meshData->m_nodeparent.begin(), meshData->m_nodeparent.end());
-
+	
 
 	return hr;
 }
@@ -322,31 +321,6 @@ HRESULT MeshObject::LoadTexture(const wstring& path)
 	}
 	texture.As(&m_texture);
 	textureView.As(&m_textureView);
-
-	D3D11_SAMPLER_DESC samplerDesc;
-	ZeroMemory(&samplerDesc, sizeof(D3D11_SAMPLER_DESC));
-	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.MinLOD = -FLT_MAX;
-	samplerDesc.MaxLOD = FLT_MAX;
-	samplerDesc.MipLODBias = 0.f;
-	samplerDesc.MaxAnisotropy = 1;
-	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	samplerDesc.BorderColor[0] = 1.f;
-	samplerDesc.BorderColor[1] = 1.f;
-	samplerDesc.BorderColor[2] = 1.f;
-	samplerDesc.BorderColor[3] = 1.f;
-
-	ComPtr<ID3D11SamplerState> samplerstate;
-	hr = m_device->CreateSamplerState(&samplerDesc, samplerstate.GetAddressOf());
-	if (FAILED(hr))
-	{
-		isTexture = false;
-		return hr;
-	}
-	samplerstate.As(&m_samplerState);
 
 	return hr;
 }

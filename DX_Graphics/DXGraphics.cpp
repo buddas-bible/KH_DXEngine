@@ -148,8 +148,8 @@ void DXGraphics::Update()
 	m_projection = camera.GetProjMatrix();
 	grid->Update(m_view, m_projection);
 	axis->Update(m_view, m_projection);
-	box->Update(m_view, m_projection);
-	skull->Update(m_view, m_projection);
+	// box->Update(m_view, m_projection);
+	// skull->Update(m_view, m_projection);
 	for (auto& e : m_objectList)
 	{
 		e->Update(m_view, m_projection);
@@ -512,7 +512,7 @@ HRESULT DXGraphics::CreateObject()
 {
 	HRESULT hr = S_OK;
 
-	hr = CreateCube();
+	// hr = CreateCube();
 	if (FAILED(hr))
 	{
 		MessageBox(m_hWnd, L"큐브 오브젝트 초기화 실패", L"오브젝트 설정 오류", MB_OK | MB_ICONWARNING);
@@ -533,7 +533,7 @@ HRESULT DXGraphics::CreateObject()
 		return hr;
 	}
 
-	hr = CreateSkull();
+	// hr = CreateSkull();
 	if (FAILED(hr))
 	{
 		MessageBox(m_hWnd, L"스컬 오브젝트 초기화 실패", L"오브젝트 설정 오류", MB_OK | MB_ICONWARNING);
@@ -685,7 +685,7 @@ HRESULT DXGraphics::CreateMeshObject()
 
 		hr = newMesh->LoadTexture(object[L"03IK-Joe"].second);
 		hr = newMesh->Initialize();
-		newMesh->LoadGeometry(m_parser->GetMesh(i));
+		hr = newMesh->LoadGeometry(m_parser->GetMesh(i));
 	}
 
 	return hr;
@@ -703,7 +703,7 @@ void DXGraphics::BeginDraw()
 	// 랜더 타겟 뷰 클리어
 	m_pd3dDeviceContext->ClearRenderTargetView(
 		m_pd3dRenderTargetView.Get(), 
-		KHColor::DimGray
+		KHColor::Black
 	);
 
 	// 뎁스 스텐실 뷰 클리어
