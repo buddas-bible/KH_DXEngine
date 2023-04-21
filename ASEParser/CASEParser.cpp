@@ -120,7 +120,7 @@ bool CASEParser::ConvertAll(Mesh* pMesh)
 /// 
 /// face의 인덱스를 참고하면서 해당하는 버텍스에 텍스쳐 좌표를 추가해줌.
 /// </summary>
-Mesh*& CASEParser::CreateVertexList(Mesh*& mesh, int index)
+Mesh*& CASEParser::CreateVertexList(Mesh*& mesh)
 {
 	const auto& face = mesh->m_meshface;			// 메쉬의 face
 	const auto& vertex = mesh->m_meshvertex;
@@ -133,11 +133,12 @@ Mesh*& CASEParser::CreateVertexList(Mesh*& mesh, int index)
 		for (int j = 0; j < 3; j++)
 		{
 			int v1 = face[i]->m_vertexindex[j];			// face에서 버텍스의 인덱스를 가져옴
+			Vector3& n = face[i]->m_normalvertex[j];	// face에서 노말 값을 가져옴
 
 			Vertex* v = new Vertex;
 			const Vertex& vt = *vertex[v1];
-			v->m_pos = vt.m_pos;				// 버텍스 배열 해당 인덱스에 있는 pos를 가져옴
-			v->m_normal = vt.m_normal;			// 버텍스 배열 해당 인덱스에 있는 normal을 가져옴
+			v->m_pos = vt.m_pos;				// 페이스에 저장된 인덱스에 있는 pos를 가져옴
+			v->m_normal = n;					// 페이스에 저장된 normal을 가져옴
 			if (mesh->istexture)				// texture 없을수도 있지?
 			{
 				v->u = 0.f;
@@ -206,9 +207,14 @@ int CASEParser::GetFVertexIndex()
 	return 0;
 }
 
+ASEParser::Mesh* CASEParser::GetOptMesh(int index)
+{
+	return CreateVertexList(m_MeshList[index]);
+}
+
 ASEParser::Mesh* CASEParser::GetMesh(int index)
 {
-	return CreateVertexList(m_MeshList[index], index);
+	return m_MeshList[index];
 }
 
 
@@ -337,7 +343,7 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 		//--------------------
 
 #pragma region Material
-		/*
+		
 		case TOKENR_MATERIAL_LIST:
 			Create_materialdata_to_list();
 			break;
@@ -372,7 +378,7 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 			m_materialdata->m_material_wiresize = Parsing_NumberFloat();
 			break;
 		case TOKENR_MATERIAL_SHADING:
-			// m_materialdata->m_material_shading = Parsing_NumberFloat();
+			m_materialdata->m_material_shading = Parsing_NumberFloat();
 			break;
 		case TOKENR_MATERIAL_XP_FALLOFF:
 			m_materialdata->m_material_xp_falloff = Parsing_NumberFloat();
@@ -381,12 +387,12 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 			m_materialdata->m_material_selfillum = Parsing_NumberFloat();
 			break;
 		case TOKENR_MATERIAL_FALLOFF:
-			// m_materialdata->m_material_falloff = Parsing_NumberFloat();
+			m_materialdata->m_material_falloff = Parsing_NumberFloat();
 			break;
 		case TOKENR_MATERIAL_XP_TYPE:
-			// m_materialdata->m_material_xp_type = Parsing_NumberFloat();
+			m_materialdata->m_material_xp_type = Parsing_NumberFloat();
 			break;
-		*/
+		
 #pragma endregion
 
 #pragma region MapDiffuse
@@ -413,16 +419,15 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 		case TOKENR_GROUP:
 			break;
 
-			/*
+			
 		case TOKENR_HELPEROBJECT:
 			Create_onemesh_to_list();
 			m_OneMesh->m_type = eHelperObject;
 			break;
-			*/
+			
 
 		case TOKENR_HELPER_CLASS:
-		{
-		}
+		{}			// 없음
 		break;
 			
 
@@ -434,7 +439,7 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 			m_OneMesh->m_type = eGeomobject;
 		}
 		break;
-		/*
+		
 		case TOKENR_NODE_NAME:
 			// 어쩄든 지금은 오브젝트들을 구별 할 수 있는 유일한 값이다.
 			// 모드에 따라 넣어야 할 곳이 다르다.
@@ -444,8 +449,9 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 		case TOKENR_NODE_PARENT:
 			m_OneMesh->m_nodeparent = Parsing_String();
 			m_OneMesh->m_isparentexist = true;
+			nodeMap[m_OneMesh->m_nodeparent] = m_OneMesh;
 			break;
-		*/
+		
 
 			/// NODE_TM
 
@@ -463,7 +469,7 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 
 			break;
 
-			/*
+			
 		case TOKENR_INHERIT_POS:
 			// 카메라는 NodeTM이 두번 나온다. 두번째라면 넣지 않는다.
 			m_OneMesh->m_inherit_pos = Parsing_NumberVector3();
@@ -478,10 +484,10 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 			m_OneMesh->m_tm_row0 = Parsing_NumberVector3();
 			break;
 		case TOKENR_TM_ROW1:
-			m_OneMesh->m_tm_row1 = Parsing_NumberVector3();
+			m_OneMesh->m_tm_row2 = Parsing_NumberVector3();
 			break;
 		case TOKENR_TM_ROW2:
-			m_OneMesh->m_tm_row2 = Parsing_NumberVector3();
+			m_OneMesh->m_tm_row1 = Parsing_NumberVector3();
 			break;
 		case TOKENR_TM_ROW3:
 			m_OneMesh->m_tm_row3 = Parsing_NumberVector3();
@@ -505,7 +511,7 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 			// 현재 카메라 상태였다면 이미 노드를 읽은 것으로 표시해준다.
 			m_OneMesh->m_tm_scaleaxisang = Parsing_NumberFloat();
 			break;
-			*/
+			
 			
 #pragma endregion
 
@@ -613,10 +619,10 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 			f->m_vertexindex[0] = Parsing_NumberInt();
 			// B:
 			Parsing_String();
-			f->m_vertexindex[1] = Parsing_NumberInt();
+			f->m_vertexindex[2] = Parsing_NumberInt();
 			// C:
 			Parsing_String();
-			f->m_vertexindex[2] = Parsing_NumberInt();
+			f->m_vertexindex[1] = Parsing_NumberInt();
 
 			/// (뒤에 정보가 더 있지만 default에 의해 스킵될 것이다.)
 			/// ......
@@ -634,14 +640,21 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 		case TOKENR_MESH_FACENORMAL:
 		{
 			int index = Parsing_NumberInt();
+			listcount = index;
 			m_OneMesh->m_meshface[index]->m_normal = Parsing_NumberVector3();
 		}
 		break;
 
 		case TOKENR_MESH_VERTEXNORMAL:
 		{
-			int index = Parsing_NumberInt();
-			m_OneMesh->m_meshvertex[index]->m_normal = Parsing_NumberVector3();
+			Parsing_NumberInt();
+			m_OneMesh->m_meshface[listcount]->m_normalvertex[0] = Parsing_NumberVector3();
+			Parsing_String();
+			Parsing_NumberInt();
+			m_OneMesh->m_meshface[listcount]->m_normalvertex[2] = Parsing_NumberVector3();
+			Parsing_String();
+			Parsing_NumberInt();
+			m_OneMesh->m_meshface[listcount]->m_normalvertex[1] = Parsing_NumberVector3();
 		}
 		break;
 #pragma endregion
@@ -683,8 +696,8 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 			// 각 face가 가지고 있는 vertex 인덱스를 확인해서 새로운 버택스를 만들어서 벡터에 저장함.
 			int index = Parsing_NumberInt();
 			m_OneMesh->m_meshface[index]->m_TFace[0] = Parsing_NumberInt();
-			m_OneMesh->m_meshface[index]->m_TFace[1] = Parsing_NumberInt();
 			m_OneMesh->m_meshface[index]->m_TFace[2] = Parsing_NumberInt();
+			m_OneMesh->m_meshface[index]->m_TFace[1] = Parsing_NumberInt();
 		}
 		break;
 #pragma endregion

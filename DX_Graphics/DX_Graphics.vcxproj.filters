@@ -10,24 +10,6 @@
     <Filter Include="2. Object">
       <UniqueIdentifier>{5efa9b4a-cf89-45cd-a053-7f2669995929}</UniqueIdentifier>
     </Filter>
-    <Filter Include="2. Object\Camera">
-      <UniqueIdentifier>{3644887e-4b67-4f20-b601-304c24241ef7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="2. Object\Axis">
-      <UniqueIdentifier>{bc2fc9f7-585b-497b-828b-5e8829a8f323}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="2. Object\Grid">
-      <UniqueIdentifier>{43a31292-2e54-40a6-a398-542dacfca471}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="2. Object\Box">
-      <UniqueIdentifier>{d8f8ba81-8f49-418b-bee1-c13563ff7d28}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="2. Object\Skull">
-      <UniqueIdentifier>{0f27749c-d3aa-49d2-a3a3-1406f354eed0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="2. Object\Teapot">
-      <UniqueIdentifier>{d23ea741-e29f-4f78-ae4a-8a3af4cb997a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="3. Struct">
       <UniqueIdentifier>{07f02d51-b009-4ad4-8fb2-e0ecebb422e1}</UniqueIdentifier>
     </Filter>
@@ -36,6 +18,30 @@
     </Filter>
     <Filter Include="5. FX">
       <UniqueIdentifier>{582acb35-8893-4522-9366-78afb8039ecb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="2. Object\MeshObject">
+      <UniqueIdentifier>{d23ea741-e29f-4f78-ae4a-8a3af4cb997a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="2. Object\etc">
+      <UniqueIdentifier>{1d982847-e407-4a42-b826-b0fa410ca43a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="2. Object\etc\Grid">
+      <UniqueIdentifier>{43a31292-2e54-40a6-a398-542dacfca471}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="2. Object\etc\Axis">
+      <UniqueIdentifier>{bc2fc9f7-585b-497b-828b-5e8829a8f323}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="2. Object\etc\Box">
+      <UniqueIdentifier>{d8f8ba81-8f49-418b-bee1-c13563ff7d28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="2. Object\etc\Camera">
+      <UniqueIdentifier>{3644887e-4b67-4f20-b601-304c24241ef7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="2. Object\etc\Skull">
+      <UniqueIdentifier>{0f27749c-d3aa-49d2-a3a3-1406f354eed0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="2. Object\MeshObject\Node">
+      <UniqueIdentifier>{b805f69e-fcb1-4e11-bad0-f9fcb40bb371}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -46,7 +52,7 @@
       <Filter>4. Color</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
-      <Filter>2. Object\Camera</Filter>
+      <Filter>2. Object\etc\Camera</Filter>
     </ClInclude>
     <ClInclude Include="DXDefine.h">
       <Filter>etc</Filter>
@@ -54,14 +60,11 @@
     <ClInclude Include="Struct.h">
       <Filter>3. Struct</Filter>
     </ClInclude>
-    <ClInclude Include="Vertex.h">
-      <Filter>3. Struct</Filter>
-    </ClInclude>
     <ClInclude Include="Axis.h">
-      <Filter>2. Object\Axis</Filter>
+      <Filter>2. Object\etc\Axis</Filter>
     </ClInclude>
     <ClInclude Include="Grid.h">
-      <Filter>2. Object\Grid</Filter>
+      <Filter>2. Object\etc\Grid</Filter>
     </ClInclude>
     <ClInclude Include="InputManager.h">
       <Filter>etc</Filter>
@@ -73,13 +76,16 @@
       <Filter>2. Object</Filter>
     </ClInclude>
     <ClInclude Include="Box.h">
-      <Filter>2. Object\Box</Filter>
+      <Filter>2. Object\etc\Box</Filter>
     </ClInclude>
     <ClInclude Include="Skull.h">
-      <Filter>2. Object\Skull</Filter>
+      <Filter>2. Object\etc\Skull</Filter>
     </ClInclude>
     <ClInclude Include="MeshObject.h">
-      <Filter>2. Object\Teapot</Filter>
+      <Filter>2. Object\MeshObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Node.h">
+      <Filter>2. Object\MeshObject\Node</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -87,13 +93,13 @@
       <Filter>1. DXGraphics</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
-      <Filter>2. Object\Camera</Filter>
+      <Filter>2. Object\etc\Camera</Filter>
     </ClCompile>
     <ClCompile Include="Axis.cpp">
-      <Filter>2. Object\Axis</Filter>
+      <Filter>2. Object\etc\Axis</Filter>
     </ClCompile>
     <ClCompile Include="Grid.cpp">
-      <Filter>2. Object\Grid</Filter>
+      <Filter>2. Object\etc\Grid</Filter>
     </ClCompile>
     <ClCompile Include="InputManager.cpp">
       <Filter>etc</Filter>
@@ -102,13 +108,16 @@
       <Filter>etc</Filter>
     </ClCompile>
     <ClCompile Include="Box.cpp">
-      <Filter>2. Object\Box</Filter>
+      <Filter>2. Object\etc\Box</Filter>
     </ClCompile>
     <ClCompile Include="Skull.cpp">
-      <Filter>2. Object\Skull</Filter>
+      <Filter>2. Object\etc\Skull</Filter>
     </ClCompile>
     <ClCompile Include="MeshObject.cpp">
-      <Filter>2. Object\Teapot</Filter>
+      <Filter>2. Object\MeshObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Node.cpp">
+      <Filter>2. Object\MeshObject\Node</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -121,6 +130,8 @@
     <FxCompile Include="WhireWire.fx">
       <Filter>5. FX</Filter>
     </FxCompile>
-    <FxCompile Include="NonTextureBasic.fx" />
+    <FxCompile Include="NonTextureBasic.fx">
+      <Filter>5. FX</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

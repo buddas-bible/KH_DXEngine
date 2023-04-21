@@ -41,6 +41,9 @@ public:
 };
 
 DirectX::XMMATRIX ConvertToXMMATRIX(const Matrix4x4& matrix);
+Matrix4x4 ConvertToKHMatrix(const DirectX::XMMATRIX& mat);
 Matrix4x4 CreateMatrix(const Vector3D& pos, const Vector3D& angle, const Vector3D& scale);
 Matrix4x4 CreateInvMatrix(const Vector3D& pos, const Vector3D& angle, const Vector3D& scale);
 Matrix4x4 TransposeMatrix(const Matrix4x4& m);
+
+Matrix4x4 InverseMatrix(const Matrix4x4& mat);

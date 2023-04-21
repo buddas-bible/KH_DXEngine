@@ -41,7 +41,8 @@ struct VertexOut
 {
     float4 PosH : SV_POSITION;
     float2 uv : TEXCOORD;
-    float Diffuse : COLOR;
+    float4 Color : COLOR;
+    // float Diffuse : COLOR;
 };
 
 VertexOut VS(VertexIn vin)
@@ -53,7 +54,8 @@ VertexOut VS(VertexIn vin)
 
     vout.PosH = mul(float4(vin.PosL, 1.0f), worldViewProj);
     vout.uv = vin.uv;
-    vout.Diffuse = dot(N, L) * 0.5f + 0.5f; // Half Lambert
+    vout.Color = float4(N.x, N.y, N.z, 1.f);
+    // vout.Diffuse = dot(N, L); // Half Lambert
 
     return vout;
 }
@@ -64,12 +66,14 @@ float4 PS(VertexOut pin) : SV_Target
     if(istexture)
     {
         c = g_Texture.Sample(g_Sampler, pin.uv);
-        return c * pin.Diffuse;
+        // return c * pin.Diffuse;
+        return pin.Color;
     }
     else
     {
         c = float4(1.f, 1.f, 1.f, 1.f);
-        return c * pin.Diffuse;
+        // return c * pin.Diffuse;
+        return pin.Color;
     }
     // ºû°ú ÇÈ¼¿ ³ë¸»ÀÌ¶û ³»ÀûÇÔ.
 }

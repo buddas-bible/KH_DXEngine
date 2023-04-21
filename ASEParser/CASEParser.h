@@ -67,7 +67,7 @@ public:
 	bool Convert_Optimize(Mesh* pMesh);		// 버텍스(노말), 텍스쳐 값으로 최적화를 해 준다.
 	bool ConvertAll(Mesh* pMesh);			// 모두 그냥 변환 (예시용)
 
-	Mesh*& CreateVertexList(Mesh*& mesh, int index);
+	Mesh*& CreateVertexList(Mesh*& mesh);
 	int GetVertexIndex(Mesh*& mesh, Vertex*& v);
 	int GetFVertexIndex();
 
@@ -108,8 +108,10 @@ public:
 	//--------------------------------------------------
 	// Export
 	//--------------------------------------------------
+	Mesh* GetOptMesh(int index);
 	Mesh* GetMesh(int index);
 	std::map<ASEParser::Vertex, int> vertexMap;
+	std::map<std::string, Mesh*> nodeMap;
 	int meshCount;
 	int GetMeshCount();
 

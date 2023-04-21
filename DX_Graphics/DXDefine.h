@@ -45,7 +45,7 @@
 #include "../KH_Math/Matrix3x3.h"
 #include "../KH_Math/Matrix4x4.h"
 // #pragma comment(lib, "KH_Math.lib")
-#include "Vertex.h"
+#include "Struct.h"
 
 /// FX를 사용하기 위한 헤더
 #include "../DXTK/Inc/d3dx11effect.h"
@@ -61,6 +61,10 @@
 #pragma comment(lib, "d3dcompiler.lib")
 
 #include "../DXTK/Inc/DDSTextureLoader.h"
+
+#include <vector>
+#include <string>
+#include <map>
 
 #define HR(x) 	if (FAILED(x)) { return hr; }
 

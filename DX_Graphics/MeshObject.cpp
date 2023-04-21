@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include "CParsingDataClass.h"
+#include "CASEParser.h"
 
 using namespace Microsoft;
 using namespace Microsoft::WRL;
@@ -38,8 +39,44 @@ HRESULT MeshObject::Initialize()
 
 HRESULT MeshObject::CreateBuffer()
 {
+	HRESULT hr = S_OK;
 
-	return S_OK;
+	if (m_type != eGeomobject)
+	{
+		return S_FALSE;
+	}
+
+	D3D11_BUFFER_DESC vbd;
+	vbd.Usage = D3D11_USAGE_DEFAULT;
+	vbd.ByteWidth = sizeof(PTNVertex) * vertices.size();
+	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vbd.CPUAccessFlags = 0;
+	vbd.MiscFlags = 0;
+	D3D11_SUBRESOURCE_DATA vinitData;
+	vinitData.pSysMem = &vertices[0];
+	hr = m_device->CreateBuffer(&vbd, &vinitData, &m_vertexBuffer);
+
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+
+	D3D11_BUFFER_DESC ibd;
+	ibd.Usage = D3D11_USAGE_DEFAULT;
+	ibd.ByteWidth = sizeof(UINT) * count;
+	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	ibd.CPUAccessFlags = 0;
+	ibd.MiscFlags = 0;
+	D3D11_SUBRESOURCE_DATA iinitData;
+	iinitData.pSysMem = &indices[0];
+	hr = m_device->CreateBuffer(&ibd, &iinitData, &m_indexBuffer);
+
+	if (FAILED(hr))
+	{
+		return hr;
+	}
+
+	return hr;
 }
 
 HRESULT MeshObject::CreateLayout()
@@ -122,6 +159,7 @@ HRESULT MeshObject::CreateEffect()
 
 	m_tech = m_effect->GetTechniqueByName("Tech");							// 파일에 Tech 이름의 데이터를 읽어옴
 	m_matrix = m_effect->GetVariableByName("worldViewProj")->AsMatrix();	// 파일에 worldViewProj 이름의 데이터를 읽어옴
+	m_invMatrix = m_effect->GetVariableByName("invTworldViewProj")->AsMatrix();
 	m_light = m_effect->GetVariableByName("lightDirection");
 
 	m_shaderResource = m_effect->GetVariableByName("g_Texture")->AsShaderResource();	// 
@@ -138,7 +176,7 @@ HRESULT MeshObject::Finalize()
 
 void MeshObject::Update(const Matrix4x4& view, const Matrix4x4& proj)
 {
-	m_worldTM = CreateMatrix(m_pos, m_angle, m_scale);
+	m_worldTM = GetWorldMatrix();
 	m_viewTM = view;
 	m_projTM = proj;
 }
@@ -172,8 +210,14 @@ void MeshObject::Render()
 	Matrix4x4 wvp = m_worldTM * m_viewTM * m_projTM;
 	DirectX::XMMATRIX worldViewProj = ConvertToXMMATRIX(wvp);
 
-	// 상수 버퍼 설정
+	DirectX::XMMATRIX d = worldViewProj;
+	d.r[3] = XMVectorSet(0.f, 0.f, 0.f, 1.f);
+	XMVECTOR det = DirectX::XMMatrixDeterminant(d);
+	DirectX::XMMATRIX invTwoldViewProj = DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(&det, worldViewProj));
+
+	// 쉐이더에 있는 변수에 행렬 설정
 	m_matrix->SetMatrix(reinterpret_cast<float*>(&worldViewProj));
+	m_invMatrix->SetMatrix(reinterpret_cast<float*>(&invTwoldViewProj));
 
 	const float light[3] = { 0.5f, 0.5f, 0.f };
 	m_light->SetRawValue(light, 0, sizeof(light));
@@ -203,14 +247,40 @@ HRESULT MeshObject::LoadNodeData(ASEParser::Mesh* meshData)
 		return S_FALSE;
 	}
 
-	meshData->m_nodename;
-	std::wstring parent;
-	parent.assign(meshData->m_nodeparent.begin(), meshData->m_nodeparent.end());
-	
+	parentName.assign(meshData->m_nodeparent.begin(), meshData->m_nodeparent.end());
 
 	return hr;
 }
 
+
+Matrix4x4 MeshObject::GetWorldMatrix()
+{
+	if (parent)
+	{
+		Matrix4x4 w = Matrix4x4::IdentityMatrix();
+		return CreateMatrix(m_pos, m_angle, m_scale) * parent->GetWorldMatrix();
+	}
+	else
+	{
+		return CreateMatrix(m_pos, m_angle, m_scale);
+	}
+}
+
+/// <summary>
+/// 아마? 
+/// </summary>
+void MeshObject::InitWorldTM()
+{
+	Matrix4x4 w = Matrix4x4::IdentityMatrix();
+
+	if (parent)
+	{
+		// w = parent->GetWorldMatrix();
+		w = InverseMatrix(w);
+	}
+	
+	m_worldTM = m_worldTM * w;
+}
 
 HRESULT MeshObject::LoadAnimation(ASEParser::Mesh* meshData)
 {
@@ -223,11 +293,36 @@ HRESULT MeshObject::LoadGeometry(ASEParser::Mesh* meshData)
 {
 	HRESULT hr = S_OK;
 
+	if (m_type != eGeomobject)
+	{
+		return S_FALSE;
+	}
+
+	m_worldTM.e[0][0] = meshData->m_tm_row0.x;
+	m_worldTM.e[0][1] = meshData->m_tm_row0.y;
+	m_worldTM.e[0][2] = meshData->m_tm_row0.z;
+
+	m_worldTM.e[1][0] = meshData->m_tm_row1.x;
+	m_worldTM.e[1][1] = meshData->m_tm_row1.y;
+	m_worldTM.e[1][2] = meshData->m_tm_row1.z;
+
+	m_worldTM.e[2][0] = meshData->m_tm_row2.x;
+	m_worldTM.e[2][1] = meshData->m_tm_row2.y;
+	m_worldTM.e[2][2] = meshData->m_tm_row2.z;
+
+	m_worldTM.e[3][0] = meshData->m_tm_row3.x;
+	m_worldTM.e[3][1] = meshData->m_tm_row3.y;
+	m_worldTM.e[3][2] = meshData->m_tm_row3.z;
+
+	Matrix4x4 invTM = InverseMatrix(m_worldTM);
+
+	Matrix4x4 invTransTM = TransposeMatrix(InverseMatrix(invTM));
+
 	UINT vcount = 0;
 	UINT tcount = 0;
 
 	vcount = meshData->m_rawVertex.size();
-	std::vector<PTNVertex> vertices(vcount);
+	vertices.resize(vcount);
 
 	// isTexture = meshData->istexture;
 
@@ -237,54 +332,27 @@ HRESULT MeshObject::LoadGeometry(ASEParser::Mesh* meshData)
 		vertices[i].pos.y = meshData->m_rawVertex[i]->m_pos.y;
 		vertices[i].pos.z = meshData->m_rawVertex[i]->m_pos.z;
 
+		vertices[i].pos = Vector4D(vertices[i].pos, 1.f) * invTM;
+
 		vertices[i].uv.x = meshData->m_rawVertex[i]->u;
 		vertices[i].uv.y = meshData->m_rawVertex[i]->v;
 
 		vertices[i].normal.x = meshData->m_rawVertex[i]->m_normal.x;
 		vertices[i].normal.y = meshData->m_rawVertex[i]->m_normal.y;
 		vertices[i].normal.z = meshData->m_rawVertex[i]->m_normal.z;
+
+		vertices[i].normal = Vector4D(vertices[i].normal, 1.f);
 	}
 
-	tcount = meshData->m_rawIndex.size();
+	count = meshData->m_rawIndex.size();
 
-	count = tcount;
-	int inv = tcount / 3;
-	std::vector<UINT> indices(count);
+	int inv = count / 3;
+	indices.resize(count);
 	for (UINT i = 0; i < inv; ++i)
 	{
 		indices[i * 3 + 0] = meshData->m_rawIndex[i * 3 + 0];
-		indices[i * 3 + 1] = meshData->m_rawIndex[i * 3 + 2];
-		indices[i * 3 + 2] = meshData->m_rawIndex[i * 3 + 1];
-	}
-
-	D3D11_BUFFER_DESC vbd;
-	vbd.Usage = D3D11_USAGE_DEFAULT;
-	vbd.ByteWidth = sizeof(PTNVertex) * vcount;
-	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vbd.CPUAccessFlags = 0;
-	vbd.MiscFlags = 0;
-	D3D11_SUBRESOURCE_DATA vinitData;
-	vinitData.pSysMem = &vertices[0];
-	hr = m_device->CreateBuffer(&vbd, &vinitData, &m_vertexBuffer);
-
-	if (FAILED(hr))
-	{
-		return hr;
-	}
-
-	D3D11_BUFFER_DESC ibd;
-	ibd.Usage = D3D11_USAGE_DEFAULT;
-	ibd.ByteWidth = sizeof(UINT) * count;
-	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	ibd.CPUAccessFlags = 0;
-	ibd.MiscFlags = 0;
-	D3D11_SUBRESOURCE_DATA iinitData;
-	iinitData.pSysMem = &indices[0];
-	hr = m_device->CreateBuffer(&ibd, &iinitData, &m_indexBuffer);
-
-	if (FAILED(hr))
-	{
-		return hr;
+		indices[i * 3 + 1] = meshData->m_rawIndex[i * 3 + 1];
+		indices[i * 3 + 2] = meshData->m_rawIndex[i * 3 + 2];
 	}
 
 	return hr;
@@ -305,10 +373,10 @@ HRESULT MeshObject::LoadTexture(const wstring& path)
 {
 	HRESULT hr = S_OK;
 
-	if (path == L"no")
+	if (path.empty())
 	{
 		isTexture = false;
-		return hr;
+		return S_FALSE;
 	}
 
 	ComPtr<ID3D11Resource> texture;

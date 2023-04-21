@@ -22,7 +22,7 @@ class DXGraphics : public IGraphics
 {
 public:
 	DXGraphics() = default;
-	virtual ~DXGraphics();
+	virtual ~DXGraphics() = default;
 
 private:
 	HWND m_hWnd;
@@ -63,10 +63,8 @@ private:
 	HRESULT CreateRasterState();		// 레스터 상태 설정
 
 	HRESULT CreateObject();
-	HRESULT LoadObject(const std::wstring&, int index = 0);
 	std::map<std::wstring, std::pair<LPSTR, std::wstring>> object;
-
-	// void Test();
+	std::map<std::wstring, MeshObject*> nodeList;
 
 #pragma region 오브젝트
 	/// <summary>

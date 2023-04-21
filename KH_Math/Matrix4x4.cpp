@@ -57,6 +57,16 @@ DirectX::XMMATRIX ConvertToXMMATRIX(const Matrix4x4& matrix)
 	return DirectX::XMLoadFloat4x4((DirectX::XMFLOAT4X4*) matrix.e);
 }
  
+Matrix4x4 ConvertToKHMatrix(const DirectX::XMMATRIX& mat)
+{
+	return Matrix4x4(
+		mat.r[0].m128_f32[0], mat.r[0].m128_f32[1],	mat.r[0].m128_f32[2], mat.r[0].m128_f32[3],
+		mat.r[1].m128_f32[0], mat.r[1].m128_f32[1],	mat.r[1].m128_f32[2], mat.r[1].m128_f32[3],
+		mat.r[2].m128_f32[0], mat.r[2].m128_f32[1],	mat.r[2].m128_f32[2], mat.r[2].m128_f32[3],
+		mat.r[3].m128_f32[0], mat.r[3].m128_f32[1],	mat.r[3].m128_f32[2], mat.r[3].m128_f32[3]
+	);
+}
+
 Matrix4x4 CreateMatrix(const Vector3D& pos, const Vector3D& angle, const Vector3D& scale)
 {
 	float cx = std::cos(angle.x);
@@ -163,6 +173,18 @@ Matrix4x4 TransposeMatrix(const Matrix4x4& m)
 		m.e[0][2], m.e[1][2], m.e[2][2], m.e[3][2],
 		m.e[0][3], m.e[1][3], m.e[2][3], m.e[3][3]
 	);
+}
+
+
+Matrix4x4 InverseMatrix(const Matrix4x4& mat)
+{
+	DirectX::XMMATRIX world = ConvertToXMMATRIX(mat);
+
+	DirectX::XMMATRIX d = world;
+	// d.r[3] = DirectX::XMVectorSet(0.f, 0.f, 0.f, 1.f);
+	DirectX::XMVECTOR det = DirectX::XMMatrixDeterminant(d);
+	
+	return ConvertToKHMatrix(DirectX::XMMatrixInverse(&det, world));
 }
 
 Matrix4x4&& Matrix4x4::IdentityMatrix()

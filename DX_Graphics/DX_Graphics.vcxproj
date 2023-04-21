@@ -173,12 +173,12 @@
     <ClInclude Include="DXGraphics.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="InputManager.h" />
+    <ClInclude Include="Node.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Skull.h" />
-    <ClInclude Include="Struct.h" />
     <ClInclude Include="MeshObject.h" />
     <ClInclude Include="TimeManager.h" />
-    <ClInclude Include="Vertex.h" />
+    <ClInclude Include="Struct.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Axis.cpp" />
@@ -187,6 +187,7 @@
     <ClCompile Include="DXGraphics.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="InputManager.cpp" />
+    <ClCompile Include="Node.cpp" />
     <ClCompile Include="Skull.cpp" />
     <ClCompile Include="MeshObject.cpp" />
     <ClCompile Include="TimeManager.cpp" />

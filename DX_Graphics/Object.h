@@ -1,7 +1,7 @@
 #pragma once
 
 #include "DXDefine.h"
-#include "Vertex.h"
+#include "Struct.h"
 
 class Object
 {

@@ -9,6 +9,8 @@ namespace ASEParser
 	class Mesh;
 }
 
+class Node;
+
 class MeshObject : public Object
 {
 public:
@@ -28,6 +30,8 @@ public:
 	virtual void Render() override;
 
 	HRESULT LoadNodeData(ASEParser::Mesh* meshData);
+	Matrix4x4 GetWorldMatrix();
+	void InitWorldTM();
 	HRESULT LoadAnimation(ASEParser::Mesh* meshData);
 	HRESULT LoadGeometry(ASEParser::Mesh* meshData);
 	HRESULT LoadTexture(const std::wstring& path);
@@ -35,15 +39,22 @@ public:
 	void SetScalse(Vector3D scale);
 	void SetPosition(Vector3D position);
 
-private:
+	int m_type;
 	std::wstring nodeName;
+	std::wstring parentName;
+	MeshObject* parent;
+private:
 
 	Vector3D m_pos{};
 	Vector3D m_angle{ 0.f, 0.f, 0.f };
-	Vector3D m_scale{ 0.01f, 0.01f, 0.01f };
+	Vector3D m_scale{ 0.05f, 0.05f, 0.05f };
 	bool isTexture{true};
 
 private:
+	Matrix4x4 m_invWorldTM;
+	std::vector<PTNVertex> vertices;
+	std::vector<UINT> indices;
+
 	// UINT count;
 	// Matrix4x4 worldTM;
 	// 
@@ -60,9 +71,10 @@ private:
 	// Microsoft::WRL::ComPtr<ID3DX11EffectTechnique> m_tech;
 	// Microsoft::WRL::ComPtr<ID3DX11EffectMatrixVariable> m_matrix;
 
-	/*
+	std::vector<Node*> nodeList;
+
 	Microsoft::WRL::ComPtr<ID3DX11EffectMatrixVariable> m_invMatrix;
-	*/
+	
 	Microsoft::WRL::ComPtr<ID3DX11EffectShaderResourceVariable> m_shaderResource;	// 
 
 	Microsoft::WRL::ComPtr<ID3D11Resource>				m_texture;		/// 초기화 당시에만 필요하고 가지고 있을 필요는 없을듯
