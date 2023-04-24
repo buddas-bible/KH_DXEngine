@@ -39,7 +39,7 @@ class Animation {
 public:
 
 	// 애니메이션 데이터의 이름. 유일한 참조수단이다
-	std::string						m_nodename;
+	std::string					m_nodename;
 	vector<CAnimation_pos*>		m_position;
 	vector<CAnimation_rot*>		m_rotation;
 	vector<CAnimation_scl*>		m_scale;

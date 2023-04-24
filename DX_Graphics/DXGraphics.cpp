@@ -609,15 +609,17 @@ HRESULT DXGraphics::CreateMeshObject()
 	m_parser->Init();
 
 	std::wstring ob1 = L"Genji_texture1";
-	std::wstring ob2 = L"03IK-Joe";
+	std::wstring ob2 = L"03IK-Joe-Mesh";
+	std::wstring ob3 = L"03IK-Joe";
 
 	object[ob1] = std::make_pair((LPSTR)"../ASEFile/genji_max.ASE", L"../Textures/000000002405_reverse.dds");
 	object[ob2] = std::make_pair((LPSTR)"../ASEFile/03IK-Joe_onlymesh.ASE", L"");
+	object[ob3] = std::make_pair((LPSTR)"../ASEFile/03IK-Joe.ASE", L"");
 
 
 
 
-	m_parser->Load(object[ob2].first);			// 경로에 있는 파일 열어서 로드
+	m_parser->Load(object[ob3].first);			// 경로에 있는 파일 열어서 로드
 	int index = m_parser->m_MeshList.size();	// 로드된 메쉬들 개수를 받아와서 그만큼 반복함
 	for (auto i = 0; i < index; i++)
 	{
@@ -627,7 +629,7 @@ HRESULT DXGraphics::CreateMeshObject()
 		newMesh->nodeName.assign(mesh->m_nodename.begin(), mesh->m_nodename.end());	// 노드 이름 복사함
 		nodeList[newMesh->nodeName] = newMesh;				// 노드이름, 메쉬 포인터를 맵으로 저장해둠
 															/// 맵으로 굳이 저장해놓고 배열로 처리한다? 그냥 맵으로 할까..?	
-		newMesh->LoadTexture(object[ob2].second);			/// 텍스쳐를 로드함
+		newMesh->LoadTexture(object[ob3].second);			/// 텍스쳐를 로드함
 		newMesh->m_type = mesh->m_type;
 		newMesh->LoadGeometry(m_parser->GetOptMesh(i));		/// 버텍스 수를 줄인 다음 버텍스 버퍼를 만듬
 		newMesh->LoadNodeData(mesh);						/// 부모 노드 이름을 저장함.

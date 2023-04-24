@@ -443,7 +443,24 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 		case TOKENR_NODE_NAME:
 			// 어쩄든 지금은 오브젝트들을 구별 할 수 있는 유일한 값이다.
 			// 모드에 따라 넣어야 할 곳이 다르다.
-			m_OneMesh->m_nodename = Parsing_String();
+			switch (m_OneMesh->m_type)
+			{
+				case eGeomobject:
+					m_OneMesh->m_nodename = Parsing_String();
+					break;
+				case eHelperObject:
+					m_OneMesh->m_nodename = Parsing_String();
+					break;
+				case eAnimation:
+					m_animation->m_nodename = Parsing_String();
+					break;
+				case eBone_List:
+					m_OneMesh->m_bone->m_bone_name = Parsing_String();
+					break;
+
+				default:
+					break;
+			}
 			break;
 
 		case TOKENR_NODE_PARENT:
@@ -516,13 +533,41 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 #pragma endregion
 
 #pragma region Animation
-			/*
+			
 		case TOKENR_TM_ANIMATION:
+			m_OneMesh->m_isAnimated = true;
+			// m_OneMesh->m_type = eAnimation;
+			Create_animationdata_to_list();
+			Parsing_String();
+			Parsing_String();
+			m_animation->m_nodename = Parsing_String();
 			break;
 
 		case TOKENR_CONTROL_POS_TRACK:
 			break;
-			*/
+
+		case TOKENR_CONTROL_POS_SAMPLE:
+		{
+			CAnimation_pos* animation_pos = new CAnimation_pos;
+			animation_pos->m_time = Parsing_NumberInt();
+			animation_pos->m_pos = Parsing_NumberVector3();
+			m_animation->m_position.push_back(animation_pos);
+		}
+			break;
+
+		case TOKENR_CONTROL_ROT_TRACK:
+			break;
+
+		case TOKENR_CONTROL_ROT_SAMPLE:
+		{
+			CAnimation_rot* animation_rot = new CAnimation_rot;
+			animation_rot->m_time = Parsing_NumberInt();
+			animation_rot->m_rot = Parsing_NumberVector3();
+			animation_rot->m_angle = Parsing_NumberFloat();
+			m_animation->m_rotation.push_back(animation_rot);
+		}
+			break;
+
 #pragma endregion
 
 #pragma region Mesh

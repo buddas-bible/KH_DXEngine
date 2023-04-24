@@ -292,10 +292,10 @@ void MeshObject::InitializeLocalTM()
 
 	if (parent != nullptr)
 	{
-		w = InverseMatrix(parent->m_worldTM);
+		w = InverseMatrix(parent->m_nodeTM);
 	}
 	
-	m_localTM = m_worldTM * w;
+	m_localTM = m_nodeTM * w;
 }
 
 HRESULT MeshObject::LoadAnimation(ASEParser::Mesh* meshData)
@@ -309,30 +309,30 @@ HRESULT MeshObject::LoadGeometry(ASEParser::Mesh* meshData)
 {
 	HRESULT hr = S_OK;
 
+	m_nodeTM.e[0][0] = meshData->m_tm_row0.x;
+	m_nodeTM.e[0][1] = meshData->m_tm_row0.y;
+	m_nodeTM.e[0][2] = meshData->m_tm_row0.z;
+
+	m_nodeTM.e[1][0] = meshData->m_tm_row1.x;
+	m_nodeTM.e[1][1] = meshData->m_tm_row1.y;
+	m_nodeTM.e[1][2] = meshData->m_tm_row1.z;
+
+	m_nodeTM.e[2][0] = meshData->m_tm_row2.x;
+	m_nodeTM.e[2][1] = meshData->m_tm_row2.y;
+	m_nodeTM.e[2][2] = meshData->m_tm_row2.z;
+
+	m_nodeTM.e[3][0] = meshData->m_tm_row3.x;
+	m_nodeTM.e[3][1] = meshData->m_tm_row3.y;
+	m_nodeTM.e[3][2] = meshData->m_tm_row3.z;
+
 	if (m_type != eGeomobject)
 	{
 		return S_FALSE;
 	}
 
-	m_worldTM.e[0][0] = meshData->m_tm_row0.x;
-	m_worldTM.e[0][1] = meshData->m_tm_row0.y;
-	m_worldTM.e[0][2] = meshData->m_tm_row0.z;
-
-	m_worldTM.e[1][0] = meshData->m_tm_row1.x;
-	m_worldTM.e[1][1] = meshData->m_tm_row1.y;
-	m_worldTM.e[1][2] = meshData->m_tm_row1.z;
-
-	m_worldTM.e[2][0] = meshData->m_tm_row2.x;
-	m_worldTM.e[2][1] = meshData->m_tm_row2.y;
-	m_worldTM.e[2][2] = meshData->m_tm_row2.z;
-
-	m_worldTM.e[3][0] = meshData->m_tm_row3.x;
-	m_worldTM.e[3][1] = meshData->m_tm_row3.y;
-	m_worldTM.e[3][2] = meshData->m_tm_row3.z;
-
-	Matrix4x4 invTM = InverseMatrix(m_worldTM);				// 월드 역행렬 버텍스를 로컬로 돌려놓으려고 함
+	Matrix4x4 invTM = InverseMatrix(m_nodeTM);				// 월드 역행렬 버텍스를 로컬로 돌려놓으려고 함
 	
-	Matrix4x4 invTransTM = InverseTransposeMatrix(m_worldTM);	// 월드 역행렬의 전치
+	Matrix4x4 invTransTM = InverseTransposeMatrix(m_nodeTM);	// 월드 역행렬의 전치
 
 	// m_pos = Vector3D(meshData->m_tm_pos.x, meshData->m_tm_pos.y, meshData->m_tm_pos.z);
 	Vector3D axis{ meshData->m_tm_rotaxis.x, meshData->m_tm_rotaxis.y, meshData->m_tm_rotaxis.z };

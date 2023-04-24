@@ -97,7 +97,7 @@
 			*CONTROL_POS_SAMPLE 57600	-35.18904	11.09587	91.33232
 		}
 	}
-}^
+}
 *GEOMOBJECT {
 	*NODE_NAME "Biped-R_hand_palm04"
 	*NODE_PARENT "Biped-help_R_muneca"

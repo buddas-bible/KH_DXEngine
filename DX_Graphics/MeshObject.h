@@ -52,7 +52,6 @@ private:
 	bool isTexture{true};
 
 private:
-	Matrix4x4 m_localTM;
 	Matrix4x4 m_animationTM;
 	Matrix4x4 m_invWorldTM;
 	std::vector<PTNVertex> vertices;
