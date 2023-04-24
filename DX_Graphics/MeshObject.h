@@ -31,7 +31,8 @@ public:
 
 	HRESULT LoadNodeData(ASEParser::Mesh* meshData);
 	Matrix4x4 GetWorldMatrix();
-	void InitWorldTM();
+	Matrix4x4 GetAnimaionTM();
+	void InitializeLocalTM();
 	HRESULT LoadAnimation(ASEParser::Mesh* meshData);
 	HRESULT LoadGeometry(ASEParser::Mesh* meshData);
 	HRESULT LoadTexture(const std::wstring& path);
@@ -47,10 +48,12 @@ private:
 
 	Vector3D m_pos{};
 	Vector3D m_angle{ 0.f, 0.f, 0.f };
-	Vector3D m_scale{ 0.05f, 0.05f, 0.05f };
+	Vector3D m_scale{ 0.07f, 0.07f, 0.07f };
 	bool isTexture{true};
 
 private:
+	Matrix4x4 m_localTM;
+	Matrix4x4 m_animationTM;
 	Matrix4x4 m_invWorldTM;
 	std::vector<PTNVertex> vertices;
 	std::vector<UINT> indices;

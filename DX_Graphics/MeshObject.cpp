@@ -210,14 +210,15 @@ void MeshObject::Render()
 	Matrix4x4 wvp = m_worldTM * m_viewTM * m_projTM;
 	DirectX::XMMATRIX worldViewProj = ConvertToXMMATRIX(wvp);
 
-	DirectX::XMMATRIX d = worldViewProj;
+	DirectX::XMMATRIX World = ConvertToXMMATRIX(m_worldTM);
+	DirectX::XMMATRIX d = World;
 	d.r[3] = XMVectorSet(0.f, 0.f, 0.f, 1.f);
 	XMVECTOR det = DirectX::XMMatrixDeterminant(d);
-	DirectX::XMMATRIX invTwoldViewProj = DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(&det, worldViewProj));
+	DirectX::XMMATRIX invTwold = DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(&det, World));
 
 	// 쉐이더에 있는 변수에 행렬 설정
 	m_matrix->SetMatrix(reinterpret_cast<float*>(&worldViewProj));
-	m_invMatrix->SetMatrix(reinterpret_cast<float*>(&invTwoldViewProj));
+	m_invMatrix->SetMatrix(reinterpret_cast<float*>(&invTwold));
 
 	const float light[3] = { 0.5f, 0.5f, 0.f };
 	m_light->SetRawValue(light, 0, sizeof(light));
@@ -237,7 +238,6 @@ void MeshObject::Render()
 	}
 }
 
-
 HRESULT MeshObject::LoadNodeData(ASEParser::Mesh* meshData)
 {
 	HRESULT hr = S_OK;
@@ -252,34 +252,50 @@ HRESULT MeshObject::LoadNodeData(ASEParser::Mesh* meshData)
 	return hr;
 }
 
-
-Matrix4x4 MeshObject::GetWorldMatrix()
-{
-	if (parent)
-	{
-		Matrix4x4 w = Matrix4x4::IdentityMatrix();
-		return CreateMatrix(m_pos, m_angle, m_scale) * parent->GetWorldMatrix();
-	}
-	else
-	{
-		return CreateMatrix(m_pos, m_angle, m_scale);
-	}
-}
-
 /// <summary>
-/// 아마? 
+/// 부모를 타고 올라가면서 로컬을 곱해나감
 /// </summary>
-void MeshObject::InitWorldTM()
+/// <returns></returns>
+Matrix4x4 MeshObject::GetWorldMatrix()
 {
 	Matrix4x4 w = Matrix4x4::IdentityMatrix();
 
-	if (parent)
+	if (parent != nullptr)
 	{
-		// w = parent->GetWorldMatrix();
-		w = InverseMatrix(w);
+		w = parent->GetWorldMatrix();
+	}
+
+	return m_localTM * w;
+}
+
+/// <summary>
+/// 애니메이션 정보에 있는 POS, ROT는 월드 기준인듯하니
+/// 일단... 프레임 별로 POS, ROT의 정보를 가지고 TM을 만들고
+/// 부모의 월드 TM을 이용해서 해당 프레임의 로컬 TM을 뽑아낸다.
+/// 선형 보간은 어떻게 할지는 고민되는 부분.
+/// </summary>
+/// <returns></returns>
+Matrix4x4 MeshObject::GetAnimaionTM()
+{
+	Matrix4x4 w = Matrix4x4::IdentityMatrix();
+
+
+	return w;
+}
+
+/// <summary>
+/// 부모 월드의 역행렬을 곱해서 자신의 로컬을 뽑아냄
+/// </summary>
+void MeshObject::InitializeLocalTM()
+{
+	Matrix4x4 w = Matrix4x4::IdentityMatrix();
+
+	if (parent != nullptr)
+	{
+		w = InverseMatrix(parent->m_worldTM);
 	}
 	
-	m_worldTM = m_worldTM * w;
+	m_localTM = m_worldTM * w;
 }
 
 HRESULT MeshObject::LoadAnimation(ASEParser::Mesh* meshData)
@@ -314,9 +330,16 @@ HRESULT MeshObject::LoadGeometry(ASEParser::Mesh* meshData)
 	m_worldTM.e[3][1] = meshData->m_tm_row3.y;
 	m_worldTM.e[3][2] = meshData->m_tm_row3.z;
 
-	Matrix4x4 invTM = InverseMatrix(m_worldTM);
+	Matrix4x4 invTM = InverseMatrix(m_worldTM);				// 월드 역행렬 버텍스를 로컬로 돌려놓으려고 함
+	
+	Matrix4x4 invTransTM = InverseTransposeMatrix(m_worldTM);	// 월드 역행렬의 전치
 
-	Matrix4x4 invTransTM = TransposeMatrix(InverseMatrix(invTM));
+	// m_pos = Vector3D(meshData->m_tm_pos.x, meshData->m_tm_pos.y, meshData->m_tm_pos.z);
+	Vector3D axis{ meshData->m_tm_rotaxis.x, meshData->m_tm_rotaxis.y, meshData->m_tm_rotaxis.z };
+	float angle{ meshData->m_tm_rotangle };
+	// m_angle = AxisAndAngleToEuler(axis, angle);
+	// m_scale = Vector3D(meshData->m_tm_scale.x, meshData->m_tm_scale.y, meshData->m_tm_scale.z);
+	Matrix4x4 scaling = CreateMatrix({}, {}, { 0.06f, 0.06f, 0.06f });
 
 	UINT vcount = 0;
 	UINT tcount = 0;
@@ -324,15 +347,14 @@ HRESULT MeshObject::LoadGeometry(ASEParser::Mesh* meshData)
 	vcount = meshData->m_rawVertex.size();
 	vertices.resize(vcount);
 
-	// isTexture = meshData->istexture;
-
 	for (int i = 0; i < vcount; i++)
 	{
 		vertices[i].pos.x = meshData->m_rawVertex[i]->m_pos.x;
 		vertices[i].pos.y = meshData->m_rawVertex[i]->m_pos.y;
 		vertices[i].pos.z = meshData->m_rawVertex[i]->m_pos.z;
 
-		vertices[i].pos = Vector4D(vertices[i].pos, 1.f) * invTM;
+		// 월드 기준으로 되어있는 버텍스를 월드의 역행렬을 취해줘서 로컬로 돌려놓는다.
+		vertices[i].pos = Vector4D(vertices[i].pos, 1.f) * scaling * invTM; // 모델링 자체가 너무 커서 줄였음.
 
 		vertices[i].uv.x = meshData->m_rawVertex[i]->u;
 		vertices[i].uv.y = meshData->m_rawVertex[i]->v;
@@ -341,6 +363,10 @@ HRESULT MeshObject::LoadGeometry(ASEParser::Mesh* meshData)
 		vertices[i].normal.y = meshData->m_rawVertex[i]->m_normal.y;
 		vertices[i].normal.z = meshData->m_rawVertex[i]->m_normal.z;
 
+		// 노말도 분명 트랜스폼된 메쉬를 기준으로 맞춰져있을 것으로 추측되기 때문에
+		// 조정을 해줘야 할텐데...
+		// 월드의 역행렬의 전치를 받아서 변환된 노말?
+		// 그럼 노말
 		vertices[i].normal = Vector4D(vertices[i].normal, 1.f);
 	}
 

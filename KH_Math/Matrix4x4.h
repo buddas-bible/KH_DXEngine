@@ -2,6 +2,7 @@
 #include <DirectXMath.h>
 
 class Vector3D;
+class Matrix3x3;
 
 class Matrix4x4
 {
@@ -13,6 +14,7 @@ public:
 		float e20, float e21, float e22, float e23,
 		float e30, float e31, float e32, float e33
 	) noexcept;
+	Matrix4x4(const Matrix3x3& mat) noexcept;
 	Matrix4x4(const Matrix4x4& mat) noexcept;
 	Matrix4x4(const Matrix4x4&& mat) noexcept;
 	~Matrix4x4() noexcept;
@@ -44,6 +46,7 @@ DirectX::XMMATRIX ConvertToXMMATRIX(const Matrix4x4& matrix);
 Matrix4x4 ConvertToKHMatrix(const DirectX::XMMATRIX& mat);
 Matrix4x4 CreateMatrix(const Vector3D& pos, const Vector3D& angle, const Vector3D& scale);
 Matrix4x4 CreateInvMatrix(const Vector3D& pos, const Vector3D& angle, const Vector3D& scale);
-Matrix4x4 TransposeMatrix(const Matrix4x4& m);
 
+Matrix4x4 TransposeMatrix(const Matrix4x4& m);
 Matrix4x4 InverseMatrix(const Matrix4x4& mat);
+Matrix4x4 InverseTransposeMatrix(const Matrix4x4& mat);

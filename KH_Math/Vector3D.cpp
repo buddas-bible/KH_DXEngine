@@ -410,3 +410,28 @@ Vector3D TripleProduct(const Vector3D& a, const Vector3D& b, const Vector3D& c)
 	return a.Cross(b).Cross(c);
 }
 
+Vector3D AxisAndAngleToEuler(const Vector3D& axis, float angle)
+{
+	Vector3D Euler;
+
+	// roll (x-axis 회전)
+	float sinr_cosp = 2 * (angle * axis.z + axis.x * axis.y);
+	float cosr_cosp = 1 - 2 * (axis.z * axis.z + axis.x * axis.x);
+	Euler.x = std::atan2f(sinr_cosp, cosr_cosp);
+
+	// pitch (y-axis 회전)
+	float sinp = 2 * (angle * axis.x - axis.y * axis.z);
+
+	if (std::abs(sinp) >= 1)
+		Euler.y = std::copysignf(3.14159265f / 2, sinp);
+	else
+		Euler.y = std::asinf(sinp);
+
+	// yaw (z-axis 회전)
+	float siny_cosp = 2 * (angle * axis.y + axis.x * axis.z);
+	float cosy_cosp = 1 - 2 * (axis.x * axis.x + axis.y * axis.y);
+	Euler.z = std::atan2f(siny_cosp, cosy_cosp);
+
+	return Euler;
+}
+

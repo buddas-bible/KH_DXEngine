@@ -73,3 +73,4 @@ public:
 };
 
 Vector3D TripleProduct(const Vector3D& a, const Vector3D& b, const Vector3D& c);
+Vector3D AxisAndAngleToEuler(const Vector3D& axis, float angle);

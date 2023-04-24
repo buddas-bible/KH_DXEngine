@@ -41,14 +41,15 @@ struct VertexOut
 {
     float4 PosH : SV_POSITION;
     float2 uv : TEXCOORD;
-    float4 Color : COLOR;
-    // float Diffuse : COLOR;
+    float4 Color : COLOR0;
+    // float Diffuse : COLOR1;
 };
 
 VertexOut VS(VertexIn vin)
 {
     VertexOut vout;
-    float3 N = vin.Normal;
+    float3 N = mul(vin.Normal, (float3x3)invTworldViewProj);
+    /// float3 N = vin.Normal;
     N = normalize(N);
     float3 L = lightDirection;
 
