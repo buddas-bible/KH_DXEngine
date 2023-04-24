@@ -644,7 +644,7 @@ HRESULT DXGraphics::CreateMeshObject()
 
 	for (auto& e : m_objectList)
 	{
-		e->InitWorldTM();
+		e->InitializeLocalTM();
 	}
 
 	/// 연결이 됐으니... 이제는 로컬 스페이스로 되돌려야한다.
