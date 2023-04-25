@@ -366,10 +366,10 @@ LONG ASE::CASELexer::GetToken(LPSTR p_TokenString)
 
 		return	TOKEND_STRING;
 	}
-	else if (Char == '\0')
-	{
-		return TOKEND_END;
-	}
+// 	else if (Char == '\0')
+// 	{
+// 		return TOKEND_END;
+// 	}
 	// 7) 지금까지 못찾았음 이건 허당이다~ 다음을 기약하자~
 	else
 	{

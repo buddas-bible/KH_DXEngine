@@ -1,6 +1,8 @@
 ﻿#include "WIN32Graphics.h"
 
 #include "../KH_Math/Vector2D.h"
+#include <algorithm>
+#include <cmath>
 
 WIN32Graphics::~WIN32Graphics()
 {
@@ -42,7 +44,7 @@ void WIN32Graphics::BeginDraw()
 	PatBlt(m_backBuffer, 0, 0, m_rect.right, m_rect.bottom, BLACKNESS);
 
 
-	DrawTriangle({ 10, 10 }, { 800, 10 }, { 800, 800 });
+	DrawSolidTriangle({ 10, 10 }, { 800, 10 }, { 800, 800 });
 }
 
 void WIN32Graphics::EndDraw()
@@ -151,4 +153,35 @@ void WIN32Graphics::DrawTriangle(const Vector2D& _v1, const Vector2D& _v2, const
 	DrawLine(_v1.x, _v1.y, _v2.x, _v2.y);
 	DrawLine(_v2.x, _v2.y, _v3.x, _v3.y);
 	DrawLine(_v3.x, _v3.y, _v1.x, _v1.y);
+}
+
+void WIN32Graphics::DrawSolidTriangle(const Vector2D& _v1, const Vector2D& _v2, const Vector2D& _v3, COLORREF _color)
+{
+	// 삼각형의 바운딩 박스 계산
+	int minX = min(_v1.x, min(_v2.x, _v3.x));
+	int maxX = max(_v1.x, max(_v2.x, _v3.x));
+	int minY = min(_v1.y, min(_v2.y, _v3.y));
+	int maxY = max(_v1.y, max(_v2.y, _v3.y));
+
+	// 바리센트릭 좌표 사용
+	Vector2D p;
+	for (p.x = minX; p.x <= maxX; ++p.x)
+	{
+		for (p.y = minY; p.y <= maxY; ++p.y)
+		{
+			// 바리센트릭 좌표 계산
+			float w0 = ((_v2.y - _v3.y) * (p.x - _v3.x) + (_v3.x - _v2.x) * (p.y - _v3.y)) /
+				((_v2.y - _v3.y) * (_v1.x - _v3.x) + (_v3.x - _v2.x) * (_v1.y - _v3.y));
+			float w1 = ((_v3.y - _v1.y) * (p.x - _v3.x) + (_v1.x - _v3.x) * (p.y - _v3.y)) /
+				((_v2.y - _v3.y) * (_v1.x - _v3.x) + (_v3.x - _v2.x) * (_v1.y - _v3.y));
+			float w2 = 1.0f - w0 - w1;
+
+			// 삼각형 내부에 있는지 확인
+			if (w0 >= 0.0f && w1 >= 0.0f && w2 >= 0.0f)
+			{
+				// 삼각형 내부에 있다면 해당 픽셀을 렌더링
+				SetPixel(m_deviceContext, p.x, p.y, _color);
+			}
+		}
+	}
 }

@@ -30,6 +30,7 @@ public:
 	void DrawPixel(float _x, float _y, COLORREF _color = RGB(0, 0, 0));
 	void DrawLine(float _sX, float _sY, float _eX, float _eY, COLORREF _color = RGB(0, 0, 0));
 	void DrawTriangle(const Vector2D& _v1, const Vector2D& _v2, const Vector2D& _v3);
+	void DrawSolidTriangle(const Vector2D& _v1, const Vector2D& _v2, const Vector2D& _v3, COLORREF _color = RGB(0, 0, 0));
 
 private:
 

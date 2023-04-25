@@ -3,6 +3,7 @@
 #include <fstream>
 #include "CParsingDataClass.h"
 #include "CASEParser.h"
+#include "TimeManager.h"
 
 using namespace Microsoft;
 using namespace Microsoft::WRL;
@@ -176,6 +177,21 @@ HRESULT MeshObject::Finalize()
 
 void MeshObject::Update(const Matrix4x4& view, const Matrix4x4& proj)
 {
+	// TimeManager& time = TimeManager::GetInstance();
+	// float dt = time.GetfDeltaTime();
+	Matrix4x4 trans = Matrix4x4::IdentityMatrix();
+	
+	if (nodeName == L"Biped-L_leg")				// 특정 관절만 회전시켜보고 싶음
+	{
+		static float angle = 0.f;
+		if (GetAsyncKeyState(VK_F9))
+		{
+			angle += 0.02f;
+			trans = CreateMatrix({}, Vector3D(angle, 0, 0), Vector3D{1.f,1.f,1.f});
+		}
+	}
+	
+	m_animationTM = trans;
 	m_worldTM = GetWorldMatrix();
 	m_viewTM = view;
 	m_projTM = proj;
@@ -265,7 +281,7 @@ Matrix4x4 MeshObject::GetWorldMatrix()
 		w = parent->GetWorldMatrix();
 	}
 
-	return m_localTM * w;
+	return m_localTM * m_animationTM * w;
 }
 
 /// <summary>
@@ -294,8 +310,16 @@ void MeshObject::InitializeLocalTM()
 	{
 		w = InverseMatrix(parent->m_nodeTM);
 	}
-	
+
 	m_localTM = m_nodeTM * w;
+
+	// DecomposeMatrix(m_pos, m_axisAndAngle, m_scale, m_localTM);
+
+	if (nodeName == L"Biped-L_leg")
+	{
+		return;
+	}
+
 }
 
 HRESULT MeshObject::LoadAnimation(ASEParser::Mesh* meshData)
@@ -308,6 +332,8 @@ HRESULT MeshObject::LoadAnimation(ASEParser::Mesh* meshData)
 HRESULT MeshObject::LoadGeometry(ASEParser::Mesh* meshData)
 {
 	HRESULT hr = S_OK;
+
+	Matrix4x4 scal = CreateMatrix(Vector3D{}, Vector3D{}, scaling);
 
 	m_nodeTM.e[0][0] = meshData->m_tm_row0.x;
 	m_nodeTM.e[0][1] = meshData->m_tm_row0.y;
@@ -325,6 +351,9 @@ HRESULT MeshObject::LoadGeometry(ASEParser::Mesh* meshData)
 	m_nodeTM.e[3][1] = meshData->m_tm_row3.y;
 	m_nodeTM.e[3][2] = meshData->m_tm_row3.z;
 
+
+	m_nodeTM = m_nodeTM * scal;
+
 	if (m_type != eGeomobject)
 	{
 		return S_FALSE;
@@ -334,12 +363,12 @@ HRESULT MeshObject::LoadGeometry(ASEParser::Mesh* meshData)
 	
 	Matrix4x4 invTransTM = InverseTransposeMatrix(m_nodeTM);	// 월드 역행렬의 전치
 
-	// m_pos = Vector3D(meshData->m_tm_pos.x, meshData->m_tm_pos.y, meshData->m_tm_pos.z);
+	m_pos = Vector3D(meshData->m_tm_pos.x, meshData->m_tm_pos.y, meshData->m_tm_pos.z);
 	Vector3D axis{ meshData->m_tm_rotaxis.x, meshData->m_tm_rotaxis.y, meshData->m_tm_rotaxis.z };
 	float angle{ meshData->m_tm_rotangle };
 	// m_angle = AxisAndAngleToEuler(axis, angle);
+	m_axisAndAngle = Vector4D{ meshData->m_tm_rotaxis.x, meshData->m_tm_rotaxis.y, meshData->m_tm_rotaxis.z, meshData->m_tm_rotangle };
 	// m_scale = Vector3D(meshData->m_tm_scale.x, meshData->m_tm_scale.y, meshData->m_tm_scale.z);
-	Matrix4x4 scaling = CreateMatrix({}, {}, { 0.06f, 0.06f, 0.06f });
 
 	UINT vcount = 0;
 	UINT tcount = 0;
@@ -354,7 +383,7 @@ HRESULT MeshObject::LoadGeometry(ASEParser::Mesh* meshData)
 		vertices[i].pos.z = meshData->m_rawVertex[i]->m_pos.z;
 
 		// 월드 기준으로 되어있는 버텍스를 월드의 역행렬을 취해줘서 로컬로 돌려놓는다.
-		vertices[i].pos = Vector4D(vertices[i].pos, 1.f) * scaling * invTM; // 모델링 자체가 너무 커서 줄였음.
+		vertices[i].pos = Vector4D(vertices[i].pos, 1.f) * scal * invTM; // 모델링 자체가 너무 커서 줄였음.
 
 		vertices[i].uv.x = meshData->m_rawVertex[i]->u;
 		vertices[i].uv.y = meshData->m_rawVertex[i]->v;

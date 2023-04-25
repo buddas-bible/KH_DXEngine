@@ -2,6 +2,7 @@
 #include <DirectXMath.h>
 
 class Vector3D;
+class Vector4D;
 class Matrix3x3;
 
 class Matrix4x4
@@ -45,8 +46,10 @@ public:
 DirectX::XMMATRIX ConvertToXMMATRIX(const Matrix4x4& matrix);
 Matrix4x4 ConvertToKHMatrix(const DirectX::XMMATRIX& mat);
 Matrix4x4 CreateMatrix(const Vector3D& pos, const Vector3D& angle, const Vector3D& scale);
+Matrix4x4 CreateMatrix(const Vector3D& pos, const Vector4D& axisAndAngle, const Vector3D& scale);
 Matrix4x4 CreateInvMatrix(const Vector3D& pos, const Vector3D& angle, const Vector3D& scale);
 
 Matrix4x4 TransposeMatrix(const Matrix4x4& m);
 Matrix4x4 InverseMatrix(const Matrix4x4& mat);
 Matrix4x4 InverseTransposeMatrix(const Matrix4x4& mat);
+void DecomposeMatrix(Vector3D& pos, Vector4D& angle, Vector3D& scale, const Matrix4x4 mat);

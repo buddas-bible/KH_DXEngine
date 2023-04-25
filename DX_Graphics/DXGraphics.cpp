@@ -435,8 +435,8 @@ void DXGraphics::SetCamera()
 	// 이건 오브젝트마다 가지고 있을것.
 	m_world = Matrix4x4::IdentityMatrix();
 
-	Vector3D eye{ 0.0f, 0.7f, -1.5f };
-	Vector3D at{ 0.0f, 0.1f, 0.0f };
+	Vector3D eye{ 0.0f, 8.f, -9.f };
+	Vector3D at{ 0.0f, 6.f, 0.0f };
 	Vector3D up{ 0.0f, 1.0f, 0.0f };
 	camera.CameraLookAtLH(eye, at, up);
 
@@ -619,17 +619,21 @@ HRESULT DXGraphics::CreateMeshObject()
 
 
 
-	m_parser->Load(object[ob3].first);			// 경로에 있는 파일 열어서 로드
+	m_parser->Load(object[ob2].first);			// 경로에 있는 파일 열어서 로드
 	int index = m_parser->m_MeshList.size();	// 로드된 메쉬들 개수를 받아와서 그만큼 반복함
 	for (auto i = 0; i < index; i++)
 	{
+		ASEParser::Mesh* mesh = m_parser->m_MeshList[i];	// 괜히 복잡해보이지만 일단 조사식 편하게 보려고 꺼냄
+		if (mesh->m_type == 3)
+		{
+			continue;
+		}
 		MeshObject* newMesh = new MeshObject(m_pd3dDevice, m_pd3dDeviceContext, m_currRasterizerState);
 		m_objectList.push_back(newMesh);					// 메쉬를 배열에 넣음
-		ASEParser::Mesh* mesh = m_parser->m_MeshList[i];	// 괜히 복잡해보이지만 일단 조사식 편하게 보려고 꺼냄
 		newMesh->nodeName.assign(mesh->m_nodename.begin(), mesh->m_nodename.end());	// 노드 이름 복사함
 		nodeList[newMesh->nodeName] = newMesh;				// 노드이름, 메쉬 포인터를 맵으로 저장해둠
 															/// 맵으로 굳이 저장해놓고 배열로 처리한다? 그냥 맵으로 할까..?	
-		newMesh->LoadTexture(object[ob3].second);			/// 텍스쳐를 로드함
+		newMesh->LoadTexture(object[ob2].second);			/// 텍스쳐를 로드함
 		newMesh->m_type = mesh->m_type;
 		newMesh->LoadGeometry(m_parser->GetOptMesh(i));		/// 버텍스 수를 줄인 다음 버텍스 버퍼를 만듬
 		newMesh->LoadNodeData(mesh);						/// 부모 노드 이름을 저장함.

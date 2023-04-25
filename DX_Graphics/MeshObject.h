@@ -47,8 +47,9 @@ public:
 private:
 
 	Vector3D m_pos{};
-	Vector3D m_angle{ 0.f, 0.f, 0.f };
+	Vector4D m_axisAndAngle{ 0.f, 0.f, 0.f };
 	Vector3D m_scale{ 0.07f, 0.07f, 0.07f };
+	Vector3D scaling{ 0.06f, 0.06f, 0.06f };
 	bool isTexture{true};
 
 private:

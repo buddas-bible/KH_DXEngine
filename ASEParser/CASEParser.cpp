@@ -346,6 +346,7 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 		
 		case TOKENR_MATERIAL_LIST:
 			Create_materialdata_to_list();
+			
 			break;
 		case TOKENR_MATERIAL_COUNT:
 			m_materialcount = Parsing_NumberInt();
@@ -430,6 +431,31 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 		{}			// 없음
 		break;
 			
+		case TOKENR_SHAPEOBJECT:
+			Create_onemesh_to_list();
+			m_OneMesh->m_type = eShape;
+			break;
+
+		case TOKENR_SHAPE_LINECOUNT:
+			// m_OneMesh->m_shape_linecount = Parsing_NumberInt();
+			break;
+
+		case TOKENR_SHAPE_LINE:
+			// m_nowshapeline->m_line_number = Parsing_NumberInt();
+			break;
+
+		case TOKENR_SHAPE_VERTEXCOUNT:
+			// m_nowshapeline->m_shape_vertexcount = Parsing_NumberInt();
+			break;
+
+		case TOKENR_SHAPE_VERTEX_KNOT:
+			break;
+
+		case TOKENR_SHAPE_VERTEX_INTERP:
+			break;
+
+		case TOKENR_SHAPE_CLOSED:
+			break;
 
 		case TOKENR_GEOMOBJECT:
 		{
@@ -443,30 +469,37 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 		case TOKENR_NODE_NAME:
 			// 어쩄든 지금은 오브젝트들을 구별 할 수 있는 유일한 값이다.
 			// 모드에 따라 넣어야 할 곳이 다르다.
-			switch (m_OneMesh->m_type)
+			if (m_OneMesh->m_isAnimated == true)
 			{
-				case eGeomobject:
-					m_OneMesh->m_nodename = Parsing_String();
-					break;
-				case eHelperObject:
-					m_OneMesh->m_nodename = Parsing_String();
-					break;
-				case eAnimation:
-					m_animation->m_nodename = Parsing_String();
-					break;
-				case eBone_List:
-					m_OneMesh->m_bone->m_bone_name = Parsing_String();
-					break;
+				m_animation->m_nodename = Parsing_String();
+			}
+			else
+			{
+				switch (m_OneMesh->m_type)
+				{
+					case eGeomobject:
+						m_OneMesh->m_nodename = Parsing_String();
+						break;
+					case eHelperObject:
+						m_OneMesh->m_nodename = Parsing_String();
+						break;
+					case eBone_List:
+						m_OneMesh->m_bone->m_bone_name = Parsing_String();
+						break;
+					case eShape:
+						m_OneMesh->m_nodename = Parsing_String();
+						break;
 
-				default:
-					break;
+					default:
+						break;
+				}
 			}
 			break;
 
 		case TOKENR_NODE_PARENT:
 			m_OneMesh->m_nodeparent = Parsing_String();
 			m_OneMesh->m_isparentexist = true;
-			nodeMap[m_OneMesh->m_nodeparent] = m_OneMesh;
+			// nodeMap[m_OneMesh->m_nodeparent] = m_OneMesh;
 			break;
 		
 
@@ -535,12 +568,9 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 #pragma region Animation
 			
 		case TOKENR_TM_ANIMATION:
-			m_OneMesh->m_isAnimated = true;
-			// m_OneMesh->m_type = eAnimation;
 			Create_animationdata_to_list();
-			Parsing_String();
-			Parsing_String();
-			m_animation->m_nodename = Parsing_String();
+			// m_OneMesh->m_type = eAnimation;
+			m_OneMesh->m_isAnimated = true;
 			break;
 
 		case TOKENR_CONTROL_POS_TRACK:

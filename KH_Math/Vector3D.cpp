@@ -412,26 +412,40 @@ Vector3D TripleProduct(const Vector3D& a, const Vector3D& b, const Vector3D& c)
 
 Vector3D AxisAndAngleToEuler(const Vector3D& axis, float angle)
 {
-	Vector3D Euler;
+// 	Vector3D Euler;
+// 
+// 	// roll (x-axis 회전)
+// 	float sinr_cosp = 2 * (angle * axis.z + axis.x * axis.y);
+// 	float cosr_cosp = 1 - 2 * (axis.z * axis.z + axis.x * axis.x);
+// 	Euler.x = std::atan2f(sinr_cosp, cosr_cosp);
+// 
+// 	// pitch (y-axis 회전)
+// 	float sinp = 2 * (angle * axis.x - axis.y * axis.z);
+// 
+// 	if (std::abs(sinp) >= 1)
+// 		Euler.y = std::copysignf(3.14159265f / 2, sinp);
+// 	else
+// 		Euler.y = std::asinf(sinp);
+// 
+// 	// yaw (z-axis 회전)
+// 	float siny_cosp = 2 * (angle * axis.y + axis.x * axis.z);
+// 	float cosy_cosp = 1 - 2 * (axis.x * axis.x + axis.y * axis.y);
+// 	Euler.z = std::atan2f(siny_cosp, cosy_cosp);
+// 
+// 	return Euler;
 
-	// roll (x-axis 회전)
-	float sinr_cosp = 2 * (angle * axis.z + axis.x * axis.y);
-	float cosr_cosp = 1 - 2 * (axis.z * axis.z + axis.x * axis.x);
-	Euler.x = std::atan2f(sinr_cosp, cosr_cosp);
+	float s = std::sin(angle * 0.5f);
+	float c = std::cos(angle * 0.5f);
 
-	// pitch (y-axis 회전)
-	float sinp = 2 * (angle * axis.x - axis.y * axis.z);
+	float x = axis.x * s;
+	float y = axis.y * s;
+	float z = axis.z * s;
+	float w = c;
 
-	if (std::abs(sinp) >= 1)
-		Euler.y = std::copysignf(3.14159265f / 2, sinp);
-	else
-		Euler.y = std::asinf(sinp);
+	float pitch = std::atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y));
+	float yaw = std::asin(2 * (w * y - z * x));
+	float roll = std::atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z));
 
-	// yaw (z-axis 회전)
-	float siny_cosp = 2 * (angle * axis.y + axis.x * axis.z);
-	float cosy_cosp = 1 - 2 * (axis.x * axis.x + axis.y * axis.y);
-	Euler.z = std::atan2f(siny_cosp, cosy_cosp);
-
-	return Euler;
+	return { pitch, yaw, roll };
 }
 

@@ -2,6 +2,7 @@
 #include <cmath>
 
 #include "Vector3D.h"
+#include "Vector4D.h"
 #include "Matrix3x3.h"
 
 Matrix4x4::Matrix4x4() noexcept :
@@ -128,6 +129,28 @@ Matrix4x4 CreateMatrix(const Vector3D& pos, const Vector3D& angle, const Vector3
 	return scaling * rotateX * rotateY * rotateZ * trans;
 }
 
+
+Matrix4x4 CreateMatrix(const Vector3D& position, const Vector4D& rotation, const Vector3D& scale)
+{
+	DirectX::XMMATRIX translationMatrix, rotationMatrix, scalingMatrix, worldMatrix;
+
+	// 이동 행렬 생성
+	translationMatrix = DirectX::XMMatrixTranslation(position.x, position.y, position.z);
+
+	DirectX::XMFLOAT4 rot{rotation.x ,rotation.y, rotation.z, rotation.w};
+
+	// 회전 행렬 생성
+	rotationMatrix = DirectX::XMMatrixRotationQuaternion(XMLoadFloat4(&rot));
+
+	// 스케일링 행렬 생성
+	scalingMatrix = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z);
+
+	// 월드 변환 행렬 생성
+	worldMatrix = scalingMatrix * rotationMatrix * translationMatrix;
+
+	return ConvertToKHMatrix(worldMatrix);
+}
+
 Matrix4x4 CreateInvMatrix(const Vector3D& pos, const Vector3D& angle, const Vector3D& scale)
 {
 	float cx = std::cos(angle.x);
@@ -208,6 +231,27 @@ Matrix4x4 InverseTransposeMatrix(const Matrix4x4& mat)
 	DirectX::XMVECTOR det = DirectX::XMMatrixDeterminant(d);
 
 	return ConvertToKHMatrix(DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(&det, world)));
+}
+
+
+void DecomposeMatrix(Vector3D& pos, Vector4D& angle, Vector3D& scale, const Matrix4x4 mat)
+{
+	DirectX::XMVECTOR _pos;
+	DirectX::XMVECTOR _ang;
+	DirectX::XMVECTOR _scl;
+	DirectX::XMMATRIX m = ConvertToXMMATRIX(mat);
+
+	DirectX::XMMatrixDecompose(&_scl, &_ang, &_pos, m);
+
+	pos.x = _pos.m128_f32[0];
+	pos.y = _pos.m128_f32[1];
+	pos.z = _pos.m128_f32[2];
+
+	angle = Vector4D(_ang.m128_f32[0], _ang.m128_f32[1],_ang.m128_f32[2], _ang.m128_f32[3]);
+
+	scale.x = _scl.m128_f32[0];
+	scale.y = _scl.m128_f32[1];
+	scale.z = _scl.m128_f32[2];
 }
 
 Matrix4x4&& Matrix4x4::IdentityMatrix()
