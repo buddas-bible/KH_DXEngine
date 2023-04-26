@@ -616,31 +616,39 @@ HRESULT DXGraphics::CreateMeshObject()
 	object[ob2] = std::make_pair((LPSTR)"../ASEFile/03IK-Joe_onlymesh.ASE", L"");
 	object[ob3] = std::make_pair((LPSTR)"../ASEFile/03IK-Joe.ASE", L"");
 
-
-
-
-	m_parser->Load(object[ob2].first);			// 경로에 있는 파일 열어서 로드
+	m_parser->Load(object[ob3].first);			// 경로에 있는 파일 열어서 로드
 	int index = m_parser->m_MeshList.size();	// 로드된 메쉬들 개수를 받아와서 그만큼 반복함
 	for (auto i = 0; i < index; i++)
 	{
 		ASEParser::Mesh* mesh = m_parser->m_MeshList[i];	// 괜히 복잡해보이지만 일단 조사식 편하게 보려고 꺼냄
-		if (mesh->m_type == 3)
-		{
-			continue;
-		}
 		MeshObject* newMesh = new MeshObject(m_pd3dDevice, m_pd3dDeviceContext, m_currRasterizerState);
 		m_objectList.push_back(newMesh);					// 메쉬를 배열에 넣음
-		newMesh->nodeName.assign(mesh->m_nodename.begin(), mesh->m_nodename.end());	// 노드 이름 복사함
-		nodeList[newMesh->nodeName] = newMesh;				// 노드이름, 메쉬 포인터를 맵으로 저장해둠
-															/// 맵으로 굳이 저장해놓고 배열로 처리한다? 그냥 맵으로 할까..?	
-		newMesh->LoadTexture(object[ob2].second);			/// 텍스쳐를 로드함
-		newMesh->m_type = mesh->m_type;
-		newMesh->LoadGeometry(m_parser->GetOptMesh(i));		/// 버텍스 수를 줄인 다음 버텍스 버퍼를 만듬
 		newMesh->LoadNodeData(mesh);						/// 부모 노드 이름을 저장함.
+		nodeList[newMesh->nodeName] = newMesh;				// 노드이름, 메쉬 포인터를 맵으로 저장해둠
+															
+		/// 맵으로 굳이 저장해놓고 배열로 처리한다? 그냥 맵으로 할까..?	
+		newMesh->LoadTexture(object[ob3].second);			/// 텍스쳐를 로드함
+		newMesh->LoadGeometry(m_parser->GetOptMesh(i));		/// 버텍스 수를 줄인 다음 버텍스 버퍼를 만듬
 	}
 
-	//
-	for (auto& e : m_objectList)					/// 모든 메쉬가 로드된 후에 노드를 연결해줌
+	// 노드 리스트에 있는 곳에 이름 따라가서 애니메이션 정보를 넣어주는데...
+	for (auto& e : m_parser->m_list_animation)
+	{
+		std::wstring str(e->m_nodename.begin(), e->m_nodename.end());
+
+		for (auto& a : e->m_position)
+		{
+			nodeList[str]->animationData.AddPositionSample(a->m_time, { a->m_pos.x, a->m_pos.y, a->m_pos.z });
+		}
+
+		for (auto & a : e->m_rotation)
+		{
+			nodeList[str]->animationData.AddRotationSample(a->m_time, { a->m_rot.x, a->m_rot.y, a->m_rot.z }, a->m_angle);
+		}
+	}
+
+	/// 모든 메쉬가 로드된 후에 노드를 연결해줌
+	for (auto& e : m_objectList)
 	{
 		if (nodeList[e->parentName])
 		{
@@ -648,17 +656,20 @@ HRESULT DXGraphics::CreateMeshObject()
 		}
 	}
 
+	/// 메쉬를 로드 했으니까 애니메이션도 로드해주자.
+
+	/// 연결이 됐으니... 이제는 로컬 스페이스로 되돌려야한다.
 	for (auto& e : m_objectList)
 	{
 		e->InitializeLocalTM();
 	}
 
-	/// 연결이 됐으니... 이제는 로컬 스페이스로 되돌려야한다.
-
 	for (auto& e : m_objectList)
 	{
 		e->Initialize();
 	}
+
+	delete m_parser;
 
 	return hr;
 }

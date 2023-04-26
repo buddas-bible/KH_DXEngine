@@ -177,20 +177,18 @@ HRESULT MeshObject::Finalize()
 
 void MeshObject::Update(const Matrix4x4& view, const Matrix4x4& proj)
 {
-	// TimeManager& time = TimeManager::GetInstance();
-	// float dt = time.GetfDeltaTime();
-	Matrix4x4 trans = Matrix4x4::IdentityMatrix();
+	Matrix4x4 trans = CreateMatrix({}, m_angle, m_scale);
 	
-	if (nodeName == L"Biped-L_leg")				// 특정 관절만 회전시켜보고 싶음
+	if (GetAsyncKeyState(VK_SPACE))
 	{
-		static float angle = 0.f;
-		if (GetAsyncKeyState(VK_F9))
-		{
-			angle += 0.02f;
-			trans = CreateMatrix({}, Vector3D(angle, 0, 0), Vector3D{1.f,1.f,1.f});
-		}
+		playAnimation = true;
 	}
-	
+
+	if (parent != nullptr)				// 특정 관절만 회전시켜보고 싶음
+	{
+		m_angle.x += 0.02f;
+	}
+
 	m_animationTM = trans;
 	m_worldTM = GetWorldMatrix();
 	m_viewTM = view;
@@ -199,6 +197,11 @@ void MeshObject::Update(const Matrix4x4& view, const Matrix4x4& proj)
 
 void MeshObject::Render()
 {
+	if (vertices.empty())
+	{
+		return;
+	}
+
 	// 레스터라이즈 스테이트
 	m_context->RSSetState(m_randerState.Get());
 
@@ -254,15 +257,28 @@ void MeshObject::Render()
 	}
 }
 
+/// <summary>
+/// 쓸데없이 함수를 많이 만들어놓은거 같은데
+/// 
+/// 부모 이름 저장하는 용도
+/// </summary>
+/// <param name="meshData"></param>
+/// <returns></returns>
 HRESULT MeshObject::LoadNodeData(ASEParser::Mesh* meshData)
 {
 	HRESULT hr = S_OK;
 
+	// 메쉬 타입 복사
+	m_type = meshData->m_type;
+
+	// 노드 이름 복사
+	nodeName.assign(meshData->m_nodename.begin(), meshData->m_nodename.end());
+
+	// 부모 이름 복사
 	if (!meshData->m_isparentexist)
 	{
 		return S_FALSE;
 	}
-
 	parentName.assign(meshData->m_nodeparent.begin(), meshData->m_nodeparent.end());
 
 	return hr;
@@ -281,6 +297,7 @@ Matrix4x4 MeshObject::GetWorldMatrix()
 		w = parent->GetWorldMatrix();
 	}
 
+	// 로컬 축을 틀어버림.
 	return m_localTM * m_animationTM * w;
 }
 
@@ -311,15 +328,8 @@ void MeshObject::InitializeLocalTM()
 		w = InverseMatrix(parent->m_nodeTM);
 	}
 
+	// 부모 노드 행렬의 역행렬을 곱해 로컬 행렬을 구한다.
 	m_localTM = m_nodeTM * w;
-
-	// DecomposeMatrix(m_pos, m_axisAndAngle, m_scale, m_localTM);
-
-	if (nodeName == L"Biped-L_leg")
-	{
-		return;
-	}
-
 }
 
 HRESULT MeshObject::LoadAnimation(ASEParser::Mesh* meshData)
@@ -351,13 +361,14 @@ HRESULT MeshObject::LoadGeometry(ASEParser::Mesh* meshData)
 	m_nodeTM.e[3][1] = meshData->m_tm_row3.y;
 	m_nodeTM.e[3][2] = meshData->m_tm_row3.z;
 
-
 	m_nodeTM = m_nodeTM * scal;
 
-	if (m_type != eGeomobject)
+	if (meshData->m_rawVertex.empty())
 	{
 		return S_FALSE;
 	}
+
+	isHelperObj = true;
 
 	Matrix4x4 invTM = InverseMatrix(m_nodeTM);				// 월드 역행렬 버텍스를 로컬로 돌려놓으려고 함
 	

@@ -3,6 +3,7 @@
 #include "Object.h"
 #include <string>
 #include <vector>
+#include "Animation.h"
 
 namespace ASEParser
 {
@@ -47,14 +48,29 @@ public:
 private:
 
 	Vector3D m_pos{};
+	Vector3D m_angle{};
 	Vector4D m_axisAndAngle{ 0.f, 0.f, 0.f };
-	Vector3D m_scale{ 0.07f, 0.07f, 0.07f };
+	Vector3D m_scale{ 1.f, 1.f, 1.f };
 	Vector3D scaling{ 0.06f, 0.06f, 0.06f };
-	bool isTexture{true};
+	bool isHelperObj{ false };
+	bool isTexture{false};
+	bool playAnimation{ false };
+
+public:
+	/// <summary>
+	/// 애니메이션 때문에 일단 들고 있음.
+	/// </summary>
+	Vector3D TM_pos;
+	Vector3D TM_rot_axis;
+	float TM_rotanlge;
+	Vector3D TM_scl;
+	Vector3D TM_scl_axis;
+	float TM_scaleaxisang;
+
+	KH::Animation animationData;
 
 private:
 	Matrix4x4 m_animationTM;
-	Matrix4x4 m_invWorldTM;
 	std::vector<PTNVertex> vertices;
 	std::vector<UINT> indices;
 
@@ -73,8 +89,6 @@ private:
 	// Microsoft::WRL::ComPtr<ID3DX11Effect> m_effect;
 	// Microsoft::WRL::ComPtr<ID3DX11EffectTechnique> m_tech;
 	// Microsoft::WRL::ComPtr<ID3DX11EffectMatrixVariable> m_matrix;
-
-	std::vector<Node*> nodeList;
 
 	Microsoft::WRL::ComPtr<ID3DX11EffectMatrixVariable> m_invMatrix;
 	

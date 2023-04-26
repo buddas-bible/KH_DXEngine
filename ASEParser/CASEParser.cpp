@@ -568,9 +568,12 @@ void CASEParser::Parsing_DivergeRecursiveALL(int depth)
 #pragma region Animation
 			
 		case TOKENR_TM_ANIMATION:
+		{
 			Create_animationdata_to_list();
-			// m_OneMesh->m_type = eAnimation;
+			std::wstring str(m_OneMesh->m_nodename.begin(), m_OneMesh->m_nodename.end());
+			animationMap[str] = m_animation;
 			m_OneMesh->m_isAnimated = true;
+		}
 			break;
 
 		case TOKENR_CONTROL_POS_TRACK:

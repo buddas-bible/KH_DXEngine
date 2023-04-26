@@ -43,6 +43,9 @@
     <Filter Include="2. Object\MeshObject\Node">
       <UniqueIdentifier>{b805f69e-fcb1-4e11-bad0-f9fcb40bb371}</UniqueIdentifier>
     </Filter>
+    <Filter Include="3. Struct\Animation">
+      <UniqueIdentifier>{20a260de-0841-4875-9678-3b3ca1d752a7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DXGraphics.h">
@@ -87,6 +90,9 @@
     <ClInclude Include="Node.h">
       <Filter>2. Object\MeshObject\Node</Filter>
     </ClInclude>
+    <ClInclude Include="Animation.h">
+      <Filter>3. Struct\Animation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DXGraphics.cpp">
@@ -118,6 +124,9 @@
     </ClCompile>
     <ClCompile Include="Node.cpp">
       <Filter>2. Object\MeshObject\Node</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation.cpp">
+      <Filter>3. Struct\Animation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

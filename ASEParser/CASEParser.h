@@ -112,6 +112,7 @@ public:
 	Mesh* GetMesh(int index);
 	std::map<ASEParser::Vertex, int> vertexMap;
 	std::map<std::string, Mesh*> nodeMap;
+	std::map<std::wstring, Animation*> animationMap;
 	int meshCount;
 	int GetMeshCount();
 

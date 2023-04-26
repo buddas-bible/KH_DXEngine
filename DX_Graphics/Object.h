@@ -29,7 +29,6 @@ public:
 protected:
 	UINT count;
 
-	Matrix4x4 m_dimensionTM;		// 메쉬 로컬 매트릭스
 	Matrix4x4 m_localTM;		// 메쉬 로컬 매트릭스
 	Matrix4x4 m_worldTM;		// 매쉬 월드 매트릭스
 	Matrix4x4 m_nodeTM;			// 매쉬 
