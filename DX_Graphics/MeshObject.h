@@ -32,7 +32,7 @@ public:
 
 	HRESULT LoadNodeData(ASEParser::Mesh* meshData);
 	Matrix4x4 GetWorldMatrix();
-	Matrix4x4 GetAnimaionTM();
+	void UpdateAnimaionTM();
 	void InitializeLocalTM();
 	HRESULT LoadAnimation(ASEParser::Mesh* meshData);
 	HRESULT LoadGeometry(ASEParser::Mesh* meshData);

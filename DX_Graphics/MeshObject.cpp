@@ -177,19 +177,71 @@ HRESULT MeshObject::Finalize()
 
 void MeshObject::Update(const Matrix4x4& view, const Matrix4x4& proj)
 {
-	Matrix4x4 trans = CreateMatrix({}, m_angle, m_scale);
-	
-	if (GetAsyncKeyState(VK_SPACE))
+	TimeManager& time = TimeManager::GetInstance();
+
+	static float 누적시간 = 0;
+	static size_t index = 0;
+
+	if (GetAsyncKeyState(VK_SPACE) && playAnimation)
+	{
+		playAnimation = false;
+	}
+	if (GetAsyncKeyState(VK_SPACE) && !playAnimation)
 	{
 		playAnimation = true;
 	}
-
-	if (parent != nullptr)				// 특정 관절만 회전시켜보고 싶음
+	if (GetAsyncKeyState(VK_BACK))
 	{
-		m_angle.x += 0.02f;
+		누적시간 = 0;
+	}
+	if (playAnimation)
+	{
+		누적시간 += time.GetfDeltaTime() * 1000;
 	}
 
-	m_animationTM = trans;
+	
+	if (!animationData.posList.empty())							// POS가 비어있는게 아니라면
+	{
+		for (auto& e : animationData.posList)
+		{
+			if (e->framerate < 누적시간)
+			{
+				continue;
+			}
+			else
+			{
+				m_pos = e->pos;
+				m_pos = Vector4D(TM_pos - m_pos, 1.f);
+				Matrix4x4 scl = CreateMatrix({}, Vector3D{}, scaling);
+				m_pos = Vector4D(m_pos, 1.f) * scl;
+				break;
+			}
+		}
+	}
+	
+	if (!animationData.rotList.empty())							// ROT이 비어있는게 아니라면
+	{
+		for (auto& e : animationData.rotList)
+		{
+			if (e->framerate < 누적시간)
+			{
+				continue;
+			}
+			else
+			{
+				m_axisAndAngle = Vector4D{ e->axis, e->angle };
+				break;
+			}
+		}
+	}
+
+	// m_nodeTM = CreateMatrix(m_pos, m_axisAndAngle, m_scale);
+
+	// InitializeLocalTM();
+
+	// m_animationTM = trans;
+	/// 부모의 노드 TM으로부터 로컬 TM을 업데이트 하고			// 구했음
+	/// 로컬 TM을 타고 올라가서 월드 TM을 구한다.
 	m_worldTM = GetWorldMatrix();
 	m_viewTM = view;
 	m_projTM = proj;
@@ -308,12 +360,14 @@ Matrix4x4 MeshObject::GetWorldMatrix()
 /// 선형 보간은 어떻게 할지는 고민되는 부분.
 /// </summary>
 /// <returns></returns>
-Matrix4x4 MeshObject::GetAnimaionTM()
+void MeshObject::UpdateAnimaionTM()
 {
 	Matrix4x4 w = Matrix4x4::IdentityMatrix();
-
-
-	return w;
+	
+	/*
+	Node TM에서 로컬을 뽑아내는데
+	Local만 변경하라고? 이게 무슨소리임?
+	*/
 }
 
 /// <summary>
@@ -361,6 +415,14 @@ HRESULT MeshObject::LoadGeometry(ASEParser::Mesh* meshData)
 	m_nodeTM.e[3][1] = meshData->m_tm_row3.y;
 	m_nodeTM.e[3][2] = meshData->m_tm_row3.z;
 
+	TM_pos = Vector3D(meshData->m_tm_pos.x, meshData->m_tm_pos.y, meshData->m_tm_pos.z);
+	TM_rot_axis = Vector3D(meshData->m_tm_rotaxis.x, meshData->m_tm_rotaxis.y, meshData->m_tm_rotaxis.z);
+	TM_rotanlge = meshData->m_tm_rotangle;
+	TM_scl = Vector3D(meshData->m_tm_scale.x, meshData->m_tm_scale.y, meshData->m_tm_scale.z);
+	
+	TM_scl_axis = Vector3D(meshData->m_tm_scaleaxis.x, meshData->m_tm_scaleaxis.y, meshData->m_tm_scaleaxis.z);
+	TM_scaleaxisang = meshData->m_tm_scaleaxisang;
+
 	m_nodeTM = m_nodeTM * scal;
 
 	if (meshData->m_rawVertex.empty())
@@ -370,16 +432,8 @@ HRESULT MeshObject::LoadGeometry(ASEParser::Mesh* meshData)
 
 	isHelperObj = true;
 
-	Matrix4x4 invTM = InverseMatrix(m_nodeTM);				// 월드 역행렬 버텍스를 로컬로 돌려놓으려고 함
-	
+	Matrix4x4 invTM = InverseMatrix(m_nodeTM);					// 월드 역행렬 버텍스를 로컬로 돌려놓으려고 함
 	Matrix4x4 invTransTM = InverseTransposeMatrix(m_nodeTM);	// 월드 역행렬의 전치
-
-	m_pos = Vector3D(meshData->m_tm_pos.x, meshData->m_tm_pos.y, meshData->m_tm_pos.z);
-	Vector3D axis{ meshData->m_tm_rotaxis.x, meshData->m_tm_rotaxis.y, meshData->m_tm_rotaxis.z };
-	float angle{ meshData->m_tm_rotangle };
-	// m_angle = AxisAndAngleToEuler(axis, angle);
-	m_axisAndAngle = Vector4D{ meshData->m_tm_rotaxis.x, meshData->m_tm_rotaxis.y, meshData->m_tm_rotaxis.z, meshData->m_tm_rotangle };
-	// m_scale = Vector3D(meshData->m_tm_scale.x, meshData->m_tm_scale.y, meshData->m_tm_scale.z);
 
 	UINT vcount = 0;
 	UINT tcount = 0;

@@ -56,7 +56,7 @@ VertexOut VS(VertexIn vin)
     vout.PosH = mul(float4(vin.PosL, 1.0f), worldViewProj);
     vout.uv = vin.uv;
     // vout.Color = float4(N.x, N.y, N.z, 1.f);
-    vout.Diffuse = dot(N, L); // Half Lambert
+    vout.Diffuse = dot(N, L) * 0.5f + 0.5f; // Half Lambert
 
     return vout;
 }
