@@ -2,6 +2,7 @@
 
 #include "Vector3D.h"
 #include "Matrix4x4.h"
+#include <cmath>
 
 Vector4D::Vector4D() noexcept :
 	x(0), y(0), z(0), w(0)
@@ -223,6 +224,41 @@ Vector4D operator / (float n, const Vector4D& other)
 Vector4D operator / (const Vector4D& other, float n)
 {
 	return Vector4D(n / other.x, n / other.y, n / other.z, 0.f);
+}
+
+Vector4D QuaternionToAxisAngle(const Vector4D& qua)
+{
+	float qx = qua.x;
+	float qy = qua.y;
+	float qz = qua.z;
+	float qw = qua.w;
+	float q = 1 / std::sqrtf(1 - qw * qw);
+	Vector4D result{ qx * q, qy * q, qz * q, 2 * std::acosf(qw) };
+
+	DirectX::XMVECTOR v = DirectX::XMVectorSet(result.x, result.y, result.z, result.w);
+	if (DirectX::XMVector4IsInfinite(v))
+	{
+		return Vector4D(1.f, 0.f, 0.f, 0.f);
+	}
+
+	return result;
+}
+
+DirectX::XMVECTOR ConvertToXMVECTOR(const Vector4D& v)
+{
+	return DirectX::XMVECTOR(
+		DirectX::XMVectorSet(v.x, v.y, v.z, v.w)
+	);
+}
+
+Vector4D ConvertToKHVector4D(DirectX::XMVECTOR v)
+{
+	return Vector4D(
+		DirectX::XMVectorGetX(v), 
+		DirectX::XMVectorGetY(v), 
+		DirectX::XMVectorGetZ(v), 
+		DirectX::XMVectorGetW(v)
+	);
 }
 
 Vector4D& Vector4D::operator /= (float n)

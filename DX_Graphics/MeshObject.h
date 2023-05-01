@@ -34,12 +34,15 @@ public:
 	Matrix4x4 GetWorldMatrix();
 	void UpdateAnimaionTM();
 	void InitializeLocalTM();
-	HRESULT LoadAnimation(ASEParser::Mesh* meshData);
+	HRESULT LoadAnimation(CASEParser* meshData);
 	HRESULT LoadGeometry(ASEParser::Mesh* meshData);
 	HRESULT LoadTexture(const std::wstring& path);
 
-	void SetScalse(Vector3D scale);
+	void SetScalse(Vector3D scalze);
 	void SetPosition(Vector3D position);
+
+	Vector3D GetLocalPosition();
+	Vector3D GetLocalRotate();
 
 	int m_type;
 	std::wstring nodeName;
@@ -60,14 +63,18 @@ public:
 	/// <summary>
 	/// 애니메이션 때문에 일단 들고 있음.
 	/// </summary>
-	Vector3D TM_pos;
-	Vector3D TM_rot_axis;
-	float TM_rotanlge;
-	Vector3D TM_scl;
-	Vector3D TM_scl_axis;
-	float TM_scaleaxisang;
+	// Vector3D TM_pos;
+	// Vector3D TM_rot_axis;
+	// float TM_rotanlge;
+	// Vector3D TM_scl;
+	// Vector3D TM_scl_axis;
+	// float TM_scaleaxisang;
 
 	KH::Animation animationData;
+
+	float m_prevFrame;
+	float m_nextFrame;
+	float m_aniStackTime;
 
 private:
 	Matrix4x4 m_animationTM;

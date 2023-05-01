@@ -11,8 +11,13 @@ namespace KH
 		Animation_Pos() = default;
 		Animation_Pos(const Animation_Pos& p) : framerate(p.framerate), pos(p.pos)
 		{}
-		int framerate;
+		size_t framerate{};
 		Vector3D pos;
+
+		bool operator == (int a)
+		{
+			return this->framerate == a;
+		}
 	};
 
 	struct Animation_Rot
@@ -20,10 +25,15 @@ namespace KH
 		Animation_Rot() = default;
 		Animation_Rot(const Animation_Rot& p) : framerate(p.framerate), axis(p.axis), angle(p.angle)
 		{}
-		int framerate;
+		size_t framerate{};
 		Vector3D axis;
-		float angle;
+		float angle{};
 		Vector4D quaternion;
+
+		bool operator == (int a)
+		{
+			return this->framerate == a;
+		}
 	};
 
 // 	struct Animation_Scl
@@ -38,6 +48,7 @@ namespace KH
 	struct Animation
 	{
 		std::wstring nodeName;
+		std::vector<int> frameList;								// 프레임 리스트?
 		std::vector<Animation_Pos*> posList;
 		std::vector<Animation_Rot*> rotList;
 		// std::vector<Animation_Scl> sclList;
@@ -45,5 +56,7 @@ namespace KH
 		void AddPositionSample(size_t framerate, const Vector3D& pos);
 		void AddRotationSample(size_t framerate, const Vector3D& axis, float angle);
 		// void AddScalingSample(size_t framerate, const Vector3D& axis, float scale);
+		void InitFramerate();
+		//
 	};
 }

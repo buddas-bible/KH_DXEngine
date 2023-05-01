@@ -1,6 +1,7 @@
 #pragma once
 
 #include <sal.h>
+#include <DirectXMath.h>
 
 class Matrix2x2;
 class Matrix3x3;
@@ -61,3 +62,7 @@ public:
 	Vector4D operator*(const Matrix4x4& other) const;	// 벡터 * 행렬 연산자
 };
 
+
+Vector4D QuaternionToAxisAngle(const Vector4D& q);
+DirectX::XMVECTOR ConvertToXMVECTOR(const Vector4D& v);
+Vector4D ConvertToKHVector4D(DirectX::XMVECTOR v);

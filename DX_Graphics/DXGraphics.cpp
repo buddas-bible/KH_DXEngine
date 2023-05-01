@@ -645,6 +645,8 @@ HRESULT DXGraphics::CreateMeshObject()
 		{
 			nodeList[str]->animationData.AddRotationSample(a->m_time, { a->m_rot.x, a->m_rot.y, a->m_rot.z }, a->m_angle);
 		}
+
+		nodeList[str]->animationData.InitFramerate();
 	}
 
 	/// 모든 메쉬가 로드된 후에 노드를 연결해줌

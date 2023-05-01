@@ -179,69 +179,21 @@ void MeshObject::Update(const Matrix4x4& view, const Matrix4x4& proj)
 {
 	TimeManager& time = TimeManager::GetInstance();
 
-	static float 누적시간 = 0;
-	static size_t index = 0;
-
-	if (GetAsyncKeyState(VK_SPACE) && playAnimation)
+	if ((GetAsyncKeyState(VK_SPACE) & 8000) && playAnimation)
 	{
 		playAnimation = false;
 	}
-	if (GetAsyncKeyState(VK_SPACE) && !playAnimation)
+	if ((GetAsyncKeyState(VK_SPACE) & 8000) && !playAnimation)
 	{
 		playAnimation = true;
 	}
 	if (GetAsyncKeyState(VK_BACK))
 	{
-		누적시간 = 0;
-	}
-	if (playAnimation)
-	{
-		누적시간 += time.GetfDeltaTime() * 1000;
+		m_aniStackTime = 0;
 	}
 
-	
-	if (!animationData.posList.empty())							// POS가 비어있는게 아니라면
-	{
-		for (auto& e : animationData.posList)
-		{
-			if (e->framerate < 누적시간)
-			{
-				continue;
-			}
-			else
-			{
-				m_pos = e->pos;
-				m_pos = Vector4D(TM_pos - m_pos, 1.f);
-				Matrix4x4 scl = CreateMatrix({}, Vector3D{}, scaling);
-				m_pos = Vector4D(m_pos, 1.f) * scl;
-				break;
-			}
-		}
-	}
-	
-	if (!animationData.rotList.empty())							// ROT이 비어있는게 아니라면
-	{
-		for (auto& e : animationData.rotList)
-		{
-			if (e->framerate < 누적시간)
-			{
-				continue;
-			}
-			else
-			{
-				m_axisAndAngle = Vector4D{ e->axis, e->angle };
-				break;
-			}
-		}
-	}
+	UpdateAnimaionTM();
 
-	// m_nodeTM = CreateMatrix(m_pos, m_axisAndAngle, m_scale);
-
-	// InitializeLocalTM();
-
-	// m_animationTM = trans;
-	/// 부모의 노드 TM으로부터 로컬 TM을 업데이트 하고			// 구했음
-	/// 로컬 TM을 타고 올라가서 월드 TM을 구한다.
 	m_worldTM = GetWorldMatrix();
 	m_viewTM = view;
 	m_projTM = proj;
@@ -349,8 +301,7 @@ Matrix4x4 MeshObject::GetWorldMatrix()
 		w = parent->GetWorldMatrix();
 	}
 
-	// 로컬 축을 틀어버림.
-	return m_localTM * m_animationTM * w;
+	return m_animationTM * w;
 }
 
 /// <summary>
@@ -364,10 +315,50 @@ void MeshObject::UpdateAnimaionTM()
 {
 	Matrix4x4 w = Matrix4x4::IdentityMatrix();
 	
-	/*
-	Node TM에서 로컬을 뽑아내는데
-	Local만 변경하라고? 이게 무슨소리임?
-	*/
+	/// 델타타임을 쌓고 프레임레이트 비교하면서
+	/// 적절한 애니메이션 데이터를 가져옴
+	/// 회전은 누적해가면서 해야하고, 위치는 처음 위치로부터 변화한걸로 함.
+	/// 
+	/// 어떤 프레임에 데이터가 있는지 알고있으면 좋을듯 싶음.
+	/// 그러기 위해선 애니메이션 데이터를 읽어올 때 프레임레이트를 먼저 정렬하는게 좋아 보인다.
+	/// 해당 키 프레임에 아무것도 없다면? 그냥 LocalTM.
+	/// 무언가가 있으면 LocalTM에 연산을 하자.
+	/// 
+	/// 
+	
+	auto& a = animationData.posList;
+	if (a.size() != 0)
+	{
+		for (; i = animationData.posList.size(); i++)
+		{
+			a[i].first;
+		}
+		if (itr == animationData.posList.end())
+		{
+			pos.x = m_localTM.e[3][0];
+			pos.y = m_localTM.e[3][1];
+			pos.z = m_localTM.e[3][2];
+		}
+		else
+		{
+			pos = (*itr).second->pos;
+		}
+	}
+	else
+	{
+		pos.x = m_localTM.e[3][0];
+		pos.y = m_localTM.e[3][1];
+		pos.z = m_localTM.e[3][2];
+	}
+
+
+
+	m_animationTM = CreateMatrix(m_pos, m_axisAndAngle, m_scale);
+	DirectX::XMMatrix
+	/// 1-1. Pos? 첫 프레임으로부터 변화
+	/// 1-2. Rot? 이전 프레임으로부터의 변화
+	/// 2. 비어있는 Framerate 처리
+	/// 3.
 }
 
 /// <summary>
@@ -375,6 +366,7 @@ void MeshObject::UpdateAnimaionTM()
 /// </summary>
 void MeshObject::InitializeLocalTM()
 {
+	using namespace DirectX;
 	Matrix4x4 w = Matrix4x4::IdentityMatrix();
 
 	if (parent != nullptr)
@@ -384,9 +376,33 @@ void MeshObject::InitializeLocalTM()
 
 	// 부모 노드 행렬의 역행렬을 곱해 로컬 행렬을 구한다.
 	m_localTM = m_nodeTM * w;
+
+
+	XMVECTOR scl{};
+	XMVECTOR rot{};
+	XMVECTOR trs{};
+	XMMATRIX local = ConvertToXMMATRIX(m_localTM);
+	XMMatrixDecompose(&scl, &rot, &trs, local);
+
+	m_pos.x = XMVectorGetX(trs);
+	m_pos.y = XMVectorGetY(trs);
+	m_pos.z = XMVectorGetZ(trs);
+
+	if (XMQuaternionIsInfinite(rot))
+	{
+		m_axisAndAngle = Vector4D{1.f, 0.f, 0.f, 0.f};
+	}
+	else
+	{
+		m_axisAndAngle = QuaternionToAxisAngle(ConvertToKHVector4D(rot));
+	}
+
+	m_scale.x = XMVectorGetX(scl);
+	m_scale.y = XMVectorGetY(scl);
+	m_scale.z = XMVectorGetZ(scl);
 }
 
-HRESULT MeshObject::LoadAnimation(ASEParser::Mesh* meshData)
+HRESULT MeshObject::LoadAnimation(CASEParser* aniList)
 {
 	HRESULT hr = S_OK;
 
@@ -415,15 +431,7 @@ HRESULT MeshObject::LoadGeometry(ASEParser::Mesh* meshData)
 	m_nodeTM.e[3][1] = meshData->m_tm_row3.y;
 	m_nodeTM.e[3][2] = meshData->m_tm_row3.z;
 
-	TM_pos = Vector3D(meshData->m_tm_pos.x, meshData->m_tm_pos.y, meshData->m_tm_pos.z);
-	TM_rot_axis = Vector3D(meshData->m_tm_rotaxis.x, meshData->m_tm_rotaxis.y, meshData->m_tm_rotaxis.z);
-	TM_rotanlge = meshData->m_tm_rotangle;
-	TM_scl = Vector3D(meshData->m_tm_scale.x, meshData->m_tm_scale.y, meshData->m_tm_scale.z);
-	
-	TM_scl_axis = Vector3D(meshData->m_tm_scaleaxis.x, meshData->m_tm_scaleaxis.y, meshData->m_tm_scaleaxis.z);
-	TM_scaleaxisang = meshData->m_tm_scaleaxisang;
-
-	m_nodeTM = m_nodeTM * scal;
+	// m_nodeTM = m_nodeTM;
 
 	if (meshData->m_rawVertex.empty())
 	{
@@ -448,7 +456,7 @@ HRESULT MeshObject::LoadGeometry(ASEParser::Mesh* meshData)
 		vertices[i].pos.z = meshData->m_rawVertex[i]->m_pos.z;
 
 		// 월드 기준으로 되어있는 버텍스를 월드의 역행렬을 취해줘서 로컬로 돌려놓는다.
-		vertices[i].pos = Vector4D(vertices[i].pos, 1.f) * scal * invTM; // 모델링 자체가 너무 커서 줄였음.
+		vertices[i].pos = Vector4D(vertices[i].pos, 1.f) * invTM; // 모델링 자체가 너무 커서 줄였음.
 
 		vertices[i].uv.x = meshData->m_rawVertex[i]->u;
 		vertices[i].uv.y = meshData->m_rawVertex[i]->v;
@@ -488,6 +496,22 @@ void MeshObject::SetPosition(Vector3D position)
 	m_pos = position;
 }
 
+
+Vector3D MeshObject::GetLocalPosition()
+{
+	return Vector3D();
+	// return Matrix4x4(
+	// 	1.f,				0.f,				0.f,			0.f,
+	// 	0.f,				1.f,				0.f,			0.f,
+	// 	0.f,				0.f,				1.f,			0.f,
+	// 	m_localTM.e[3][0], m_localTM.e[3][1], m_localTM.e[3][2], 1.f);
+}
+
+Vector3D MeshObject::GetLocalRotate()
+{
+	return  Vector3D();
+	// DirectX::XMMatrixDecompose();
+}
 
 HRESULT MeshObject::LoadTexture(const wstring& path)
 {
