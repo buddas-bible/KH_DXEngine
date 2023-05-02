@@ -190,8 +190,9 @@ void MeshObject::Update(const Matrix4x4& view, const Matrix4x4& proj)
 	}
 	else
 	{
-		m_animationTM;
-		m_localTM = CreateMatrix(m_pos, m_quaternion, m_scale);
+		// m_animationTM;
+		// m_localTM = CreateMatrix(m_pos, m_quaternion, m_scale);
+		m_localTM = m_animationTM;
 	}
 
 	m_worldTM = GetWorldMatrix();
@@ -350,10 +351,10 @@ void MeshObject::UpdateAnimaionTM()
 				m_nextFrame = rotList[i]->framerate;
 				break;
 			}
-			else if (rotList[rotList.size() - 1]->framerate < m_aniStackTime)
+			else if (rotList[rotList.size() - 1]->framerate <= m_aniStackTime)
 			{
-				i = 1;
-				m_aniStackTime = 0.f;
+				i = rotList.size() - 1;
+				m_aniStackTime = rotList[rotList.size() - 1]->framerate;
 				break;
 			}
 			else
@@ -400,10 +401,10 @@ void MeshObject::UpdateAnimaionTM()
 				m_nextFrame = posList[i]->framerate;
 				break;
 			}
-			else if (posList[animationData.posList.size() - 1]->framerate < m_aniStackTime)
+			else if (posList[animationData.posList.size() - 1]->framerate <= m_aniStackTime)
 			{
-				i = 1;
-				m_aniStackTime = 0.f;
+				i = posList.size() - 1;
+				m_aniStackTime = posList[posList.size() - 1]->framerate;
 				break;
 			}
 			else
@@ -426,6 +427,7 @@ void MeshObject::UpdateAnimaionTM()
 
 	animationTM = animationTM * posTM;
 
+	m_animationTM = ConvertToKHMatrix(animationTM);
 	m_localTM = ConvertToKHMatrix(animationTM);
 
 	/// 1-1. Pos? 첫 프레임으로부터 변화
