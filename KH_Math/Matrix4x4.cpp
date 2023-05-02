@@ -137,15 +137,16 @@ Matrix4x4 CreateMatrix(const Vector3D& position, const Vector4D& rotation, const
 	// 捞悼 青纺 积己
 	translationMatrix = DirectX::XMMatrixTranslation(position.x, position.y, position.z);
 
-	DirectX::XMVECTOR rot{rotation.x ,rotation.y, rotation.z};
-	float angle = rotation.w;
+	// DirectX::XMVECTOR rot{rotation.x ,rotation.y, rotation.z};
+	// float angle = rotation.w;
 	
 	// 雀傈 青纺 积己
-	rotationMatrix = DirectX::XMMatrixRotationAxis(rot, angle);
+	// rotationMatrix = DirectX::XMMatrixRotationAxis(rot, angle);
 	
-	// DirectX::XMVECTOR q = DirectX::XMVectorSet(rotation.x, rotation.y, rotation.z, rotation.w);
-	// 
-	// rotationMatrix = DirectX::XMMatrixRotationQuaternion(q);
+	DirectX::XMVECTOR q = DirectX::XMVectorSet(rotation.x, rotation.y, rotation.z, rotation.w);
+	
+	// 雀傈 青纺 积己
+	rotationMatrix = DirectX::XMMatrixRotationQuaternion(q);
 	
 	// 胶纳老傅 青纺 积己
 	scalingMatrix = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z);

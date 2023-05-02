@@ -191,7 +191,7 @@ void MeshObject::Update(const Matrix4x4& view, const Matrix4x4& proj)
 	else
 	{
 		m_animationTM;
-		m_localTM = CreateMatrix(m_pos, m_axisAndAngle, m_scale);
+		m_localTM = CreateMatrix(m_pos, m_quaternion, m_scale);
 	}
 
 	m_worldTM = GetWorldMatrix();
@@ -335,11 +335,6 @@ void MeshObject::UpdateAnimaionTM()
 	sclTM = DirectX::XMMatrixScalingFromVector(ConvertToXMVECTOR(m_scale));
 	animationTM = animationTM * sclTM;
 
-	if (nodeName == L"Biped-R_legup")
-	{
-		int a = 0;
-	}
-
 	// DirectX::XMMATRIX rrr = DirectX::XMMatrixRotationAxis({ XMVectorSet(m_axisAndAngle.x, m_axisAndAngle.z,m_axisAndAngle.z, 0.f) }, m_axisAndAngle.w);
 	// DirectX::XMMATRIX rrrq = DirectX::XMMatrixRotationQuaternion(ConvertToXMVECTOR(m_quaternion));
 	// Matrix4x4 rrar = ConvertToKHMatrix(rrr);
@@ -431,11 +426,6 @@ void MeshObject::UpdateAnimaionTM()
 
 	animationTM = animationTM * posTM;
 
-	if (nodeName == L"Text02")
-	{
-		int i = 0;
-	}
-
 	m_localTM = ConvertToKHMatrix(animationTM);
 
 	/// 1-1. Pos? 첫 프레임으로부터 변화
@@ -465,6 +455,10 @@ void MeshObject::InitializeLocalTM()
 	XMMATRIX local = ConvertToXMMATRIX(m_localTM);
 	XMMatrixDecompose(&scl, &rot, &trs, local);
 
+	XMVECTOR rotAxis;
+	float tamp;
+	XMQuaternionToAxisAngle(&rotAxis, &tamp, rot);
+
 	m_pos.x = XMVectorGetX(trs);
 	m_pos.y = XMVectorGetY(trs);
 	m_pos.z = XMVectorGetZ(trs);
@@ -481,28 +475,33 @@ void MeshObject::InitializeLocalTM()
 	}
 
 	/// negative scale 확인?
-	// Vector3D rx = { m_nodeTM.e[0][0] , m_nodeTM.e[0][1] , m_nodeTM.e[0][2] };
-	// Vector3D ry = { m_nodeTM.e[1][0] , m_nodeTM.e[1][1] , m_nodeTM.e[1][2] };
-	// Vector3D rz = { m_nodeTM.e[2][0] , m_nodeTM.e[2][1] , m_nodeTM.e[2][2] };
-	// 
-	// static std::vector<std::wstring> a;
-	// Vector3D zCrossX = rz.Cross(rx);
-	// float theta = zCrossX.Dot(ry);
-	// if (theta < 0)
-	// {
-	// 	for (size_t i = 0; i < 3; i++)
-	// 	{
-	// 		if (scl.m128_f32[i] < 0.f)
-	// 		{
-	// 			scl.m128_f32[i] *= -1.f;
-	// 			break;
-	// 		}
-	// 	}
-	// }
+	Vector3D rx = { m_localTM.e[0][0] , m_localTM.e[0][1] , m_localTM.e[0][2] };
+	Vector3D ry = { m_localTM.e[1][0] , m_localTM.e[1][1] , m_localTM.e[1][2] };
+	Vector3D rz = { m_localTM.e[2][0] , m_localTM.e[2][1] , m_localTM.e[2][2] };
 
-	m_scale.x = XMVectorGetX(scl);
-	m_scale.y = XMVectorGetY(scl);
-	m_scale.z = XMVectorGetZ(scl);
+	Vector3D zCrossX = rz.Cross(rx);
+	float theta = zCrossX.Dot(ry);
+	if (theta < 0)
+	{
+		if (XMVectorGetZ(scl) < 0)
+		{
+			m_scale.x = -XMVectorGetX(scl);
+			m_scale.y = -XMVectorGetY(scl);
+			m_scale.z = XMVectorGetZ(scl);
+		}
+		if (XMVectorGetX(scl) < 0)
+		{
+			m_scale.x = XMVectorGetX(scl);
+			m_scale.y = XMVectorGetY(scl);
+			m_scale.z = XMVectorGetZ(scl);
+		}
+	}
+	else
+	{
+		m_scale.x = XMVectorGetX(scl);
+		m_scale.y = XMVectorGetY(scl);
+		m_scale.z = XMVectorGetZ(scl);
+	}
 
 // 	if (m_scale.x < 0.f)
 // 	{
