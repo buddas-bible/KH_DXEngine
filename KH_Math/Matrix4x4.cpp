@@ -139,10 +139,14 @@ Matrix4x4 CreateMatrix(const Vector3D& position, const Vector4D& rotation, const
 
 	DirectX::XMVECTOR rot{rotation.x ,rotation.y, rotation.z};
 	float angle = rotation.w;
-
+	
 	// 雀傈 青纺 积己
 	rotationMatrix = DirectX::XMMatrixRotationAxis(rot, angle);
-
+	
+	// DirectX::XMVECTOR q = DirectX::XMVectorSet(rotation.x, rotation.y, rotation.z, rotation.w);
+	// 
+	// rotationMatrix = DirectX::XMMatrixRotationQuaternion(q);
+	
 	// 胶纳老傅 青纺 积己
 	scalingMatrix = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z);
 
@@ -253,6 +257,64 @@ void DecomposeMatrix(Vector3D& pos, Vector4D& angle, Vector3D& scale, const Matr
 	scale.x = _scl.m128_f32[0];
 	scale.y = _scl.m128_f32[1];
 	scale.z = _scl.m128_f32[2];
+}
+
+
+Matrix4x4 RotationAxisAngle(Vector3D axis, float angle)
+{
+	float cos = std::cos(angle);
+	float sin = std::sin(angle);
+	float x = axis.x;
+	float y = axis.y;
+	float z = axis.z;
+
+	return Matrix4x4(
+		cos + x * x * (1 - cos),
+		x * y * (1 - cos) - z * sin,
+		x * z * (1 - cos) + y * sin,
+		0.f,
+
+		y * x * (1 - cos) + z * sin,
+		cos + y * y * (1 - cos),
+		y * z * (1 - cos) - x * sin,
+		0.f,
+
+		z * x * (1 - cos) - y * sin,
+		z * y * (1 - cos) + x * sin,
+		cos + z * z * (1 - cos),
+		0.f,
+
+		0.f, 0.f, 0.f, 1.f
+	);
+}
+
+
+Matrix4x4 RotationAxisAngle(Vector4D axisangle)
+{
+	float cos = std::cos(axisangle.w);
+	float sin = std::sin(axisangle.w);
+	float x = axisangle.x;
+	float y = axisangle.y;
+	float z = axisangle.z;
+
+	return Matrix4x4(
+		cos + x * x * (1 - cos),
+		x * y * (1 - cos) - z * sin,
+		x * z * (1 - cos) + y * sin,
+		0.f,
+
+		y * x * (1 - cos) + z * sin,
+		cos + y * y * (1 - cos),
+		y * z * (1 - cos) - x * sin,
+		0.f,
+
+		z * x * (1 - cos) - y * sin,
+		z * y * (1 - cos) + x * sin,
+		cos + z * z * (1 - cos),
+		0.f,
+
+		0.f, 0.f, 0.f, 1.f
+	);
 }
 
 Matrix4x4&& Matrix4x4::IdentityMatrix()

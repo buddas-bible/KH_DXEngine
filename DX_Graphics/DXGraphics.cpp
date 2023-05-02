@@ -145,6 +145,19 @@ void DXGraphics::Update()
 	axis->Update(m_view, m_projection);
 	// box->Update(m_view, m_projection);
 	// skull->Update(m_view, m_projection);
+	if (GetAsyncKeyState(VK_SPACE) & 0001)
+	{
+		for (auto& e : m_objectList)
+		{
+			e->SetAnimation();
+		}
+	}
+
+	for (auto& e : m_objectList)
+	{
+		e->UpdateAnimaionTM();
+	}
+
 	for (auto& e : m_objectList)
 	{
 		e->Update(m_view, m_projection);

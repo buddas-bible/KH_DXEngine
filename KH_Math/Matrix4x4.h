@@ -53,3 +53,5 @@ Matrix4x4 TransposeMatrix(const Matrix4x4& m);
 Matrix4x4 InverseMatrix(const Matrix4x4& mat);
 Matrix4x4 InverseTransposeMatrix(const Matrix4x4& mat);
 void DecomposeMatrix(Vector3D& pos, Vector4D& angle, Vector3D& scale, const Matrix4x4 mat);
+Matrix4x4 RotationAxisAngle(Vector3D axis, float angle);
+Matrix4x4 RotationAxisAngle(Vector4D axisangle );

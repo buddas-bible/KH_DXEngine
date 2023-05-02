@@ -20,29 +20,36 @@ namespace KH
 		r->angle = angle;
 		rotList.push_back(r);
 	}
-	/*
-	*/
+
 	void Animation::InitFramerate()
 	{
-		for (auto& e : posList)
+		using namespace DirectX;
+		if (rotList.size() == 0)
 		{
-			frameList.push_back(e->framerate);
+			return;
 		}
-
-		for (auto& e : rotList)
+		
+		for (size_t i = 0; i < rotList.size(); i++)
 		{
-			auto itr = std::find(rotList.begin(), rotList.end(), e->framerate);
-			if (itr != rotList.end())
+			XMVECTOR quaternion =
+				XMQuaternionRotationAxis(
+					ConvertToXMVECTOR({ rotList[i]->axis, 0.f }), rotList[i]->angle);
+			quaternion = XMQuaternionNormalize(quaternion);
+
+			if (i == 0)
 			{
-				continue;
+				rotList[i]->quaternion = ConvertToKHVector4D(quaternion);
 			}
 			else
 			{
-				frameList.push_back(e->framerate);
+				XMVECTOR prev = ConvertToXMVECTOR(rotList[i - 1]->quaternion);
+				XMVECTOR result = XMQuaternionMultiply(prev, quaternion);
+
+				result = XMQuaternionNormalize(result);
+
+				rotList[i]->quaternion = ConvertToKHVector4D(result);
 			}
 		}
-
-		std::sort(frameList.begin(), frameList.end());
 	}
 
 	// void Animation::AddScalingSample(size_t framerate, const Vector3D& axis, float scale)

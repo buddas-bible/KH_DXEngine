@@ -11,6 +11,7 @@ namespace ASEParser
 }
 
 class Node;
+class CASEParser;
 
 class MeshObject : public Object
 {
@@ -40,6 +41,7 @@ public:
 
 	void SetScalse(Vector3D scalze);
 	void SetPosition(Vector3D position);
+	void SetAnimation();
 
 	Vector3D GetLocalPosition();
 	Vector3D GetLocalRotate();
@@ -51,8 +53,8 @@ public:
 private:
 
 	Vector3D m_pos{};
-	Vector3D m_angle{};
 	Vector4D m_axisAndAngle{ 0.f, 0.f, 0.f };
+	Vector4D m_quaternion{};
 	Vector3D m_scale{ 1.f, 1.f, 1.f };
 	Vector3D scaling{ 0.06f, 0.06f, 0.06f };
 	bool isHelperObj{ false };

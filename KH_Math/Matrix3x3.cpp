@@ -192,8 +192,6 @@ Matrix3x3 Matrix3x3::operator=(const Matrix3x3&& other) noexcept
 
 Matrix3x3 AxisAndAngleRotation(const Vector3D& vec, float angle)
 {
-	Vector3D axis = vec;
-
 	float cos = std::cos(angle);
 	float sin = std::sin(angle);
 	float x = vec.x;

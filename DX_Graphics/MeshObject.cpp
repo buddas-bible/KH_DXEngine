@@ -179,20 +179,20 @@ void MeshObject::Update(const Matrix4x4& view, const Matrix4x4& proj)
 {
 	TimeManager& time = TimeManager::GetInstance();
 
-	if ((GetAsyncKeyState(VK_SPACE) & 8000) && playAnimation)
-	{
-		playAnimation = false;
-	}
-	if ((GetAsyncKeyState(VK_SPACE) & 8000) && !playAnimation)
-	{
-		playAnimation = true;
-	}
 	if (GetAsyncKeyState(VK_BACK))
 	{
 		m_aniStackTime = 0;
 	}
 
-	UpdateAnimaionTM();
+	if (playAnimation)
+	{
+		m_aniStackTime += time.GetfDeltaTime() * 4000.f;
+	}
+	else
+	{
+		m_animationTM;
+		m_localTM = CreateMatrix(m_pos, m_axisAndAngle, m_scale);
+	}
 
 	m_worldTM = GetWorldMatrix();
 	m_viewTM = view;
@@ -294,14 +294,15 @@ HRESULT MeshObject::LoadNodeData(ASEParser::Mesh* meshData)
 /// <returns></returns>
 Matrix4x4 MeshObject::GetWorldMatrix()
 {
-	Matrix4x4 w = Matrix4x4::IdentityMatrix();
+	Matrix4x4 w = Matrix4x4::ScaleMatrix(0.02f, 0.02f, 0.02f);
+	// Matrix4x4 w = Matrix4x4::IdentityMatrix();
 
 	if (parent != nullptr)
 	{
 		w = parent->GetWorldMatrix();
 	}
 
-	return m_animationTM * w;
+	return m_localTM * w;
 }
 
 /// <summary>
@@ -313,8 +314,6 @@ Matrix4x4 MeshObject::GetWorldMatrix()
 /// <returns></returns>
 void MeshObject::UpdateAnimaionTM()
 {
-	Matrix4x4 w = Matrix4x4::IdentityMatrix();
-	
 	/// 델타타임을 쌓고 프레임레이트 비교하면서
 	/// 적절한 애니메이션 데이터를 가져옴
 	/// 회전은 누적해가면서 해야하고, 위치는 처음 위치로부터 변화한걸로 함.
@@ -325,40 +324,123 @@ void MeshObject::UpdateAnimaionTM()
 	/// 무언가가 있으면 LocalTM에 연산을 하자.
 	/// 
 	/// 
-	
-	auto& a = animationData.posList;
-	if (a.size() != 0)
+
+	using namespace DirectX;
+	m_animationTM = Matrix4x4::IdentityMatrix();
+
+	XMMATRIX animationTM = XMMatrixIdentity();
+	XMMATRIX posTM, rotTM, sclTM;
+
+	// sclTM = Matrix4x4::ScaleMatrix(m_scale.x, m_scale.y, m_scale.z);
+	sclTM = DirectX::XMMatrixScalingFromVector(ConvertToXMVECTOR(m_scale));
+	animationTM = animationTM * sclTM;
+
+	if (nodeName == L"Biped-R_legup")
 	{
-		for (; i = animationData.posList.size(); i++)
+		int a = 0;
+	}
+
+	// DirectX::XMMATRIX rrr = DirectX::XMMatrixRotationAxis({ XMVectorSet(m_axisAndAngle.x, m_axisAndAngle.z,m_axisAndAngle.z, 0.f) }, m_axisAndAngle.w);
+	// DirectX::XMMATRIX rrrq = DirectX::XMMatrixRotationQuaternion(ConvertToXMVECTOR(m_quaternion));
+	// Matrix4x4 rrar = ConvertToKHMatrix(rrr);
+	auto& rotList = animationData.rotList;
+	if (rotList.size() != 0)
+	{
+		size_t i = 0;
+		for (; i < rotList.size(); i++)
 		{
-			a[i].first;
+			if (rotList[i]->framerate > m_aniStackTime)
+			{
+				m_prevFrame = rotList[i - 1]->framerate;
+				m_nextFrame = rotList[i]->framerate;
+				break;
+			}
+			else if (rotList[rotList.size() - 1]->framerate < m_aniStackTime)
+			{
+				i = 1;
+				m_aniStackTime = 0.f;
+				break;
+			}
+			else
+			{
+				continue;
+			}
 		}
-		if (itr == animationData.posList.end())
-		{
-			pos.x = m_localTM.e[3][0];
-			pos.y = m_localTM.e[3][1];
-			pos.z = m_localTM.e[3][2];
-		}
-		else
-		{
-			pos = (*itr).second->pos;
-		}
+		XMVECTOR q1 = ConvertToXMVECTOR(rotList[i - 1]->quaternion);
+		XMVECTOR q2 = ConvertToXMVECTOR(rotList[i]->quaternion);
+
+		float f = (m_aniStackTime - m_prevFrame) / (m_nextFrame - m_prevFrame);			// 현재 프레임을 비율로 함.
+
+		XMVECTOR nowRot = XMQuaternionSlerp(q1, q2, f);
+
+		rotTM = XMMatrixRotationQuaternion(nowRot);
+
+		XMVECTOR axi{};
+		float an;
+		XMQuaternionToAxisAngle(&axi, &an, nowRot);
+		Matrix4x4 r = RotationAxisAngle(ConvertToKHVector4D(axi), an);
 	}
 	else
 	{
-		pos.x = m_localTM.e[3][0];
-		pos.y = m_localTM.e[3][1];
-		pos.z = m_localTM.e[3][2];
+		rotTM = DirectX::XMMatrixRotationQuaternion(ConvertToXMVECTOR(m_quaternion));
 	}
 
+	// rotTM = ConvertToKHMatrix(DirectX::XMMatrixRotationQuaternion(ConvertToXMVECTOR(m_quaternion)));
+	/// 왜 쿼터니언으로 회전 행렬을 만들 때랑, 축각으로 만들때랑 값이 다른거지? 어째서지?
+	// rotTM = AxisAndAngleRotation({ m_axisAndAngle.x, m_axisAndAngle.y , m_axisAndAngle.z }, m_axisAndAngle.w);
+	animationTM = animationTM * rotTM;
 
+	// 리스트의 크기가 0이 아니면 프레임레이트 비교해서
+	// 누구 사이에 있는지 보고 보간한 값 
+	// 0이라면 그냥 기본값
+	auto& posList = animationData.posList;
+	if (posList.size() != 0)
+	{
+		size_t i = 0;
+		for (; i < posList.size(); i++)
+		{
+			if (posList[i]->framerate > m_aniStackTime)
+			{
+				m_prevFrame = posList[i - 1]->framerate;
+				m_nextFrame = posList[i]->framerate;
+				break;
+			}
+			else if (posList[animationData.posList.size() - 1]->framerate < m_aniStackTime)
+			{
+				i = 1;
+				m_aniStackTime = 0.f;
+				break;
+			}
+			else
+			{
+				continue;
+			}
+		}
+		XMVECTOR v1 = ConvertToXMVECTOR({ posList[i - 1]->pos , 1.f });
+		XMVECTOR v2 = ConvertToXMVECTOR({ posList[i]->pos , 1.f });
+		
+		float f = (m_aniStackTime - m_prevFrame) / (m_nextFrame - m_prevFrame);			// 현재 프레임을 비율로 함.
+		XMVECTOR nowPos = XMVectorLerp(v1, v2, f);
 
-	m_animationTM = CreateMatrix(m_pos, m_axisAndAngle, m_scale);
-	DirectX::XMMatrix
+		posTM = XMMatrixTranslationFromVector(nowPos);
+	}
+	else
+	{
+		posTM = XMMatrixTranslationFromVector(ConvertToXMVECTOR({ m_pos, 1.f}));
+	}
+
+	animationTM = animationTM * posTM;
+
+	if (nodeName == L"Text02")
+	{
+		int i = 0;
+	}
+
+	m_localTM = ConvertToKHMatrix(animationTM);
+
 	/// 1-1. Pos? 첫 프레임으로부터 변화
 	/// 1-2. Rot? 이전 프레임으로부터의 변화
 	/// 2. 비어있는 Framerate 처리
-	/// 3.
 }
 
 /// <summary>
@@ -377,7 +459,6 @@ void MeshObject::InitializeLocalTM()
 	// 부모 노드 행렬의 역행렬을 곱해 로컬 행렬을 구한다.
 	m_localTM = m_nodeTM * w;
 
-
 	XMVECTOR scl{};
 	XMVECTOR rot{};
 	XMVECTOR trs{};
@@ -388,18 +469,49 @@ void MeshObject::InitializeLocalTM()
 	m_pos.y = XMVectorGetY(trs);
 	m_pos.z = XMVectorGetZ(trs);
 
+	m_quaternion = ConvertToKHVector4D(rot);
+
 	if (XMQuaternionIsInfinite(rot))
 	{
-		m_axisAndAngle = Vector4D{1.f, 0.f, 0.f, 0.f};
+		m_axisAndAngle = Vector4D{ 1.f, 0.f, 0.f, 0.f };
 	}
 	else
 	{
 		m_axisAndAngle = QuaternionToAxisAngle(ConvertToKHVector4D(rot));
 	}
 
+	/// negative scale 확인?
+	// Vector3D rx = { m_nodeTM.e[0][0] , m_nodeTM.e[0][1] , m_nodeTM.e[0][2] };
+	// Vector3D ry = { m_nodeTM.e[1][0] , m_nodeTM.e[1][1] , m_nodeTM.e[1][2] };
+	// Vector3D rz = { m_nodeTM.e[2][0] , m_nodeTM.e[2][1] , m_nodeTM.e[2][2] };
+	// 
+	// static std::vector<std::wstring> a;
+	// Vector3D zCrossX = rz.Cross(rx);
+	// float theta = zCrossX.Dot(ry);
+	// if (theta < 0)
+	// {
+	// 	for (size_t i = 0; i < 3; i++)
+	// 	{
+	// 		if (scl.m128_f32[i] < 0.f)
+	// 		{
+	// 			scl.m128_f32[i] *= -1.f;
+	// 			break;
+	// 		}
+	// 	}
+	// }
+
 	m_scale.x = XMVectorGetX(scl);
 	m_scale.y = XMVectorGetY(scl);
 	m_scale.z = XMVectorGetZ(scl);
+
+// 	if (m_scale.x < 0.f)
+// 	{
+// 		// m_scale.x *= -1.f;
+// 	}
+// 	if (m_scale.z < 0.f)
+// 	{
+// 		m_scale.z *= -1.f;
+// 	}
 }
 
 HRESULT MeshObject::LoadAnimation(CASEParser* aniList)
@@ -412,8 +524,6 @@ HRESULT MeshObject::LoadAnimation(CASEParser* aniList)
 HRESULT MeshObject::LoadGeometry(ASEParser::Mesh* meshData)
 {
 	HRESULT hr = S_OK;
-
-	Matrix4x4 scal = CreateMatrix(Vector3D{}, Vector3D{}, scaling);
 
 	m_nodeTM.e[0][0] = meshData->m_tm_row0.x;
 	m_nodeTM.e[0][1] = meshData->m_tm_row0.y;
@@ -430,8 +540,6 @@ HRESULT MeshObject::LoadGeometry(ASEParser::Mesh* meshData)
 	m_nodeTM.e[3][0] = meshData->m_tm_row3.x;
 	m_nodeTM.e[3][1] = meshData->m_tm_row3.y;
 	m_nodeTM.e[3][2] = meshData->m_tm_row3.z;
-
-	// m_nodeTM = m_nodeTM;
 
 	if (meshData->m_rawVertex.empty())
 	{
@@ -496,6 +604,16 @@ void MeshObject::SetPosition(Vector3D position)
 	m_pos = position;
 }
 
+void MeshObject::SetAnimation()
+{
+	if (playAnimation)
+	{
+		playAnimation = false;
+		return;
+	}
+
+	playAnimation = true;
+}
 
 Vector3D MeshObject::GetLocalPosition()
 {
